@@ -1,0 +1,5 @@
+Known Issues version 2.1
+Feb 01, 2011
+
+1. Certain invocations of the power operator may cause an error (e.g. 2.3 ** 'c'). The underlying reason for 
+this has to do with the order of operations that is followed for evaluating power operations. 

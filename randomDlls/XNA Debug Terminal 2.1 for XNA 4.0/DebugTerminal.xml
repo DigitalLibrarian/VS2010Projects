@@ -1,0 +1,3665 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DebugTerminal</name>
+    </assembly>
+    <members>
+        <member name="T:DebugTerminal.Input.CursorMovementType">
+            
+             <summary>
+            		Direction cursor should move in
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.Input.CursorMovementType.FORWARD">
+            
+             <summary>
+            		Forward/Right
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.Input.CursorMovementType.BACKWARD">
+            
+             <summary>
+            		Backward/Left
+             </summary>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.AssignExp">
+            
+             <summary>
+            		Used to parse assignment expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.AssignExp.Parse(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject},System.Collections.Generic.List{System.String},System.Collections.Generic.List{DebugTerminal.Exps.XdtObject},DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Parses assignment expressions. This method basically just prepares
+            		the parameters for a call to IdentifierExp.Parse(). Reference that
+            		method for more information on this method's parameters.
+             </summary>
+             
+             <param name="envChain">
+            		List of XdtObjects from the chain expression of the lhs.
+            		This makes up the list of environment objects.
+            	</param>
+             <param name="envNames">List of field/property names in the lhs chain expression.</param>
+             <param name="envIndices">
+            		List of array indices for each array in the lhs chain expression.
+            		For each non-array, the envIndices at that index is null.
+            	</param>
+             <param name="rhs">Rhs expression</param>
+             
+             <returns>The rhs parameter</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.SHToken">
+            
+             <summary>
+            		Represents a syntax highlighting token
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.SHToken.charRep">
+            
+             <summary>
+            		String representation of token (e.g. identifier name if ident,
+            		content of string if string, etc.). This is typically called
+            		a lexeme.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.SHToken.type">
+            
+             <summary>
+            		Type of token. This matches the int representation in xdtParser.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.SHToken.scolor">
+            
+             <summary>
+            		Color to use when drawing the token.
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHToken.#ctor(System.String,System.Int32,Microsoft.Xna.Framework.Graphics.Color)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="charRep">String representation of the token (lexeme)</param>
+             <param name="type">Type of token (xdtParser int representation)</param>
+             <param name="scolor">Color to use when drawing token</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHToken.Draw(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Graphics.SpriteFont,Microsoft.Xna.Framework.Vector2)">
+            
+             <summary>
+            		Draws the token to the terminal window.
+             </summary>
+             
+             <param name="sb">SpriteBatch object to draw to</param>
+             <param name="sf">SpriteFont object to use</param>
+             <param name="offset">Initial offset (starting local to draw the text)</param>
+             
+             <returns>
+            		The charRep field of the token (used for MeasureString method so the next
+            		token is draw starting at the correct position)
+            	</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHToken.DrawType(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Graphics.SpriteFont,Microsoft.Xna.Framework.Vector2)">
+            <summary>
+            	Draws to param sb a string representative of this token's type
+            </summary>
+            
+            <param name="sb">SpriteBatch object to draw to</param>
+            <param name="sf">SpriteFont object to use</param>
+            <param name="offset">Offset to start drawing terminal text</param>
+            
+            <returns>The string representative of the token</returns>
+            
+        </member>
+        <member name="P:DebugTerminal.Input.SHToken.RepLength">
+            
+             <summary>
+            		Length of the charRep (i.e. string length of lexeme)
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.XdtObject">
+            
+             <summary>
+            		Wrapper for values passed around the terminal expression
+            		Parse methods. This allows the values to have metadata 
+            		attached to them for better decision making in some cases
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.XdtObject.callMod">
+            
+             <summary>
+            		Indicates what kind of method call argument modifier
+            		this value has in case it is used as an argument.
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.XdtObject.#ctor(System.Object)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="value">Object for it to hold</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.XdtObject.op_UnaryNegation(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Negates the value property
+             </summary>
+             
+             <param name="obj">XdtObject to change</param>
+             
+             <returns>The XdtObject with its value property negated</returns>
+             
+        </member>
+        <member name="P:DebugTerminal.Exps.XdtObject.Value">
+            
+             <summary>
+            		The actual value being held
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Exps.XdtObject.CompileTimeType">
+            
+             <summary>
+            		The type the Value had during compilation. This can
+            		help in cases where inheritance is used and the compile-time
+            		type of a field is not the same as its run-time type.
+            		<para>-</para>
+            		<para>E.g.</para>
+            		<para>/* field declaration */</para>
+            		<para>private BaseClass bc;</para>
+            		<para>/* in constructor or another method */</para>
+            		<para>bc = new DerivedClass();</para>
+            		<para>//</para>
+            		<para>
+            			This property would have the BaseClass type. This is
+            			helpful when determining which overloaded method to
+            			call since C# is single dispatch.
+            		</para>
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Exps.XdtObject.IsLiteral">
+            
+             <summary>
+            		True if value is a literal, false otherwise.
+            		If value is not a literal, its type is not implicitly
+            		coerced to match method signatures during a call
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Exps.XdtObject.CallMod">
+            
+             <summary>
+            		Gets or sets the callMod value. During a set, value is
+            		checked to see if it is a literal or not. If it is, only
+            		CallArgMod.NONE is a valid value and an exception is thrown
+            		if any other modifier is used.
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.TestBridge">
+            
+             <summary>
+            		Provides public access to certain members necessary for
+            		the unit test project to run.
+             </summary>
+            
+        </member>
+        <member name="M:DebugTerminal.TestBridge.ExpParser_Parse(System.String)">
+            
+             <summary>
+            		Exposes ExpParser's Parse method to test projec
+             </summary>
+             
+             <param name="data">The main/current expression</param>
+             
+             <returns>The return result of evaluating the expression</returns>
+             
+        </member>
+        <member name="P:DebugTerminal.TestBridge.TerminalRootDebugInstance">
+            
+             <summary>
+            		Exposes Terminal's RootDebugInstance property to test project
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.IdentifierExp">
+            
+             <summary>
+            		Used to parse identifier expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.IdentifierExp.defaultFlags">
+            
+             <summary>
+            		Combines standard bindingflag options to be used to find the identifier
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.IdentifierExp.Parse(DebugTerminal.Exps.XdtObject,System.String)">
+            
+             <summary>
+            		Parses identifiers (fields or properties)
+             </summary>
+             
+             <param name="instance">The object in which the field or property is found</param>
+             <param name="data">The name of the field or property</param>
+             
+             <returns>An XdtObject containing the value of the identifier or containing null if identifier cannot be found</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.IDENT_NOT_FOUND"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.IdentifierExp.Assign(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject},System.Collections.Generic.List{System.String},System.Collections.Generic.List{DebugTerminal.Exps.XdtObject},DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Assigns a value to the specified identifier (field or property).
+            		Since any field or property that is a ValueType will not have its
+            		value changed without explicitly being set, this method is given the
+            		entire list of objects of the lhs chain expression and uses recursion to
+            		set them right to left.
+             </summary>
+             
+             <example>
+            		<c language="C#">x.y.z = 3</c>
+            		This will set z = 3, then y = z (the newly changed z), then x = y.
+            		If the expression is simply <c language="C#">x = 3</c>, then that is the only assignment
+            		performed and all List arguments contain only a single value.
+             </example>
+             
+             <param name="envChain">
+            		List of XdtObjects from the chain expression of the lhs. This makes up the
+            		list of environment objects. In the case of x = 3, envChain would contain
+            		x's value.
+            	</param>
+             <param name="envNames">List of field/property names in the lhs chain expression. In the case of x = 3, envNames would contain "x".</param>
+             <param name="envIndices">
+            		List of array indices for each array in the lhs chain expression. For each non-array, the
+            		envIndices at that index is null. In the case of x = 3, envIndices would contain null.
+            		In the case of x[2] = 3, envIndices would contain 2.
+            	</param>
+             <param name="xrhs">Rhs expression</param>
+             
+             <returns>xrhs's Value property</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ARRAY_INDEX_NOT_INT"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_FIND_IDENT_IN_ENV"/>
+            
+        </member>
+        <member name="T:DebugTerminal.TerminalStateType">
+            
+             <summary>
+            		FSM states for terminal
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalStateType.READ">
+            
+             <summary>
+            		State for reading user input
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalStateType.REPORT">
+            
+             <summary>
+            		State for reporting output from processing statement
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalStateType.COMMIT">
+            
+             <summary>
+            		State for committing output and clearing 
+            		terminal for next user input
+             </summary>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.ObjectConstructionExp">
+            
+             <summary>
+            		Used to parse object construction expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ObjectConstructionExp.Parse(DebugTerminal.Exps.XdtObject,System.String,System.Collections.Generic.List{DebugTerminal.Exps.XdtObject})">
+            
+             <summary>
+            		Parses object construction expression (expression using "new")
+             </summary>
+             
+             <param name="instance">The root object</param>
+             <param name="typeName">Name of the type to create</param>
+             <param name="constructorParams">XdtObject array containing arguments to be sent to the constructor. Each XdtObject is one argument</param>
+             
+             <returns>XdtObject containing the new object</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.UNKNOWN_TYPE"/>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.LiteralExp">
+            
+             <summary>
+            		Used to parse literal expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseIntType(System.String,System.String)">
+            
+             <summary>
+            		Parses integral-type literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             <param name="suffix">Optional type suffix</param>
+             
+             <returns>An integral-type value or float-type if float-type suffix is supplied</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.NOT_A_NUM"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_INT_TYPE"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseIntType(System.String,System.Boolean)">
+            
+             <summary>
+            		Parses integral-type literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             <param name="hasSuffix">Indicates whether a suffix is present or not</param>
+             
+             <returns>An integral-type value or float-type if float-type suffix is supplied</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_INT_TYPE"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.NOT_A_NUM"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseFloatType(System.String,System.String)">
+            
+             <summary>
+            		Parses float-type literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             <param name="suffix">Optional type suffix</param>
+             
+             <returns>A float-type value</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_FLT_TYPE"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.NOT_A_NUM"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseFloatType(System.String,System.Boolean)">
+            
+             <summary>
+            		Parses float-type literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             <param name="hasSuffix">Indicates whether a suffix is present or not</param>
+             
+             <returns>A float-type value</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_FLT_TYPE"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.NOT_A_NUM"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseEType(System.String)">
+            
+             <summary>
+            		Parses literals that contain the exponential 'e' character
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             
+             <returns>A double value</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_DBL"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseChar(System.String)">
+            
+             <summary>
+            		Parses char literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             
+             <returns>A char value</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_CHAR"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseStr(System.String)">
+            
+             <summary>
+            		Parses string literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             
+             <returns>A string value</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseBool(System.String)">
+            
+             <summary>
+            		Parses bool literals
+             </summary>
+             
+             <param name="data">String containing the literal</param>
+             
+             <returns>A bool value</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.ParseEscSeqs(System.String@,System.Boolean)">
+            
+             <summary>
+            		Parses escape sequences found in char or string literals
+             </summary>
+             
+             <param name="data">String containing the literal that may have escape sequences</param>
+             <param name="isVerbatim">
+            		Used to tell if the literal passed is a verbatim string. 
+            		True if data represents verbatim string, false otherwise
+            	</param>
+            	
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.HEX_ESC_CODE_NOT_RECOGNIZED"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.IsIntType(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Determines if value passed in is an integral-type
+             </summary>
+             
+             <param name="data">Value to examine</param>
+             
+             <returns>True if value is an integral-type, false otherwise</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.NarrowIntType(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Changes the given integral-type object to the smallest integral data type
+            		that can contain its value. If xdata has a CompileTimeType that is
+            		unsigned, then the smallest unsigned integral type is used. Otherwise
+            		the smallest signed type is used. The only current exception to this is
+            		byte vs. sbyte as they are considered special cases and therefore, regardless
+            		if the original type is unsigned or not, byte is always attempted in place
+            		of sbyte.
+             </summary>
+             
+             <param name="xdata">Integral-type value to narrow</param>
+             
+             <returns>An integral-type object with same Value as the xdata param</returns>
+             
+             <exception cref="T:System.ArgumentException"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.LiteralExp.IsUnsignedType(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Determines whether the xdata's CompileTimeType is an unsigned integral type or not
+             </summary>
+             
+             <param name="xdata">XdtObject to examine the CompileTimeType of</param>
+             
+             <returns>True if xdata's CompileTimeType is an unsigned integral type, false otherwise</returns>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.ExpParser">
+            
+             <summary>
+            		Main class for parsing terminal statements/expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ExpParser.Parse(System.String)">
+            
+             <summary>
+            		Base parsing method for all terminal expressions. 
+             </summary>
+             
+             <param name="data">The main/current expression</param>
+             
+             <returns>The return result of evaluating the expression</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.ExpParser.Parse(DebugTerminal.AntlrParser.xdtParser)">
+            
+             <summary>
+            		Base parsing method for all terminal expressions. 
+             </summary>
+             
+             <param name="parser">The xdtParser for the main/current expression</param>
+             
+             <returns>The return result of evaluating the expression</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.ExpParser.GetParser(System.String)">
+            
+             <summary>
+            		Gets a xdtParser object for the terminal expression
+             </summary>
+             
+             <param name="data">Terminal expression</param>
+             
+             <returns>xdtParser object for terminal expression</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ExpParser.RemoveComment(System.String@)">
+            <summary>
+            	Removes single and multi line comments from end of input.
+            	This is necessary so end of line delimiter, semicolon, is
+            	not consumed as part of the comment.
+            </summary>
+            
+            <param name="data">Terminal expression</param>
+            
+        </member>
+        <member name="T:DebugTerminal.Exceptions.XdtLogicExceptionType">
+            
+             <summary>
+            		Holds all logical exception types thrown when a user entered
+            		statement contains a logical error
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ARITH_EXCEPTION">
+            
+             <summary>
+            		Arithmetic exception
+             </summary>
+             
+             <example>"h" + 3</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ARRAY_INDEX_NOT_INT">
+            
+             <summary>
+            		Array index is not an integer
+             </summary>
+             
+             <example>arrayIdent["Hello"]</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_AFFIRM_NON_NUM">
+            
+             <summary>
+            		Can't apply unary plus (or "affirmation") to a non-numeric value
+             </summary>
+             
+             <example>+ "Hello"</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CAST_VALUE_TO_TYPE">
+            
+             <summary>
+            		Can't cast the given value to the given type
+             </summary>
+             
+             <example>(ulong) -3</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_CHAR">
+            
+             <summary>
+            		Can't parse the given value as a character
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_DBL">
+            
+             <summary>
+            		Can't parse the given value as a double
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_FLT_TYPE">
+            
+             <summary>
+            		Can't parse the given value as a floating point type
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CONVERT_TO_INT_TYPE">
+            
+             <summary>
+            		Can't parse the given value as an integral type
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_FIND_IDENT_IN_ENV">
+            
+             <summary>
+            		Can't find identifier in given environment
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_NEGATE_NON_NUM">
+            
+             <summary>
+            		Can't apply unary minus (or negation) to a non-numeric value
+             </summary>
+             
+             <example>- "Hello"</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ERROR_NEGATING_VALUE_OF_TYPE">
+            
+             <summary>
+            		Error while trying to apply unary minus (or negation) to the given value
+             </summary>
+             
+             <example>- unsignedTypeVariable</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.HEX_CHAR_NOT_IN_SPRITEFONT">
+            
+             <summary>
+            		Hex escape character is not in the range of characters that can be displayed
+            		in the given spritefont object
+             </summary>
+             
+             <example>"\9"  // Displays tab character which isn't in default SpriteFont files</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.HEX_ESC_CODE_NOT_RECOGNIZED">
+            
+             <summary>
+            		Hex escape character is not a recognizable unicode character
+             </summary>
+             
+             <example>\U12345678</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.IDENT_IS_NOT_ARRAY">
+            
+             <summary>
+            		Identifier is not an array but is being used like one
+             </summary>
+             
+             <example>nonArrayIdent[3]</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.IDENT_NOT_FOUND">
+            
+             <summary>
+            		Identifier can't be found / doesn't exist
+             </summary>
+             
+             <example>unknownIdent</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.LEFT_OP_NON_NUM">
+            
+             <summary>
+            		Left operand to arithmetic expression is non-numeric.
+            		Not throw if both left and right operands are strings.
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_CALL_AMBIGUOUS">
+            
+             <summary>
+            		Method is overloaded and correct method to call can't be
+            		accurately determined given the types of arguments being
+            		sent.
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_CANT_IMPLICITLY_COERCE_ARGS">
+            
+             <summary>
+            		Method is not overloaded but arguments can't be
+            		coerced to match its signature
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_DOESNT_EXIST">
+            
+             <summary>
+            		Method doesn't exist
+             </summary>
+             
+             <example>UnknownMethod()</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_EXISTS_BUT_CANT_BE_INVOKED">
+            
+             <summary>
+            		Method does exist but (for some reason) can't be called
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.NOT_A_NUM">
+            
+             <summary>
+            		Value is not a number but is being used in such a way that demands
+            		it to be.
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.OUT_OR_REF_USED_WITH_LIT">
+            
+             <summary>
+            		Out or ref keyword used on a literal
+             </summary>
+             
+             <example>Foo(out 3.2);</example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.OVERFLOW_TRYING_TO_CAST">
+            
+             <summary>
+            		Overflow (or underflow) when trying to cast given value to given type
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.POW_OP_TYPE_INVALID">
+            <summary>
+            	Decimal operators are not valid for the power operator.
+            </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.RIGHT_OP_NON_NUM">
+            
+             <summary>
+            		Right operand to arithmetic expression is non-numeric.
+            		Not throw if both left and right operands are strings.
+             </summary>
+             
+             <example></example>
+             
+        </member>
+        <member name="F:DebugTerminal.Exceptions.XdtLogicExceptionType.UNKNOWN_TYPE">
+            
+             <summary>
+            		Type can't be found / doesn't exist
+             </summary>
+             
+             <example>new UnknownType()</example>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.ToggleKeys">
+            
+             <summary>
+            		Holds booleans for whether toggle keys (shift, ctrl, alt, and Windows key) are
+            		being held down
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.ToggleKeys.ShiftPressed">
+            
+             <summary>
+            		True if shift key is down, false otherwise
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.ToggleKeys.CtrlPressed">
+            
+             <summary>
+            		True if ctrl key is down, false otherwise
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.ToggleKeys.AltPressed">
+            
+             <summary>
+            		True if alt key is down, false otherwise
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.ToggleKeys.WinPressed">
+            
+             <summary>
+            		True if Windows key is down, false otherwise
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.ToggleKeys.#ctor(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="shiftPressed">True if shift key is down, false otherwise</param>
+             <param name="ctrlPressed">True if ctrl key is down, false otherwise</param>
+             <param name="altPressed">True if alt key is down, false otherwise</param>
+             <param name="winPressed">True if Windows key is down, false otherwise</param>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.TypeExp">
+            
+             <summary>
+            		Used to parse type expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.TypeExp.cachedTypes">
+            
+             <summary>
+            		Holds all types that have been given to it (in CacheCommonTypes method) or 
+            		successfully parsed from terminal expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.TypeExp.failedTypes">
+            
+             <summary>
+            		Holds all failed attempts at evaluating an expression into a type.
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.TypeExp.CacheCommonTypes">
+            
+             <summary>
+            		Caches common types for fast lookup
+             </summary>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.TypeExp.GetType(System.String)">
+            
+             <summary>
+            		Converts string parameter containing type into an actual type
+             </summary>
+             
+             <param name="typeData">String containing type</param>
+             
+             <returns>Found type or null if type is not found</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.TypeExp.GetTypeObj(System.Object)">
+            
+             <summary>
+            		Gets type information from object. If object is already a type, object is
+            		casted as a type and returned, if not, GetType is called.
+             </summary>
+             
+             <param name="typeData">Object to get the type of</param>
+             
+             <returns>Type of object</returns>
+            
+        </member>
+        <member name="P:DebugTerminal.Exps.TypeExp.HasCachedCommonTypes">
+            
+             <summary>
+            		True if CacheCommonTypes has been called, false otherwise
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.SHTokenManager">
+            
+             <summary>
+            		Manages the syntax highlighting tokens
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.SHTokenManager.tokens">
+            
+             <summary>
+            		List of tokens from the current input
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHTokenManager.#ctor">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHTokenManager.CreateTokens(DebugTerminal.TerminalSkin,System.String)">
+            
+             <summary>
+            		Creates a list of tokens from the param line
+             </summary>
+             
+             <param name="skin">TerminalSkin object to use to color the tokens</param>
+             <param name="line">String to tokenize (usually the current Terminal input)</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHTokenManager.CreateAndGetTokens(System.String)">
+            
+             <summary>
+            		Creates and returns a token stream from the param line
+             </summary>
+             
+             <param name="line">String to tokenize (usually the current Terminal input)</param>
+             
+             <returns>Stream of tokens created from param line</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHTokenManager.Draw(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Graphics.SpriteFont,Microsoft.Xna.Framework.Vector2)">
+            
+             <summary>
+            		Draws each token's text to the Terminal window as it should appear
+            		(i.e. in correct order and preserving whitespace)
+             </summary>
+             
+             <param name="sb">SpriteBatch object to draw to</param>
+             <param name="sf">SpriteFont object to use</param>
+             <param name="offset">Initial offset (starting local to draw the text)</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.SHTokenManager.DrawTypes(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Graphics.SpriteFont,Microsoft.Xna.Framework.Vector2)">
+            
+             <summary>
+            		Draws token names in place of token text. Triggered with key combination
+            		of alt+t
+             </summary>
+             
+             <param name="sb">SpriteBatch object to draw to</param>
+             <param name="sf">SpriteFont object to use</param>
+             <param name="offset">Initial offset (starting local to draw the text)</param>
+             
+        </member>
+        <member name="T:DebugTerminal.TerminalThemeSH">
+            
+             <summary>
+            		Holds the information for syntax highlighting token colors
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHChar">
+            
+             <summary>
+            		Color for char literals
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHComment">
+            
+             <summary>
+            		Color for comments
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHIdent">
+            
+             <summary>
+            		Color for identifiers
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHInvTermCom">
+            
+             <summary>
+            		Color for invalid terminal commands
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHKeyword">
+            
+             <summary>
+            		Color for keywords
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHNum">
+            
+             <summary>
+            		Color for numeric literals
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHOperator">
+            
+             <summary>
+            		Color for operators
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHStr">
+            
+             <summary>
+            		Color for string literals
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalThemeSH.SHTermCom">
+            
+             <summary>
+            		Color for valid terminal commands
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.RectangleF">
+            
+             <summary>
+            		Same as built-in Rectangle class but uses float types
+            		for X, Y, Width, and Height properties.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.RectangleF.X">
+            
+             <summary>
+            		X location (i.e. Left)
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.RectangleF.Y">
+            
+             <summary>
+            		Y location (i.e. Top)
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.RectangleF.Width">
+            
+             <summary>
+            		Width of rectangle
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.RectangleF.Height">
+            
+             <summary>
+            		Height of rectangle
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.RectangleF.#ctor(System.Single,System.Single,System.Single,System.Single)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="x">X position (i.e. Left)</param>
+             <param name="y">Y position (i.e. Top)</param>
+             <param name="width">Width of rectangle</param>
+             <param name="height">Height of rectangle</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.RectangleF.MoveX(System.Single)">
+            
+             <summary>
+            		Moves rectangle along the x axis by the specified amount
+             </summary>
+             
+             <param name="amount">Amount to move rectangle</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.RectangleF.MoveY(System.Single)">
+            
+             <summary>
+            		Moves rectangle along the y axis by the specified amount
+             </summary>
+             
+             <param name="amount">Amount to move rectangle</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.RectangleF.WidenTo(System.Single)">
+            
+             <summary>
+            		Changes width to the specified amount
+             </summary>
+             
+             <param name="amount">Amount to set width to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.RectangleF.ToString">
+            
+             <summary>
+            		Overrides ToString method to print out X, Y, Width, 
+            		and Height properties
+             </summary>
+             
+             <returns>The string representation of this rectangle</returns>
+             
+        </member>
+        <member name="P:DebugTerminal.Input.RectangleF.Left">
+            
+             <summary>
+            		Left location
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Input.RectangleF.Right">
+            
+             <summary>
+            		Right location
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Input.RectangleF.Top">
+            
+             <summary>
+            		Top location
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Input.RectangleF.Bottom">
+            
+             <summary>
+            		Bottom location
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Exceptions.XdtLogicException">
+            
+             <summary>
+            		Primary class for all logic exceptions in statements entered in the terminal
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exceptions.XdtLogicException.#ctor(DebugTerminal.Exceptions.XdtLogicExceptionType)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="type">Type of exception to display</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Exceptions.XdtLogicException.#ctor(DebugTerminal.Exceptions.XdtLogicExceptionType,System.Object[])">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="type">Type of exception to display</param>
+             <param name="args">Argument(s) to send to the formatted string that param type produces</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Exceptions.XdtLogicException.QuoteArgs(System.Object[])">
+            
+             <summary>
+            		Places double quotes around each argument sent to the constructor.
+            		This changes a statement like:
+            			Can't cast -3 to ulong
+            		to:
+            			Can't cast "-3" to "ulong"
+             </summary>
+             
+             <param name="args">Arguments to convert to strings with double quotes around them</param>
+             
+             <returns>String array containing each object in param args converted to a string with double quotes around it</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exceptions.XdtLogicException.GetExceptionMsg(DebugTerminal.Exceptions.XdtLogicExceptionType)">
+            
+             <summary>
+            		Converts XdtLogicExceptionType value to a formatted exception message
+            		(to be used in String.Format())
+             </summary>
+             
+             <param name="xdtLogicExceptionType">Exception to convert to a message</param>
+             
+             <returns>The corresponding message for the exception type given</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.TempIdentifierExp">
+            
+             <summary>
+            		Used for storing of temporary identifiers declared using the terminal
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.EvalNoticeType">
+            
+             <summary>
+            		Used for displaying terminal expression evaluation notices
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.COULDNT_ADD_WATCH">
+            
+             <summary>
+            		Watch cannot be added
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.COULDNT_DELETE_WATCH">
+            
+             <summary>
+            		Watch cannot be deleted
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.ERROR">
+            
+             <summary>
+            		General error
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.PROBLEM_WITH_STATEMENT">
+            
+             <summary>
+            		General/Unknown problem with terminal statement
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.PROBLEM_WITH_TERMINAL_COMMAND">
+            
+             <summary>
+            		General/Unknown problem with terminal command
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.SUCCESS">
+            
+             <summary>
+            		Terminal statement accepted and properly evaluated
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.UNKNOWN_TERMINAL_COMMAND">
+            
+             <summary>
+            		Unknown terminal command
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.EvalNoticeType.UNMATCHED_PARENTHESES">
+            
+             <summary>
+            		Unequal number of opening and closing parens
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.WatchExpManager">
+            
+             <summary>
+            		For managing all watch expressions
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.WatchExpManager.exp">
+            
+             <summary>
+            		List of watch expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.WatchExpManager.debugInstance">
+            
+             <summary>
+            		Object instance of the game
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.WatchExpManager.font">
+            
+             <summary>
+            		SpriteFont to use when displaying watch expression
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.WatchExpManager.width">
+            
+             <summary>
+            		Pixel width of watch expression area
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.#ctor(System.Object,Microsoft.Xna.Framework.Graphics.SpriteFont,System.UInt16)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="debugInstance">Object instance of the game</param>
+             <param name="font">SpriteFont to use when displaying watch expression</param>
+             <param name="width">Pixel width of watch expression area</param>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.AddWatch(System.String)">
+            
+             <summary>
+            		Adds watch expression
+             </summary>
+             
+             <param name="exp">Expression to add</param>
+             
+             <returns>True if watch expression was successfully added, false otherwise</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.DeleteWatch(System.Int32)">
+            
+             <summary>
+            		Deletes watch expression
+             </summary>
+             
+             <param name="index">Expression id to delete</param>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.NumberOfExps">
+            
+             <summary>
+            		Retrieves the number of expressions currently in the watch
+             </summary>
+             
+            	<returns>Number of expressions currently held</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.HasExps">
+            
+             <summary>
+            		Used to see if watch currently contains any expressions
+             </summary>
+             
+             <returns>True if watch has at least one expression, false otherwise</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.Eval(System.Int32)">
+            
+             <summary>
+            		Used to evaluate the terminal expression of a watch.
+             </summary>
+             
+             <param name="index">Id of watch expression to evaluate</param>
+             
+             <returns>Evaluated object or an error message if expression cannot be evaluated</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.WatchExpManager.GetExpToDisplay(System.Int32)">
+            
+             <summary>
+            		Gets a watch expression with the given id
+             </summary>
+             
+             <param name="index">Id of watch expression to retrieve</param>
+             
+             <returns>Watch expression with given id</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.WatchExp">
+            
+             <summary>
+            		Handles watch expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.WatchExp.#ctor(System.String,DebugTerminal.AntlrParser.xdtParser)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="exp">Watch expression</param>
+             <param name="parser">xdtParser created from the watch expression</param>
+             
+        </member>
+        <member name="M:DebugTerminal.WatchExp.CalcExpToDisplay(System.String)">
+            
+             <summary>
+            		Used to calculate the exact expression to display
+            		on the screen. Will be a truncated form of the actual
+            		expression if actual expression exceeds 70% of the
+            		screen width.
+             </summary>
+             
+             <param name="exp">Watch expression</param>
+             
+        </member>
+        <member name="M:DebugTerminal.WatchExp.Eval">
+            
+             <summary>
+            		Evaluates the watch expression
+             </summary>
+             
+             <returns>The return result of evaluating the watch expression</returns>
+             
+        </member>
+        <member name="P:DebugTerminal.WatchExp.Parser">
+            
+             <summary>
+            		The xdtParser object created from the watch expression.
+            		This is created once and is used for evaluation each time
+            		after that to prevent reparsing of watch expression.
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.WatchExp.ExpToDisplay">
+            
+             <summary>
+            		The watch expression text to actually display. This
+            		may not be the same as the actual expression if the
+            		actual expression exceeds a certain length on the screen.
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.ArithExp">
+            
+             <summary>
+            		Used to parse arithmetic expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ArithExp.Parse(DebugTerminal.Exps.XdtObject,DebugTerminal.Exps.XdtObject,DebugTerminal.Exps.ArithType)">
+            
+             <summary>
+            		Parses arithmetic expressions
+             </summary>
+             
+             <param name="xleftOperand">Left operand</param>
+             <param name="xrightOperand">Right operand</param>
+             <param name="arithType">Arithmetic operator type</param>
+             
+             <remarks>
+            		Only works with operands that evaluate to either numeric or string types. If both operands are strings
+            		and arithType is ADD, concatenation is performed. Else, if either operand is of a float type, both are 
+            		treated as float type. Else, both are treated as int types. This is to ensure proper behavior of operators 
+            		such as addition and division. If operands are of int type, result is then parsed as a literal expression
+            		to ensure correct return type.
+            	</remarks>
+            	
+             <returns>Result of arithmetic operation</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ARITH_EXCEPTION"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.LEFT_OP_NON_NUM"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.RIGHT_OP_NON_NUM"/>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ArithExp.Affirm(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Applies numeric affirmation (i.e. unary plus) to numeric values
+             </summary>
+             
+             <param name="xvalue">The XdtObject with the value to affirm</param>
+             
+             <returns>The XdtObject after affirmation</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_AFFIRM_NON_NUM"/>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ArithExp.Negate(DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Applies numeric negation (i.e. unary minus) to numeric values
+             </summary>
+             
+             <param name="xvalue">The XdtObject with the value to negate</param>
+             
+             <returns>The XdtObject after negation</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_NEGATE_NON_NUM"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.ERROR_NEGATING_VALUE_OF_TYPE"/>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal">
+            
+             <summary>
+            		Main terminal class
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.Terminal.TERMSHIFT">
+            
+             <summary>
+            		The amount of pixels to add to the total terminal
+            		height per watch expression
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.TERMPIXELHEIGHT">
+            
+             <summary>
+            		The pixel height of the terminal with no watch expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.MAXHISTORY">
+            
+             <summary>
+            		Max amount of statement to store in history before deleting the oldest
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.screenWidth">
+            
+             <summary>
+            		Width of the game screen
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.screenHeight">
+            
+             <summary>
+            		Height of the game screen
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.termHeight">
+            
+             <summary>
+            		Height of the terminal
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.isOpen">
+            
+             <summary>
+            		True if terminal is open, false otherwise
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.debugInstance">
+            
+             <summary>
+            		Object instance of the game
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.device">
+            
+             <summary>
+            		Reference to the game's graphic device. 
+            		Used for drawing terminal background
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.spriteBatch">
+            
+             <summary>
+            		Reference to the game's sprite batch.
+            		Used for drawing terminal text
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.spriteFont">
+            
+             <summary>
+            		Font settings for terminal text
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.bgVerts">
+            
+             <summary>
+            		Vertices for the two triangles that form a rectangle for the terminal background
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.vertDec">
+            
+             <summary>
+            		Vertex declaration information for drawing terminal background
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.basicEffect">
+            
+             <summary>
+            		Basic effect for drawing terminal background
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.curLine">
+            
+             <summary>
+            		List of charactes in the current terminal statement
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.cursor">
+            
+             <summary>
+            		Blinking cursor object
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.keyMan">
+            
+             <summary>
+            		Used for handling all key presses
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.lastKeysPressed">
+            
+             <summary>
+            		Holds the set of keys that were pressed last frame.
+            		This is so when a key is released, it will remain in
+            		this list for one more frame and its corresponding key
+            		lock can be released.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.watchExps">
+            
+             <summary>
+            		Used for handling all watch expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.history">
+            
+             <summary>
+            		Stores history of all previously typed command (up to MAXHISTORY)
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.curHistoryIndex">
+            
+             <summary>
+            		Current history statement being shown
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.curPos">
+            
+             <summary>
+            		Index in the terminal text where the cursor currently is
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.skin">
+            
+             <summary>
+            		Provides skin/theme information for the terminal
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.state">
+            
+             <summary>
+            		State of the terminal
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.drawTokenTypes">
+            
+             <summary>
+            		True if token types should be displayed, false if token text should be displayed
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.Init(Microsoft.Xna.Framework.Game,Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Graphics.SpriteFont,Microsoft.Xna.Framework.Graphics.GraphicsDevice)">
+            
+             <summary>
+            		Initializes key fields of terminal class
+             </summary>
+             
+             <param name="debugInstance">Object instance of the game</param>
+             <param name="spriteBatch">Used for drawing terminal text</param>
+             <param name="spriteFont">Used for drawing terminal text</param>
+             <param name="device">Used for drawing terminal background</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.GameWindow_ClientSizeChanged(System.Object,System.EventArgs)">
+            
+             <summary>
+            		Triggers when game window is resized or full-screened. Used to resize Terminal
+            		correctly when window is resized.
+            		This is added to the window's ClientSizeChanged eventhandler during the 
+            		Terminal's Init() method call and will not disrupt already added events.
+             </summary>
+             
+             <param name="sender">Event's sender</param>
+             <param name="e">Event's arguments</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.SetSkin(DebugTerminal.TerminalThemeType)">
+            
+             <summary>
+            		Sets the skinning aspects of the terminal by using the given
+            		TerminalThemeType. Uses the TerminalThemeSHType that goes
+            		with the given TerminalThemeType.
+             </summary>
+             
+             <param name="theme">TerminalThemeType to use for skinning</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.SetSkin(DebugTerminal.TerminalThemeType,DebugTerminal.TerminalThemeSHType)">
+            
+             <summary>
+            		Sets the skinning aspects of the terminal by using the given
+            		TerminalThemeType and TerminalThemeSHType.
+             </summary>
+             
+             <param name="theme">TerminalThemeType to use for skinning</param>
+             <param name="sh">TerminalThemeSHType to use for syntax highlighting</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.SetSkin(DebugTerminal.TerminalSkin)">
+            
+             <summary>
+            		Sets the skinning aspects of the terminal by using the given TerminalSkin
+            		object. A TerminalSkin object is a composition of a TerminalThemeType and
+            		a TerminalThemeSHType.
+             </summary>
+             
+             <param name="skin">TerminalSkin to use for skinning</param>
+             
+             <seealso cref="T:DebugTerminal.TerminalSkin"/>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.Resize(System.Int32)">
+            
+             <summary>
+            		Resizes the terminal height
+             </summary>
+             
+             <param name="newHeight">New height value of the terminal</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.Open">
+            
+             <summary>
+            		Clears previous terminal text and sets proper values to indicate terminal is open
+             </summary>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.Close">
+            
+             <summary>
+            		Sets value indicated terminal is closed
+             </summary>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.CheckOpen(Microsoft.Xna.Framework.Input.Keys,Microsoft.Xna.Framework.Input.KeyboardState)">
+            
+             <summary>
+            		Checks if terminal is open and handles current keypresses if it is
+             </summary>
+             
+             <param name="key">Key designed to open/close terminal</param>
+             <param name="keyboardState">State of keys on keyboard</param>
+             
+             <returns>true if terminal is open, false otherwise</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.ChangeState(DebugTerminal.TerminalStateType)">
+            
+             <summary>
+            		Changes the terminal's state
+             </summary>
+             
+             <param name="newState">Terminal's new state</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.DoState">
+            
+             <summary>
+            		Performs the proper actions based on the terminal's state
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.CheckDraw(System.Boolean)">
+            
+             <summary>
+            		Checks if terminal is open and draws it if it is
+             </summary>
+             
+             <param name="resetDeviceFor3D">True if graphics device should reset for drawing 3D models, false otherwise</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.Draw(System.Boolean)">
+            
+             <summary>
+            		Draws terminal background and all text
+             </summary>
+             
+             <param name="resetDeviceFor3D">True if graphics device should reset for drawing 3D models, false otherwise</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.HandleInput(Microsoft.Xna.Framework.Input.KeyboardState)">
+            
+             <summary>
+            		Handles keypresses and calls AddInput to add to current terminal statement
+             </summary>
+             
+             <param name="ks">Current state of keyboard</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.AddInput(System.Object[])">
+            
+             <summary>
+            		Processes key pressed and adds char to terminal or processes special command key
+             </summary>
+             
+             <param name="args">Array containing keyboard state at index 0 and key to process at index 1</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.MoveCursor(DebugTerminal.Input.CursorMovementType)">
+            
+             <summary>
+            		Moves the cursor forward or backward one character
+             </summary>
+             
+             <param name="direction">Direction to move the cursor</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.ResetCursor">
+            
+             <summary>
+            		Moves cursor to the default position (position without text)
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.MoveCursorToEnd">
+            
+             <summary>
+            		Moves cursor to the end of the terminal text
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.ClearCurLine">
+            
+             <summary>
+            		Clears the terminal's text and resets cursor position
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.IsInSpriteFont(System.Char)">
+            
+             <summary>
+            		Determines if the given character is in the terminal's spritefont
+            		character range
+             </summary>
+             
+             <param name="c">The character to check</param>
+             
+             <returns>True if the character is in the spritefont's range. False otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.AcceptInput(System.Boolean)">
+            
+             <summary>
+            		Processes the committed terminal statement and takes appropriate action
+             </summary>
+             
+             <param name="addToHistory">True if this statement should be added to this history. False otherwise.</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.CheckTerminalCommands">
+            
+             <summary>
+            		Checks to see if the terminal statement contains a terminal command
+            		and process it if it does
+             </summary>
+             
+             <returns>
+            		Result of processing the terminal command if one is found. If not it
+            		returns true indicating the terminal statement should be processed
+            		normally.
+            	</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.ReportEvalNotice(DebugTerminal.EvalNoticeType)">
+            
+             <summary>
+            		Used for reporting evaluation notices after committed terminal statement
+             </summary>
+             
+             <param name="evalNotice">Enum value for displaying proper notice</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Terminal.ReportEvalNotice(DebugTerminal.EvalNoticeType,System.String)">
+            
+             <summary>
+            		Used for reporting evaluation notices after committed terminal statement
+             </summary>
+             
+             <param name="evalNotice">Enum value for displaying proper notice</param>
+             <param name="extraData">This is displayed after the standard eval notice text and is optional. Send null if this is not required.</param>
+            
+        </member>
+        <member name="P:DebugTerminal.Terminal.TokenMan">
+            
+             <summary>
+            		Token manager to handle the syntax highlighting
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Terminal.RootDebugInstance">
+            
+             <summary>
+            		Provides global access to root debugging instance (i.e. the main game object) as
+            		well as internally visible setting (for test cases)
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Terminal.IsOpen">
+            
+             <summary>
+            		Checks if terminal is open
+             </summary>
+             
+             <returns>true is terminal is open, false otherwise</returns>
+            
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalKeyCommands">
+            
+             <summary>
+            		Handles all special key, or key combination, press events
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.TerminalKeyCommands.toggleKeys">
+            
+             <summary>
+            		Holds information on whether ctrl, alt, shift, or the Windows key is down.
+            		Used for key combinations.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.TerminalKeyCommands.keyCommandActions">
+            
+             <summary>
+            		Maps Keys enum value to press event code
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.CommitAction(Microsoft.Xna.Framework.Input.Keys,DebugTerminal.Input.ToggleKeys)">
+            
+             <summary>
+            		If param key is found in keyCommandActions, that action is run.
+            		If not nothing happens
+             </summary>
+             
+             <param name="key">The key to run the mapped action for</param>
+             <param name="toggleKeys">Current state of ctrl, alt, shift, and Windows keys</param>
+             
+             <returns>True if mapped action is found and that action returns true, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Back">
+            
+             <summary>
+            		Backspace and ctrl+backspace mapped actions.
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Delete">
+            
+             <summary>
+            		Delete and ctrl+delete mapped actions.
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Down">
+            
+             <summary>
+            		Down mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.End">
+            
+             <summary>
+            		End mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Enter">
+            
+             <summary>
+            		Enter mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Escape">
+            
+             <summary>
+            		Escape mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Home">
+            
+             <summary>
+            		Home mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Left">
+            
+             <summary>
+            		Left and ctrl+left mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Right">
+            
+             <summary>
+            		Right and ctrl+right mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Tilde">
+            
+             <summary>
+            		Tilde mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.U">
+            
+             <summary>
+            		U and ctrl+U mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Up">
+            
+             <summary>
+            		Up mapped action
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.V">
+            
+             <summary>
+            		Ctrl+V mapped action.
+            		This is for pasting text from the clipboard. It is important to note
+            		that for this to work, the System.STAThread attribute must be added to
+            		Main.
+            		<para>E.g.</para>
+            		<para>
+            			For a fresh, default XNA project, your Program class in your Program.cs
+            			file should look like this: </para>
+            		<para>static class Program {</para>
+            		<para>	[System.STAThread]</para>
+            		<para>	static void Main(string[] args) {</para>
+            		<para>		using (Game1 game = new Game1()) {</para>
+            		<para>			game.Run();</para>
+            		<para>		}</para>
+            		<para>	}</para>
+            		<para>}</para>
+             </summary>
+             
+             <returns>True if further processing is required for this key, false otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.Scan(DebugTerminal.Input.CursorMovementType,DebugTerminal.Terminal.TerminalKeyCommands.CharAlteration)">
+            
+             <summary>
+            		Scans forward or backwards through the current terminal text and runs midChar on all
+            		middle characters and endChar on the last (if going forward) or first (if going backwards) character.
+             </summary>
+             
+             <param name="moveDir">Forward or Backward</param>
+             <param name="midChar">Function to run on each consumed character</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalKeyCommands.GetTokensAroundIndex(System.Int32,Antlr.Runtime.CommonTokenStream)">
+            
+             <summary>
+            		Retrieves the tokens surrounding the current cursor position.
+            		Used for navigating words.
+             </summary>
+             
+             <param name="index">Index within current Terminal text of cursor</param>
+             <param name="cts">Stream of tokens resulting from tokenization of current Terminal text</param>
+             
+             <returns>List of tokens surrounding cursor</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalKeyCommands.KeyCommandAction">
+            
+             <summary>
+            		Delegate containing code to run when key, or key combination, is pressed
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalKeyCommands.CharAlteration">
+            
+             <summary>
+            		Delegate that describes what actions to take when scanning forward or
+            		backward using the Scan method
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalKeyCommands.ConsumeChar">
+            
+             <summary>
+            		Function to determine whether character scanning (e.g. when navigating
+            		words) should continue consuming characters or not.
+             </summary>
+             
+             <returns>True if scanning should continue consuming characters, false otherwise</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalCommands">
+            
+             <summary>
+            		Handles all terminal commands
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.TerminalCommands.commandShorthand">
+            
+             <summary>
+            		Holds the shorthand name(s) for all terminal commands
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Terminal.TerminalCommands.commandActions">
+            
+             <summary>
+            		Maps command action shorthand names to their action method
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.CommitAction(System.String,System.String)">
+            
+             <summary>
+            		If the parameter command is a valid terminal command, that 
+            		command's action is invoked. Otherwise an EvalNoticeType.UNKNOWN_TERMINAL_COMMAND
+            		is reported
+             </summary>
+             
+             <param name="command">Terminal command</param>
+             <param name="statement">Expression after the command</param>
+             
+             <returns>
+            		The return results of executing the terminal command action if command is found.
+            		Otherwise false.
+            	</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.AddWatch(System.String)">
+            
+             <summary>
+            		Adds expression given to the watch list. Expressions in the watch list are re-evaluated
+            		each frame and the result is displayed next to it. Each watch has an id that appears as
+            		the first part of the line. Use this id for the delete watch command.
+            		
+            		Example:
+            		    $Add Watch: count
+            		    
+            		Will add the identifier count to the list of watch expressions and retrieve and display
+            		its value each frame. 
+             </summary>
+             
+             <param name="statement">Expression after the command</param>
+             
+             <returns>True if the statement parameter needs to be evaluated. False otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.DelWatch(System.String)">
+            
+             <summary>
+            		Deletes the watch expression with the given id.
+            		
+            		Example:
+            		    $Delete Watch: 0
+            		    
+            		Will delete watch expression with id = 0 
+             </summary>
+             
+             <param name="statement">Expression after the command</param>
+             
+             <returns>True if the statement parameter needs to be evaluated. False otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.DelAllWatches(System.String)">
+            
+             <summary>
+            		Deletes all current watch expressions. This doesn't need an expression.
+            		
+            		Example:
+            			$Delete All Watches: 
+             </summary>
+             
+             <param name="statement">Expression after the command</param>
+             
+             <returns>True if the statement parameter needs to be evaluated. False otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.Evaluate(System.String)">
+            
+             <summary>
+            		Can give terminal a string variable containing custom terminal statement to
+            		evaluate. Useful for setting up testing expressions in multiple strings in 
+            		code, then simply using those variables in terminal
+            		
+            		Example:
+            			$Evaluate: playerPosX
+            		
+            		If, say, playerPosX = "Player.Position.X", this would first look up the value
+            		of playerPosX, then evaluate the string "Player.Position.X" as an expression. 
+             </summary>
+             
+             <param name="statement">Expression after the command</param>
+             
+             <returns>True if the statement parameter needs to be evaluated. False otherwise.</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Terminal.TerminalCommands.AddEvaluateWatch(System.String)">
+            
+             <summary>
+            		Preforms 'Evaluate' terminal command on expression then adds the result to the 
+            		list of watch expressions
+            		
+            		Example:
+            			$Add Evaluate Watch: playerPosX
+            		
+            		Runs an 'Evaluate' command on playerPosX and stores the resulting string in list 
+            		of watches as an expression. 
+             </summary>
+             
+             <param name="statement">Expression after the command</param>
+             
+             <returns>True if the statement parameter needs to be evaluated. False otherwise.</returns>
+             
+        </member>
+        <member name="P:DebugTerminal.Terminal.TerminalCommands.CommandShorthand">
+            
+             <summary>
+            		Provides public get access to the shorthand command name(s),
+            		and private set access
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Terminal.TerminalCommands.CommandAction">
+            
+             <summary>
+            		Delegate for the action each command takes
+             </summary>
+             
+             <param name="statement">Statement after the command</param>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.ArrayExp">
+            
+             <summary>
+            		Used to parse array index expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.ArrayExp.Parse(DebugTerminal.Exps.XdtObject,System.String,DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Parses array expressions
+             </summary>
+             
+             <param name="rootInstance">The object in which the method is implemented</param>
+             <param name="arrayIdent">Name of the array</param>
+             <param name="index">Object for the index value</param>
+             
+             <returns>XdtObject containing the array element at the specified index</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.IDENT_IS_NOT_ARRAY"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.IDENT_NOT_FOUND"/>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.CallArgMod">
+            
+             <summary>
+            		Represents a method call argument modifier
+            		(i.e. ref, out, or none)
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.CallArgMod.NONE">
+            
+             <summary>
+            		No modifier used
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.CallArgMod.OUT">
+            
+             <summary>
+            		Out keyword used
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.CallArgMod.REF">
+            
+             <summary>
+            		Ref keyword used
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.TerminalTheme">
+            
+             <summary>
+            		Holds basic terminal theme preferences
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalTheme.CursorColor">
+            
+             <summary>
+            		Color of cursor
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalTheme.CursorWidth">
+            
+             <summary>
+            		Width of cursor
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalTheme.WatchFGColor">
+            
+             <summary>
+            		Color for watch expressions
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalTheme.BgColor">
+            
+             <summary>
+            		Holds the 4 background colors for the top left, top right,
+            		bottom right, bottom left corners respectively
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.TerminalTheme.Alpha">
+            
+             <summary>
+            		Alpha value for the terminal background
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.DispMath">
+            
+             <summary>
+            		Used for display math or math for accurate screen placement
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.DispMath.screenHeight">
+            
+             <summary>
+            		Pixel height of the game window
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.DispMath.Init(System.UInt16)">
+            
+             <summary>
+            		Sets the screen height
+             </summary>
+             
+             <param name="screenHeight">Pixel height of the game window</param>
+             
+        </member>
+        <member name="M:DebugTerminal.DispMath.GetYFromBottomFromPixelHeight(System.Int32)">
+            
+             <summary>
+            		Converts absolute 2D pixel value to screen range between -1 and 1
+             </summary>
+             
+             <remarks>Used for drawing vertices of terminal background</remarks>
+             
+             <param name="pixel">The pixel value to convert</param>
+             
+             <returns>A value between -1 and 1</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.DispMath.GetPixelFromPercentHeight(System.Single)">
+            
+             <summary>
+            		Converts screen range -1 to 1 to absolute 2D pixel value
+             </summary>
+             
+             <remarks>Used for proper positioning of text to overlap terminal background</remarks>
+             
+             <param name="percent">Screen range value</param>
+             
+             <returns>Absolute 2D pixel value</returns>
+            
+        </member>
+        <member name="M:DebugTerminal.DispMath.ChangeRange(System.Single,System.Single,System.Single,System.Single,System.Single)">
+            
+             <summary>
+            		Changes a value from one range [min, max] to another.
+             </summary>
+             
+             <param name="value">Value to convert</param>
+             <param name="oldMin">Old range's minimum</param>
+             <param name="oldMax">Old range's maximum</param>
+             <param name="newMin">New range's minimum</param>
+             <param name="newMax">New range's maximum</param>
+             
+             <returns>The param value after adjusting it into the new range</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.TerminalSkin">
+            
+             <summary>
+            		Holds all terminal skin/theme information
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.TerminalSkin.sh">
+            
+             <summary>
+            		Terminal syntax highlighting preferences
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.TerminalSkin.theme">
+            
+             <summary>
+            		Terminal basic theme preferences
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.TerminalSkin.vsDefault">
+            
+             <summary>
+            		Visual Studio default syntax highlighting color scheme
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.TerminalSkin.themeTypes">
+            
+             <summary>
+            		Connects TerminalThemeTypes to their corresponding TerminalThemes
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.TerminalSkin.themeSHTypes">
+            
+             <summary>
+            		Connects TerminalThemeSHType (syntax highlighting types) to their corresponding TerminalThemeSH (syntax highlighting color sets)
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.#ctor(Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color[],System.Single,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color,Microsoft.Xna.Framework.Graphics.Color)">
+            <summary>
+            	Constructor
+            </summary>
+            
+            <param name="cursorColor">Color for the cursor</param>
+            <param name="watchFGColor">Color for watch expressions</param>
+            <param name="bgColor">
+            	Holds the 4 background colors for the top left, top right,
+            	bottom right, bottom left corners respectively
+            </param>
+            <param name="alpha">Alpha value for the terminal background</param>
+            <param name="shChar">Color for character literals</param>
+            <param name="shComment">Color for comments</param>
+            <param name="shIdent">Color for identifiers</param>
+            <param name="shInvTermCom">Color for invalid terminal commands</param>
+            <param name="shKeyword">Color for keywords</param>
+            <param name="shNum">Color for numeric literals</param>
+            <param name="shOperator">Color for operators</param>
+            <param name="shStr">Color for string literals</param>
+            <param name="shTermCom">Color for valid terminal commands</param>
+            
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.#ctor(DebugTerminal.TerminalThemeType)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="themeType">Basic terminal theme</param>
+             
+             <remarks>
+            		Uses syntax highlighting color set corresponding to param themeType.
+             </remarks>
+             
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.#ctor(DebugTerminal.TerminalThemeType,DebugTerminal.TerminalThemeSHType)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="themeType">Basic terminal theme</param>
+             <param name="shType">Syntax highlighting color set</param>
+             
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.CreateVSCurrentThemeSH">
+            
+             <summary>
+            		Creates a syntax highlighting color set from Visual Studio's current
+            		syntax highlighting settings
+             </summary>
+             
+             <returns>A TerminalThemeSH created from Visual Studio's current syntax highlighting settings</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.ParseRegVal(Microsoft.Xna.Framework.Graphics.Color,System.Int32,Microsoft.Xna.Framework.Graphics.Color)">
+            
+             <summary>
+            		Parses a Visual Studio "Fonts and Colors" color setting from the param value
+            		pulled from the registry
+             </summary>
+             
+             <param name="auto">"Automatic" color setting</param>
+             <param name="value">Registry value to parse</param>
+             <param name="defaultColor">Color to use as default</param>
+             
+             <returns>Color from parsing param value</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.TerminalSkin.GetSHColor(System.Int32)">
+            
+             <summary>
+            		Retrieves the token color from this instance's syntax highlighting set
+             </summary>
+             
+             <param name="tokenType">Type of token (int value from in xdtParser)</param>
+             
+             <returns>Color of token</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.KeyLock">
+            
+             <summary>
+            		Used to control when a key press "event" (or whatever action is attached to the key)
+            		is fired. This prevents a key press from being recognized every frame and uses the
+            		user's Windows settings for key repeat rate and initial delay.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.autoRepeatDelay">
+            
+             <summary>
+            		The amount of milliseconds to wait after a key is first pressed before it starts
+            		to repeat.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.autoRepeatRate">
+            
+             <summary>
+            		The amount of milliseconds to wait until the key gets repeated 
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.pressedTimeStamp">
+            
+             <summary>
+            		Saves a time stamp so total elapsed milliseconds can be calculated. Used for
+            		autoRepeatDelay and autoRepeatRate.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.locked">
+            
+             <summary>
+            		If true key is "locked" and no press event occurs. If false key is "unlocked"
+            		and press event can occur.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.useRepeatDelay">
+            
+             <summary>
+            		If true key is not in repeat mode and autoRepeatDelay is used if key is down.
+            		If false key is in repeat mode and autoRepeatRate is used. 
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyLock.isRepeatedPress">
+            
+             <summary>
+            		Helps determine proper value of useRepeatDelay. If true the next time key is
+            		locked it will be in repeat mode (i.e. useRepeatDelay = false). If false the 
+            		next time key is locked it will	not be in repeat mode (i.e. useRepeatDelay = true).
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyLock.#ctor">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyLock.SetRepeatDelayAndRate">
+            
+             <summary>
+            		Sets the autoRepeatDelay and autoRepeatRate fields based on settings found
+            		in the registry
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyLock.Lock">
+            
+             <summary>
+            		Locks the key to prevent repeated events from firing (at least until the
+            		autoRepeatDelay time has expired)
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyLock.Unlock">
+            
+             <summary>
+            		Unlocks the key to allow the press event to fire next time it is pressed
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyLock.Update">
+            
+             <summary>
+            		If locked, checks the time elapsed since it was last locked and releases that lock if
+            		autoRepeatDelay (if key is not in repeat mode) or autoRepeatRate (if key is in repeat
+            		mode) time has passed.
+             </summary>
+             
+        </member>
+        <member name="P:DebugTerminal.Input.KeyLock.IsLocked">
+            
+             <summary>
+            		Returns the value of the locked field
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.KeyboardManager">
+            
+             <summary>
+            		Controls keyboard interactions with game
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.KeyboardManager.keylocks">
+            
+             <summary>
+            		Holds array of KeyLock object that each correspond to a single key. Used to control
+            		when a keypress event is fired.
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyboardManager.#ctor">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyboardManager.KeyAction(Microsoft.Xna.Framework.Input.Keys,DebugTerminal.Input.KeyboardManager.KeyActionMethNoParams)">
+            
+             <summary>
+            		Used to map key press/repeat to method that matches KeyActionMethNoParams signature
+             </summary>
+             
+             <param name="key">Key to map</param>
+             <param name="meth">Action to map key to (will fire when key is pressed or repeated)</param> 
+            
+        </member>
+        <member name="M:DebugTerminal.Input.KeyboardManager.KeyAction(Microsoft.Xna.Framework.Input.Keys,DebugTerminal.Input.KeyboardManager.KeyActionMethVarParams,System.Object[])">
+            
+             <summary>
+            		Used to map key press/repeat to method that matches KeyActionMethVarParams signature
+             </summary>
+             
+             <param name="key">Key to map</param>
+             <param name="meth">Action to map key to (will fire when key is pressed or repeated)</param> 
+             <param name="args">Array of all arguments to be sent to meth</param>
+            
+        </member>
+        <member name="M:DebugTerminal.Input.KeyboardManager.ReleaseKeyLocks">
+            
+             <summary>
+            		Releases all locks on keys so keypress events can fire
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.KeyboardManager.GetKeyChar(Microsoft.Xna.Framework.Input.KeyboardState,Microsoft.Xna.Framework.Input.Keys)">
+            
+             <summary>
+            		Used for figuring out the character associated with a pressed key
+             </summary>
+             
+             <param name="keyState">Current state of keyboard</param>
+             <param name="key">Key to check</param>
+             
+             <returns>Char associated with key or null if matching character cannot be found</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.KeyboardManager.KeyActionMethNoParams">
+            
+             <summary>
+            		Delegate for methods that are triggered by a keypress and has no parameters
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.KeyboardManager.KeyActionMethVarParams">
+            
+             <summary>
+            		Delegate for methods that are triggered by a keypress and has at least one parameter
+             </summary>
+             
+             <param name="args">Arguments to send to the key action method</param>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.ArithType">
+            
+             <summary>
+            		Arithmetic operator types
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.ADD">
+            
+             <summary>
+            		Addition
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.SUB">
+            
+             <summary>
+            		Subtraction
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.MUL">
+            
+             <summary>
+            		Multiplication
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.DIV">
+            
+             <summary>
+            		Division
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.MOD">
+            
+             <summary>
+            		Modulus
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.ArithType.POW">
+            
+             <summary>
+            		Power/Exponent
+             </summary>
+             
+        </member>
+        <member name="T:DebugTerminal.Input.GraphicRect">
+            
+             <summary>
+            		A graphic representation of a rectangle
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.GraphicRect.rect">
+            
+             <summary>
+            		Holds the rectangle's position and boundaries
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.GraphicRect.pts">
+            
+             <summary>
+            		Points of the rectangle. Used for drawing.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.GraphicRect.ptIndices">
+            
+             <summary>
+            		Point indices referring to field pts.
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.#ctor(Microsoft.Xna.Framework.Graphics.Color,System.Single,System.Single,System.Single,System.Single)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="color">Solid color of rectangle</param>
+             <param name="x">X position (i.e. Left)</param>
+             <param name="y">Y position (i.e. Top)</param>
+             <param name="width">Width of rectangle</param>
+             <param name="height">Height of rectangle</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.ChangeColor(Microsoft.Xna.Framework.Graphics.Color)">
+            
+             <summary>
+            		Changes the color of the rectangle
+             </summary>
+             
+             <param name="newColor">Color to change to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.ChangeWidth(System.Single)">
+            
+             <summary>
+            		Changes the width of the rectangle
+             </summary>
+             
+             <param name="newWidth">Width to change to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.SetX(System.Single)">
+            
+             <summary>
+            		Resets the x position of the rectangle to the param amt
+             </summary>
+             
+             <param name="amt">Value to set x to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.SetY(System.Single,System.Single)">
+            
+             <summary>
+            		Resets the y position of the rectangle to the param amt
+             </summary>
+             
+             <param name="amt">Value to set y to</param>
+             <param name="height">Current height of the Terminal window</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.GraphicRect.Draw(Microsoft.Xna.Framework.Graphics.GraphicsDevice)">
+            
+             <summary>
+            		Draws the cursor
+             </summary>
+             
+             <param name="device">GraphicsDevice to draw to</param>
+             
+        </member>
+        <member name="T:DebugTerminal.TerminalThemeSHType">
+            
+             <summary>
+            		Terminal theme syntax highlighting color sets
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.BLACK_ON_WHITE">
+            
+             <summary>
+            		<para>Char: Tomato</para>
+            		<para>Comment: Green</para>
+            		<para>Identifier: Black</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: Blue</para>
+            		<para>Number: Dark Violet</para>
+            		<para>Operator: Dim Gray</para>
+            		<para>String: Dark Red</para>
+            		<para>Terminal Command: Medium Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.BLACK_ON_WHITE_GRADIENT">
+            
+             <summary>
+            		<para>Char: Saddle Brown</para>
+            		<para>Comment: Green</para>
+            		<para>Identifier: Black</para>
+            		<para>Invalid Terminal Command: Crimson</para>
+            		<para>Keyword: Blue</para>
+            		<para>Number: Dark Violet</para>
+            		<para>Operator: Dim Gray</para>
+            		<para>String: Dark Red</para>
+            		<para>Terminal Command: Medium Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.CHRISTMAS_ONE">
+            
+             <summary>
+            		<para>Char: Dark Orange</para>
+            		<para>Comment: Yellow Green</para>
+            		<para>Identifier: Tan</para>
+            		<para>Invalid Terminal Command: Aqua</para>
+            		<para>Keyword: Dark Sea Green</para>
+            		<para>Number: Green Yellow</para>
+            		<para>Operator: White</para>
+            		<para>String: Orange Red</para>
+            		<para>Terminal Command: Light Yellow</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.CHRISTMAS_TWO">
+            
+             <summary>
+            		<para>Char: Plum</para>
+            		<para>Comment: Cadet Blue</para>
+            		<para>Identifier: Tan</para>
+            		<para>Invalid Terminal Command: Black</para>
+            		<para>Keyword: Dark Sea Green</para>
+            		<para>Number: Green Yellow</para>
+            		<para>Operator: White</para>
+            		<para>String: Dark Orange</para>
+            		<para>Terminal Command: Light Yellow</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.FIRE">
+            
+             <summary>
+            		<para>Char: Orange</para>
+            		<para>Comment: Dim Gray</para>
+            		<para>Identifier: Light Coral</para>
+            		<para>Invalid Terminal Command: Dodger Blue</para>
+            		<para>Keyword: Orange Red</para>
+            		<para>Number: Gold</para>
+            		<para>Operator: Light Yellow</para>
+            		<para>String: Goldenrod</para>
+            		<para>Terminal Command: Dark Orange</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.HALLOWEEN_ONE">
+            
+             <summary>
+            		<para>Char: Maroon</para>
+            		<para>Comment: Orange Red</para>
+            		<para>Identifier: Black</para>
+            		<para>Invalid Terminal Command: Green</para>
+            		<para>Keyword: Yellow</para>
+            		<para>Number: Firebrick</para>
+            		<para>Operator: Red</para>
+            		<para>String: Brown</para>
+            		<para>Terminal Command: White</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.HALLOWEEN_TWO">
+            
+             <summary>
+            		<para>Char: Orange Red</para>
+            		<para>Comment: Dark Goldenrod</para>
+            		<para>Identifier: Orange</para>
+            		<para>Invalid Terminal Command: Green</para>
+            		<para>Keyword: Yellow</para>
+            		<para>Number: Chocolate</para>
+            		<para>Operator: Red</para>
+            		<para>String: Brown</para>
+            		<para>Terminal Command: White</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.ICE">
+            
+             <summary>
+            		<para>Char: Navy</para>
+            		<para>Comment: Steel Blue</para>
+            		<para>Identifier: White Smoke</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: Midnight Blue</para>
+            		<para>Number: Slate Blue</para>
+            		<para>Operator: Dim Gray</para>
+            		<para>String: Dark Slate Blue</para>
+            		<para>Terminal Command: Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.JULY_FOURTH">
+            
+             <summary>
+            		<para>Char: Dark Blue</para>
+            		<para>Comment: Gainsboro</para>
+            		<para>Identifier: White</para>
+            		<para>Invalid Terminal Command: Dark Green</para>
+            		<para>Keyword: Red</para>
+            		<para>Number: Aqua</para>
+            		<para>Operator: Yellow</para>
+            		<para>String: Medium Blue</para>
+            		<para>Terminal Command: Indigo</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.OLD_SCHOOL">
+            
+             <summary>
+            		<para>Char: Light Yellow</para>
+            		<para>Comment: Lime Green</para>
+            		<para>Identifier: Tan</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: White</para>
+            		<para>Number: Dark Goldenrod</para>
+            		<para>Operator: Yellow Green</para>
+            		<para>String: Green</para>
+            		<para>Terminal Command: Dark Orange</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.SUNRISE">
+            
+             <summary>
+            		<para>Char: Orange Red</para>
+            		<para>Comment: Dark Orange</para>
+            		<para>Identifier: Dark Red</para>
+            		<para>Invalid Terminal Command: Navy</para>
+            		<para>Keyword: Brown</para>
+            		<para>Number: Dark Goldenrod</para>
+            		<para>Operator: Tomato</para>
+            		<para>String: Red</para>
+            		<para>Terminal Command: Firebrick</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.WHITE_ON_BLACK">
+            
+             <summary>
+            		<para>Char: Yellow</para>
+            		<para>Comment: Dark Sea Green</para>
+            		<para>Identifier: White</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: Royal Blue</para>
+            		<para>Number: Violet</para>
+            		<para>Operator: Light Gray</para>
+            		<para>String: Dark Orange</para>
+            		<para>Terminal Command: Cornflower Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.WHITE_ON_BLACK_GRADIENT">
+            
+             <summary>
+            		<para>Char: Yellow</para>
+            		<para>Comment: Dark Sea Green</para>
+            		<para>Identifier: White</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: Royal Blue</para>
+            		<para>Number: Violet</para>
+            		<para>Operator: Light Gray</para>
+            		<para>String: Dark Orange</para>
+            		<para>Terminal Command: Cornflower Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.VS_DEFAULT">
+            
+             <summary>
+            		<para>Char: RGB(163,21,21)</para>
+            		<para>Comment: Green</para>
+            		<para>Identifier: Black</para>
+            		<para>Invalid Terminal Command: Red</para>
+            		<para>Keyword: Blue</para>
+            		<para>Number: Black</para>
+            		<para>Operator: Black</para>
+            		<para>String: RGB(163,21,21)</para>
+            		<para>Terminal Command: Blue</para>
+            	</summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeSHType.VS_CURRENT">
+            
+             <summary>
+            		<para>Char: VS String Setting</para>
+            		<para>Comment: VS Comment Setting</para>
+            		<para>Identifier: VS Identifier Setting</para>
+            		<para>Invalid Terminal Command: VS Syntax Error Setting</para>
+            		<para>Keyword: VS Keyword Setting</para>
+            		<para>Number: VS Number Setting</para>
+            		<para>Operator: VS Operator Setting</para>
+            		<para>String: VS String Setting</para>
+            		<para>Terminal Command: VS User Keywords Setting</para>
+            	</summary>
+            
+        </member>
+        <member name="T:DebugTerminal.Input.Cursor">
+            
+             <summary>
+            		Used to simulate a blinking cursor
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.leftPos">
+            
+             <summary>
+            		The x and y axes in screen coordinates are from -1 to +1.
+            		This holds the x value in that range for where the cursor
+            		is to begin and return to when there is no text.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.pixelHeight">
+            
+             <summary>
+            		Pixel height of the cursor. Is equal to the height of a space 
+            		character in the terminal's font (held by the font field)
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.pixelWidth">
+            
+             <summary>
+            		Pixel width of the cursor.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.graphicRect">
+            
+             <summary>
+            		Graphic representation. Representation as a GraphicRect allows
+            		for the user to change the cursor's width.
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.blinkDelay">
+            
+             <summary>
+            		Number of milliseconds to wait until showCursor	is toggled
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.showCursor">
+            
+             <summary>
+            		If true the cursor is to be displayed, otherwise
+            		it won't be displayed. Is toggled for blinking
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.font">
+            
+             <summary>
+            		SpriteFont object used to display terminal's text.
+            		Used so MeasureString() can be called and cursor's position
+            		can be calculated
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.screenWidth">
+            
+             <summary>
+            		Width of game screen
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Input.Cursor.msCursorStateChange">
+            
+             <summary>
+            		Holds the number of elapsed milliseconds to help
+            		in blink rate
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.#ctor(Microsoft.Xna.Framework.Graphics.Color,System.Byte,System.Single,Microsoft.Xna.Framework.Graphics.SpriteFont,System.UInt16)">
+            
+             <summary>
+            		Constructor
+             </summary>
+             
+             <param name="color">Cursor's color</param>
+             <param name="pixelWidth">Pixel width of cursor</param>
+            	<param name="termHeight">Height of the terminal</param>
+             <param name="font">
+            		SpriteFont object used to display terminal's text.
+            		Used so MeasureString() can be called and cursor's position
+            		can be calculated
+            	</param>
+            	<param name="screenWidth">Width of game window</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.ChangeColor(Microsoft.Xna.Framework.Graphics.Color)">
+            
+             <summary>
+            		Changes cursor's color
+             </summary>
+             
+             <param name="color">Color to change cursor to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.ChangeWidth(System.Byte)">
+            
+             <summary>
+            		Changes width of the cursor
+             </summary>
+             
+             <param name="newWidth">Width to change to</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.SetPosition(System.String)">
+            
+             <summary>
+            		Resets the cursor's x position based on the width of the
+            		given text
+             </summary>
+             
+             <param name="leftOfCursor">
+            		Text to the left of the cursor.
+            		Width of that text tells how far to move the cursor
+            	</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.ShiftCursor(System.Int32)">
+            
+             <summary>
+            		Moves cursor up/down based on the number of active
+            		watches
+             </summary>
+             
+             <param name="screenPixelLines">Number of active watches</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Input.Cursor.Draw(Microsoft.Xna.Framework.Graphics.GraphicsDevice)">
+            
+             <summary>
+            		Draws cursor
+             </summary>
+             
+             <param name="device">Graphics device to use for drawing</param>
+             
+        </member>
+        <member name="T:DebugTerminal.Exps.CastExp">
+            
+             <summary>
+            		Used to parse cast expressions
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.CastExp.Parse(DebugTerminal.Exps.XdtObject,System.String,DebugTerminal.Exps.XdtObject)">
+            
+             <summary>
+            		Parses casts
+             </summary>
+             
+             <remarks>
+            		Can only perform a real cast in certain situations. When it can't it
+            		tries to mimic a cast using parsing or conversion.
+            	</remarks>
+            	
+             <param name="instance">The root object</param>
+             <param name="typeName">Type to cast to</param>
+             <param name="xdtData">Expression to cast</param>
+             
+             <returns>The converted object</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.CANT_CAST_VALUE_TO_TYPE"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.OVERFLOW_TRYING_TO_CAST"/>
+            
+        </member>
+        <member name="T:DebugTerminal.Exps.MethodExp">
+            
+             <summary>
+            		Used to parse method call expressions
+             </summary>
+             
+        </member>
+        <member name="F:DebugTerminal.Exps.MethodExp.findFlags">
+            
+             <summary>
+            		Flags used in GetMethod() to locate the method being called
+             </summary>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.Parse(DebugTerminal.Exps.XdtObject,System.String,System.Collections.Generic.List{DebugTerminal.Exps.XdtObject})">
+            
+             <summary>
+            		Parses method calls
+             </summary>
+             
+             <param name="instance">The object in which the method is implemented</param>
+             <param name="methName">Name of the method</param>
+             <param name="args">XdtObject array containing arguments to be sent to the method. Each XdtObject is one argument</param>
+             
+             <returns>XdtObject containing the return result of the method call or XdtObject containing null if method is void</returns>
+             
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_CALL_AMBIGUOUS"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_CANT_IMPLICITLY_COERCE_ARGS"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_DOESNT_EXIST"/>
+             <exception cref="F:DebugTerminal.Exceptions.XdtLogicExceptionType.METHOD_EXISTS_BUT_CANT_BE_INVOKED"/>
+            
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.CountMeths(System.Type,System.String)">
+            
+             <summary>
+            		Counts the number of methods matching methName in env
+             </summary>
+             
+             <param name="env">Type environment to search for the method in</param>
+             <param name="methName">Name of method to search for</param>
+             
+             <returns>The number of methods having the same name as methName</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.GetMethodInfos(System.Type,System.String)">
+            
+             <summary>
+            		Gets information on methods matching param methName
+             </summary>
+             
+             <param name="env">Environment to look up the method in</param>
+             <param name="methName">Method name</param>
+             
+             <returns>List of MethodInfos containing information on all methods matching methName</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.CanCoerce(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject})">
+            
+             <summary>
+            		Determines if it is possible to coerce the given list of arguments
+            		so a method signature can be matched.
+             </summary>
+             
+             <param name="args">List of arguments to check</param>
+             
+             <returns>
+            		True if exactly one argument is of an integral type, false otherwise.
+            		Idea is to only coerce integral arguments since floating point arguments
+            		would lose precision when converted to a narrower type and objects don't
+            		need it due to inheritance (i.e. they will match the method signature without
+            		it). If there is more than one integral argument, then the chance that the
+            		wrong overloaded method is called is too great, and so this method returns
+            		false meaning it can't safely coerce the integral args. If only one is found,
+            		and a method can't be matched without coercion, then we can safely narrow
+            		down that one integral arg without worry about matching the wrong method.
+             </returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.NarrowAllIntTypes(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject}@)">
+            
+             <summary>
+            		Inspects all XdtObjects in args and for the literal integral values, it
+            		converts their type to the most narrow type that can contain their value.
+            		E.g. if the value is a literal 300 (not the value of an identifier as those
+            		types aren't changed), then the smallest integral data type that can store
+            		that would be a short. This increases the chance that the given args will
+            		match a wider method signature.
+             </summary>
+             
+             <param name="args">Arguments to inspect and convert</param>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.GetTypeArray(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject})">
+            
+             <summary>
+            		Converts list of XdtObject arguments into a type array using either
+            		their CompileTimeType property or if that is null, using GetType() on
+            		their Value property.
+             </summary>
+             
+             <param name="args">Arguments to extract the types of</param>
+             
+             <returns>
+            		A type array from the CompileTimeType or the inherited (from Object) GetType() on the Value
+            		property of each XdtObject in args
+            	</returns>
+             
+        </member>
+        <member name="M:DebugTerminal.Exps.MethodExp.GetObjArgs(System.Collections.Generic.List{DebugTerminal.Exps.XdtObject})">
+            
+             <summary>
+            		Converts list of XdtObject arguments into a object array using their
+            		Value property
+             </summary>
+             
+             <param name="args">Arguments to extract the Value property of</param>
+             
+             <returns>An object array from the Value property of each argument in args</returns>
+             
+        </member>
+        <member name="T:DebugTerminal.TerminalThemeType">
+            
+             <summary>
+            		Terminal theme types
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.BLACK_ON_WHITE">
+            
+             <summary>
+            		<para>CursorColor: Black</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Gray</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: White</para>
+            		<para>BgColor Top Right: White</para>
+            		<para>BgColor Bottom Right: White</para>
+            		<para>BgColor Bottom Left: White</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.BLACK_ON_WHITE_GRADIENT">
+            
+             <summary>
+            		<para>CursorColor: Black</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Gray</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Gray</para>
+            		<para>BgColor Top Right: Gray</para>
+            		<para>BgColor Bottom Right: White</para>
+            		<para>BgColor Bottom Left: White</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.CHRISTMAS_ONE">
+            
+             <summary>
+            		<para>CursorColor: DarkGreen</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: DarkOliveGreen</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Firebrick</para>
+            		<para>BgColor Top Right: Firebrick</para>
+            		<para>BgColor Bottom Right: Firebrick</para>
+            		<para>BgColor Bottom Left: Firebrick</para>
+            		<para>_</para>
+            		<para>Alpha: 75%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.CHRISTMAS_TWO">
+            
+             <summary>
+            		<para>CursorColor: DarkRed</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Firebrick</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: DarkOliveGreen</para>
+            		<para>BgColor Top Right: DarkOliveGreen</para>
+            		<para>BgColor Bottom Right: DarkOliveGreen</para>
+            		<para>BgColor Bottom Left: DarkOliveGreen</para>
+            		<para>_</para>
+            		<para>Alpha: 75%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.FIRE">
+            
+             <summary>
+            		<para>CursorColor: Gold</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: DarkSalmon</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: DarkRed</para>
+            		<para>BgColor Top Right: DarkRed</para>
+            		<para>BgColor Bottom Right: Red</para>
+            		<para>BgColor Bottom Left: Red</para>
+            		<para>_</para>
+            		<para>Alpha: 70%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.HALLOWEEN_ONE">
+            
+             <summary>
+            		<para>CursorColor: Black</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Brown</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: DarkOrange</para>
+            		<para>BgColor Top Right: Orange</para>
+            		<para>BgColor Bottom Right: Orange</para>
+            		<para>BgColor Bottom Left: DarkOrange</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.HALLOWEEN_TWO">
+            
+             <summary>
+            		<para>CursorColor: Khaki</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: PapayaWhip</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Black</para>
+            		<para>BgColor Top Right: DarkSlateGray</para>
+            		<para>BgColor Bottom Right: DarkSlateGray</para>
+            		<para>BgColor Bottom Left: Black</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.ICE">
+            
+             <summary>
+            		<para>CursorColor: Navy</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: RGB(0, 0, 75)</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: DodgerBlue</para>
+            		<para>BgColor Top Right: DodgerBlue</para>
+            		<para>BgColor Bottom Right: Aquamarine</para>
+            		<para>BgColor Bottom Left: Aquamarine</para>
+            		<para>_</para>
+            		<para>Alpha: 83%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.JULY_FOURTH">
+            
+             <summary>
+            		<para>CursorColor: Black</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: DarkSlateGray</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Yellow</para>
+            		<para>BgColor Top Right: Green</para>
+            		<para>BgColor Bottom Right: Blue</para>
+            		<para>BgColor Bottom Left: Red</para>
+            		<para>_</para>
+            		<para>Alpha: 80%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.OLD_SCHOOL">
+            
+             <summary>
+            		<para>CursorColor: Green</para>
+            		<para>CursorWidth: 4px</para>
+            		<para>WatchFGColor: DarkGreen</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Black</para>
+            		<para>BgColor Top Right: Black</para>
+            		<para>BgColor Bottom Right: Black</para>
+            		<para>BgColor Bottom Left: Black</para>
+            		<para>_</para>
+            		<para>Alpha: 100%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.SUNRISE">
+            
+             <summary>
+            		<para>CursorColor: MediumVioletRed</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: OrangeRed</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Yellow</para>
+            		<para>BgColor Top Right: Orange</para>
+            		<para>BgColor Bottom Right: Orange</para>
+            		<para>BgColor Bottom Left: Orange</para>
+            		<para>_</para>
+            		<para>Alpha: 70%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.WHITE_ON_BLACK">
+            
+             <summary>
+            		<para>CursorColor: White</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Gray</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Black</para>
+            		<para>BgColor Top Right: Black</para>
+            		<para>BgColor Bottom Right: Black</para>
+            		<para>BgColor Bottom Left: Black</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+        <member name="F:DebugTerminal.TerminalThemeType.WHITE_ON_BLACK_GRADIENT">
+            
+             <summary>
+            		<para>CursorColor: White</para>
+            		<para>CursorWidth: 2px</para>
+            		<para>WatchFGColor: Gray</para>
+            		<para>_</para>
+            		<para>BgColor Top Left: Gray</para>
+            		<para>BgColor Top Right: Gray</para>
+            		<para>BgColor Bottom Right: Black</para>
+            		<para>BgColor Bottom Left: Black</para>
+            		<para>_</para>
+            		<para>Alpha: 90%</para>
+             </summary>
+            
+        </member>
+    </members>
+</doc>

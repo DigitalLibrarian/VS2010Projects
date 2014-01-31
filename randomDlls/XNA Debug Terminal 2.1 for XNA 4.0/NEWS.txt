@@ -1,0 +1,286 @@
+2.1 (February 1, 2010)
+---------------------
+Added Support For:
+    Expressions (L = lhs expression in assignment, R = rhs expression in assignment or non-assignment expression)
+		[R] Power operator (**)
+		[R] Operator-equals (+=, -=, /=, *=, %=, **=)
+		[R] Built-in constants (e.g. #PI shorthand for Math.PI)
+		[R] Suffixes on exponential numeric literals (e.g. 3e2d)
+		[R] Escape sequences in both types and identifiers
+		
+    Other
+		Syntax highlighting
+		Correctness is verified against 635 unit tests
+			Includes several tests with purposely incorrect expressions to be sure that errors are properly handled
+
+Fixed Bugs:
+	PROBLEM: Editing recalled terminal history items would modify the actual item stored in history.
+	FIX: 	 The terminal history list is copied instead of referenced, so that edits won't modify past history items.
+	
+	PROBLEM: Caps Lock was always assumed to be OFF when game started. Caps Lock state was also not checked when Terminal was not active.
+	FIX: 	 The state of the Caps Lock key is now checked before printing any characters to the terminal.
+
+	PROBLEM: Expressions that evaluated to null threw a null-pointer exception.
+	EXAMPLE: null
+	FIX: 	 Explicitly checks for null after evaluating expression
+	
+	PROBLEM: Calling a function with a numeric literal encapsulated in a string may call an overloaded method that accepts a numeric 
+			 literal instead.
+	EXAMPLE: Foo("3")
+	FIX:	 Function argument types are first checked against the method signature and only if necessary,
+			 are coerced according to the method's formal parameters. This is only performed on non-overloaded
+			 methods.
+			
+	PROBLEM: Calling a function with a valid sbyte literal that accepts an sbyte would not call the function.
+	EXAMPLE: Bar(7)  // where method signature would be Bar(sbyte)
+	FIX: 	 Same fix as above.
+							
+	PROBLEM: Identifiers matching numeric literal suffixes would not be recognized.
+	EXAMPLE: UL  // used as an identifier
+	FIX: 	 Improved the ANTLR grammar to step around this issue
+
+UI Improvements
+	Cursor
+		Word navigation is more consistent with Visual Studio's behavior
+		Setting and adjusting the cursor width is now possible
+
+	Keyboard Changes
+		Actively checks the state of the Caps Lock key to ensure that correct input is entered.
+		While Caps Lock is on, using the Shift key will produce the expected result.
+
+	New Keyboard Commands
+		Alt+T to toggle the display of input as tokens
+
+Known Issues:
+    See the attached KnownIssues.txt file for a list of known issues.
+
+
+
+2.0 (August 22, 2010)
+---------------------
+Added Support For:
+    Expressions (L = lhs expression in assignment, R = rhs expression in assignment or non-assignment expression)
+        [R]  Arithmetic expressions
+        [LR] Full assignment support (can be used in rhs expressions of other assignments. E.g. x = y=3 and x = (y=3) + (z=5))
+        [LR] Array indexing
+        [R]  Unary "+" and "-"
+        [R]  "@" identifier prefix (doesn't work in lhs expressions, yet)
+        [R]  Exponential "E"/"e" in numeric literals
+        [R]  Literal expressions such as the following:
+                23f.ToString()
+                -89.6.ToString().Length
+                ("Hello World").Length
+        [R]  Verbatim string literals
+        [R]  Escape sequences (including unicode escape sequences) in string and character literals (e.g. "Hello \t World", '\u0020')
+        [R]  Parenthetical Expressions: parentheses are allowed arbitrarily in expressions where desired. Precedence rules are properly followed.
+
+    Terminal Themes
+        FIRE
+        ICE
+
+    Other
+        Correctness is verified against 478 unit tests
+        Includes several tests with purposely incorrect expressions to be sure that errors are properly handled
+        Semi-colon is optional at end of expression
+
+Fixed Bugs:
+    PROBLEM: Using null in assignment reports an error even though it works fine.
+    EXAMPLE: someIdent = null
+    FIX:     Uses exceptions instead of null to indicate expression parsing problems
+
+    PROBLEM: Floating point literals were always cast as floats causing some loss in precision.
+    EXAMPLE: 0.1
+    FIX:     Floating point literals are considered as doubles by default. In testing, precision was approximately 7x closer to actual 
+             C# precision (arithmetic result typing contains some inconsistencies over actual C# compiler so it's not perfect yet)
+
+    PROBLEM: Casting of floating point expressions to integral types would round instead of truncate
+    EXAMPLE: (int)3.8 /* Would give 4 instead of 3 */
+    FIX:     Improved casting
+
+Interpreter Improvements
+    Lexer and parser are now based on ANTLR engine with a custom grammar
+    Previous versions were based on heuristics-type interpretation
+    Parsing is approximately 2.7x faster
+    More accurate error messages
+    Watch expressions are evaluated faster since parsed state is now preserved after the initial evaluation.
+    Proper method is called when method is overloaded or an error message is generated if ambiguous
+    The default data type of numeric literals follow the standard C# specification 
+    i.e. 
+        integral type: int
+        larger integral type: long
+        floating-point type: double (leads to greater precision when using floating-point literals)
+
+UI Improvements
+    New Insertion Cursor
+        Cursor blink rate is based on user's Windows settings.
+        
+    Keyboard Changes
+        Keyboard repeat rate and repeat speed are supported and are based on user's Windows settings.
+        Fixed a problem where any key could not be pressed twice until all keys were released. 
+        
+    New Keyboard Commands
+        Ctrl+Backspace and Ctrl+Delete to delete words
+        Left and Right to navigate between characters
+        Ctrl+Left and Ctrl+Right to navigate between words
+        Home to go to beginning of terminal text
+        End to go to end of terminal text
+        Escape and Ctrl+U clear the terminal along with Tilde
+        Ctrl+V to paste text from the clipboard (more on that below) 
+        
+    Paste using standard Ctrl+V
+        Must have attribute System.STAThread on Main method to work.
+        i.e.
+          static class Program {
+              [System.STAThread]
+              static void Main(string[] args) {
+                  using (Game1 game = new Game1()) {
+                      game.Run();
+                  }
+              }
+          }
+        Pasted characters that are not supported by the given SpriteFont will not appear.
+        Copy and Cut are expected in a future version 
+        
+    Result Message Auto-Clear
+        Further keypresses after result message presented will properly clear the messages and appear properly in the next command.
+        (i.e. no need to clear terminal after each entered expression) 
+    
+Further Improvements:
+    Using watch expressions that become null while the watch expression is active (e.g. null-pointer exceptions) are handled nicely.
+    Terminal command deleteallwatches (daw) does not require a colon at the end
+
+Breaking Changes:
+    Method Resolution
+        In previous versions numeric literal types were treated differently (e.g. "3" would be considered a byte data type instead 
+        of an int (C# compiler would consider it an int)). Because of this overloaded methods are now handled more accurately, and 
+        the actual method invoked may be different than that in previous versions.
+
+    Terminal.SetSkin Method
+        Terminal.SetSkin now only accepts either a TerminalThemeType or a TerminalSkin object. The TerminalSkin overloaded version 
+        can be used to apply your own TerminalSkin object created from scratch or one manipulated from a preset TerminalThemeType 
+        using TerminalSkin's CreateFromTheme static method.
+
+        Example:
+            TerminalSkin skin = TerminalSkin.CreateFromTheme(TerminalThemeType.WHITE_ON_BLACK);
+            skin.FgColor = Color.Cyan;
+            skin.CursorColor = Color.Cyan;
+            Terminal.SetSkin(skin);
+
+    ANTLR
+        Since we are using ANTLR, the file "Antlr3.Runtime.dll" is included with the download and must remain in the same directory 
+        as "DebugTerminal.dll". This is also mentioned in the "README.txt" that comes with the download.
+
+
+Known Issues:
+    See the attached KnownIssues.txt file for a list of known issues.
+
+
+
+1.1 (September 23, 2009)
+------------------------
+Added Support For:
+    Expressions
+        Enums
+        Boolean literals (true and false)
+        
+    Terminal Commands
+        Evaluate
+        Add Evaluate Watch
+        
+    Other
+        Error notice for unmatching parens in expression
+        Code is fully documented and will appear in intellisense and object browser.
+        Created and passed 135 unit tests
+        
+Fixed Bugs:
+    PROBLEM: String literals used as arguments were not recognized as strings causing contents to be regarded as code
+    EXAMPLE: Foo("hello, world") // would see hello and world as arguments passed to Foo
+    FIX:     Quotes were not being recognized correctly. A small change to logic in parsing param expressions fixed this.
+
+    PROBLEM: Type name sometimes chosen incorrectly over identier of the same name.
+    EXAMPLE: If main class has declaration "Color Color", and "Color" is typed in terminal, Color type is returned instead of identifier.
+    FIX:     Changed recognition behavior to:
+                If in cast or object construction:  only search for types of that name
+                Otherwise:                          search identifiers of that name first, then types if that fails.
+
+    PROBLEM: Whitespace was being discarded in string and character literals
+    EXAMPLE: "Hello World" was being changed to "HelloWorld"
+    FIX:     Discards whitespace in all but string and character literals
+
+    PROBLEM: Keyword "new" followed by typename as the name of a method would construct new object of that type
+    EXAMPLE: newFoo() // if "Foo" was a type, would call Foo's constructor
+    FIX:     Added reserved word delimiters to tell the difference after eliminating white space. "new Foo()" as an object construction
+             translates into "#new#Foo()" and "newFoo()" as a method call remains unchanged.
+
+    PROBLEM: Boolean literal names inside strings and identifiers were being treated as actual boolean literals
+    EXAMPLE: "true" // string containing true was treated as boolean literal true
+             xtruex // identier name containing true was treated as boolean literal true
+    FIX:     Added '^' (beginning of line) and '$' (end of line) to regex parsing boolean literals. So quotes and other characters will not match.
+
+    PROBLEM: Object chains that contained method calls were using scope of chain to evaluate arguments sent to method.
+    EXAMPLE: testObj.Foo(testObj.field) // uses scope of testObj to evaluate "testObj.field" resulting in evaluation of "testObj.testObj.Field"
+    FIX:     Now parses params with scope of root instance
+
+    PROBLEM: Tabs and newlines would throw off expression parsing
+    EXAMPLE: new    Color() // tab character would not be discarded and cause problems in parsing
+    FIX:     Now discards '\n', '\t', and '\r' as well as ' ' in expressions
+
+    PROBLEM: Was not able to cast some primitive struct types to others.
+    EXAMPLE: (char)97
+             (int)'a'
+    FIX:     Improved casting. Cast now only attempts to parse (e.g. int.TryParse(...)), and if fails, uses Convert.ChangeType.
+             Would only use parse (e.g. int.Parse(...)) before and not handle cases where that would fail.
+
+Further Improvements:
+    Improved casting
+        Casting now checks if type is enum and acts appropriately. If not enum, will try to parse and if can't parse, it will try Convert.ChangeType.
+        This results in casting that more closely resembles casting in actual code.
+        
+    Added unit test project
+        This ensures more stability and helps to check if future modifications break existing behavior. Each new functionality will have its
+        own set of test cases added to the project.
+
+
+
+1.0 (August 24, 2009)
+---------------------
+Added Support For:
+    Expressions
+        Literals (numeric, char, and string)
+            May also suffix any numeric literal with chars associated with C# types (i.e. "m" for decimal, "ul" for unsigned long, etc.)
+        Identifiers (fields or properties)
+        Methods (void or single return)
+        Types (for calling static fields, properties, and methods)
+        New operator
+        Casting (do not delimit rhs expression with parens. E.g. "(float)value", not "(float)(value)")
+        Object chains (i.e. player.Position.X)
+    
+    Terminal Themes
+        BLACK_ON_WHITE
+        BLACK_ON_WHITE_GRADIENT
+        CHRISTMAS_ONE
+        CHRISTMAS_TWO
+        HALLOWEEN_ONE
+        HALLOWEEN_TWO
+        JULY_FOURTH
+        OLD_SCHOOL
+        SUNRISE
+        WHITE_ON_BLACK
+        WHITE_ON_BLACK_GRADIENT 
+    
+    Terminal Commands
+        Add Watch
+        Delete Watch
+        Delete All Watches 
+    
+    Other
+        Command history (Up/Down keys)
+        Standard generic error messages
+        Try catch to prevent unexpected problems from interfering with game
+        Clear current statement key ('`'/'~' key) 
+    
+Fixed Bugs:
+    No data since this is first version 
+
+Further Improvements:
+    No data since this is first version 
