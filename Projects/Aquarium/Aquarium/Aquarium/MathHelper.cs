@@ -73,5 +73,11 @@ namespace Aquarium
             return rounded;
         }
 
+        public static T NextElement<T>(this Random me, List<T> list)
+        {
+            return list[me.Next(list.Count)];
+        }
+
+
     }
 }

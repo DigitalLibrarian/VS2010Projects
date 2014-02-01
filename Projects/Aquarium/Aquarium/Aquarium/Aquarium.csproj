@@ -116,6 +116,7 @@
     <Compile Include="GA\Bodies\BodyPartSocket.cs" />
     <Compile Include="GA\Bodies\Body.cs" />
     <Compile Include="GA\Bodies\BodyPart.cs" />
+    <Compile Include="GA\Bodies\NervousSystem.cs" />
     <Compile Include="GA\Genomes\Genome.cs" />
     <Compile Include="GA\Organism.cs" />
     <Compile Include="GA\Organs\Organ.cs" />
@@ -123,12 +124,13 @@
     <Compile Include="GA\Signals\ISignalProducer.cs" />
     <Compile Include="GA\Signals\ISignalConsumer.cs" />
     <Compile Include="GA\Signals\Signal.cs" />
+    <Compile Include="GA\Signals\SignalNode.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="NaNny.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="TestBodyPartGenerator.cs" />
+    <Compile Include="GA\BodyGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

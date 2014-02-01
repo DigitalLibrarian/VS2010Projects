@@ -15,6 +15,9 @@ using Forever.Render.Cameras;
 using Forever.Render;
 
 using System.Timers;
+using Aquarium.GA.Organs;
+using Forever.Neural;
+using Aquarium.GA.Signals;
 
 namespace Aquarium
 {
@@ -27,6 +30,8 @@ namespace Aquarium
         SpriteBatch spriteBatch;
 
         Timer GenerateTimer = new Timer(30000);
+
+        BodyGenerator BodyGen = new BodyGenerator();
        
         public Game1()
         {
@@ -38,8 +43,52 @@ namespace Aquarium
 
         void genTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            GenerateBody();
+            Generate();
         }
+        private void Generate()
+        {
+            var body = BodyGen.GenerateBody();
+
+            var min = new Vector3();
+            var max = new Vector3();
+            foreach (var part in body.Parts)
+            {
+                var bsc = part.BodySpaceCorners();
+
+                foreach (var vec in bsc)
+                {
+                    min = Vector3.Min(vec, min);
+                    max = Vector3.Max(vec, max);
+                }
+            }
+            var s = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
+            Camera.Position = Vector3.UnitZ * s.Radius * 3f;
+
+            Body = body;
+            /*
+            var organs = new List<Organ>();
+
+            body.Parts.ForEach(part =>
+            {
+                var network = new NeuralNetwork(2, 2, 2);
+                network.RandomizeWeights(this.BodyGen.Random);
+                var organ = new NeuralOrgan(network);
+                organ.ReceiveSignal(new Signal(new List<double> { 0.0, 0.0 }));
+                organs.Add(organ);
+            });
+
+
+            var network = new NeuralNetwork(2, 2, 2);
+            network.RandomizeWeights(this.BodyGen.Random);
+            var organ = new NeuralOrgan(network);
+            organ.ReceiveSignal(new Signal(new List<double> { 0.0, 0.0 }));
+
+          
+            */
+        }
+
+
+
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -72,82 +121,10 @@ namespace Aquarium
 
             SetupRenderContextAndCamera();
 
-            GenerateBody();
+            Generate();
 
 
             GenerateTimer.Enabled = true;
-        }
-
-
-        private void GenerateBody()
-        {
-            int numParts = 25;
-            var body = new Body();
-            TestBodyPartGenerator gen = new TestBodyPartGenerator();
-            for (int i = 0; i < numParts; i++)
-            {
-                var test = gen.Generate(body);
-                if (!AutoConnectPart(body, test))
-                {
-                    throw new Exception("It won't fit");
-                }
-            }
-            Body = body;
-
-            var min = new Vector3();
-            var max = new Vector3();
-            foreach (var part in Body.Parts)
-            {
-                var bsc = part.BodySpaceCorners();
-
-                foreach (var vec in bsc)
-                {
-                    min = Vector3.Min(vec, min);
-                    max = Vector3.Max(vec, max);
-                }
-            }
-
-            var s = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
-            Camera.Position = Vector3.UnitZ * s.Radius * 3f;
-
-            if (Body.Parts.Count() != numParts)
-            {
-                throw new Exception();
-            }
-        }
-
-
-
-        Random R = new Random();
-        private Color RandomColor()
-        {
-            return new Color((float)R.NextDouble(), (float)R.NextDouble(), (float)R.NextDouble(), (float)R.NextDouble());
-        }
-
-        private bool AutoConnectPart(Body body, BodyPart part)
-        {
-            if (!body.Parts.Any())
-            {
-                body.Parts.Add(part);
-                return true;
-            }
-
-            foreach (var foreignSocket in part.Sockets)
-            {
-                if (!foreignSocket.HasAvailable) continue;
-                foreach (var bPart in body.Parts)
-                {
-                    BodyPartSocket winner = bPart.Sockets.FirstOrDefault(socket => socket.HasAvailable && body.WillFit(socket, foreignSocket));
-                    if (winner != null)
-                    {
-                        winner.ConnectSocket(foreignSocket);
-                        body.Parts.Add(part);
-                        return true;
-                    }
-                }
-            }
-            return false;
-
         }
 
 
@@ -200,14 +177,13 @@ namespace Aquarium
         float rot = 0;
         private void UpdateSimulation(GameTime gameTime)
         {
-
-            Body.World = Matrix.CreateRotationY(rot += 0.01f);
-
-
+            Body.World = Matrix.CreateRotationY(rot += 0.01f)
+                * Matrix.CreateRotationX(rot);
+            Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
         }
 
         Body Body { get; set; }
-
+      
 
         /// <summary>
         /// This is called when the game should draw itself.

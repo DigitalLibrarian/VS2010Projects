@@ -51,13 +51,6 @@ namespace Aquarium.GA.Bodies
 
         public bool HasAvailable { get { return ForeignSocket == null && !Blocked; } }
      
-        public void RotateWithBody(Matrix rotate)
-        {
-            //_ucPos = Vector3.Transform(_ucPos, rotate);
-            //_ucNorm = Vector3.Transform(_ucNorm, rotate);
-
-
-        }
 
     }
 }

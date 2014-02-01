@@ -2,34 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.GA.Bodies;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.Organs;
+using Forever.Neural;
+using Aquarium.GA.Signals;
 
-namespace Aquarium
+namespace Aquarium.GA.Bodies
 {
-    public class TestBodyPartGenerator
+    public class BodyGenerator
     {
-        Random Random = new Random();
+        public Random Random { get; private set; }
 
-        List<Func<BodyPart>> Samples { get; set; }
-        public TestBodyPartGenerator()
+        List<Func<BodyPart>> PartFactories { get; set; }
+        public BodyGenerator()
         {
-            Samples = new List<Func<BodyPart>>();
+            Random =  new System.Random();
+            PartFactories = new List<Func<BodyPart>>();
 
-            RegisterSamples();
+            RegisterBodyPartFabs();
         }
 
-        public BodyPart Generate(Body body)
+
+        public BodyPart GenerateBodyPart(Body body)
         {
             int epoch = 0;
             int maxEpoch = 500;
 
-            while (true || epoch < maxEpoch)
+            while (epoch < maxEpoch)
             {
-                int index = Random.Next(Samples.Count());
+                int index = Random.Next(PartFactories.Count());
 
               
-                if (!body.Parts.Any()) return Samples[index]();
+                if (!body.Parts.Any()) return PartFactories[index]();
 
                 foreach (var part in body.Parts)
                 {
@@ -37,7 +41,7 @@ namespace Aquarium
                     {
                         if (!socket.HasAvailable) continue;
 
-                        var test = Samples[index]();
+                        var test = PartFactories[index]();
                         var tempSockets = test.Sockets;
                         var tempUCT = test.UCTransform;
 
@@ -98,8 +102,6 @@ namespace Aquarium
                             
                             if (body.WillFit(socket, testSocket))
                             {
-                                // update all the socket positions and normals, in case this one works
-                                test.Sockets.ForEach(x => x.RotateWithBody(rotate));
                                 return test;
                             }
 
@@ -123,6 +125,83 @@ namespace Aquarium
             var R = Random;
             return new Color((float)R.NextDouble(), (float)R.NextDouble(), (float)R.NextDouble(), (float)R.NextDouble());
         }
+
+
+        public Body GenerateBody(int numParts = 20)
+        {
+            var body = new Body();
+            
+            for (int i = 0; i < numParts; i++)
+            {
+                var test = GenerateBodyPart(body);
+                if (!AutoConnectPart(body, test))
+                {
+                    throw new Exception("It won't fit");
+                }
+            }
+            
+            if (body.Parts.Count() != numParts)
+            {
+                throw new Exception();
+            }
+            var organs = new List<Organ>();
+
+            int totalInputs = 0;
+            body.Parts.ForEach(part =>
+            {
+                int numInputs = part.Sockets.Count(x => !x.HasAvailable);
+                int numHidden = 2;
+                int numOutputs = part.Sockets.Count(x => x.HasAvailable);
+
+
+                var network = new NeuralNetwork(numInputs, numHidden, numOutputs);
+                network.RandomizeWeights(Random);
+                var organ = new NeuralOrgan(network);
+                organs.Add(organ);
+            });
+
+
+            var rootOutputs = 38;
+
+            var rootNetwork = new NeuralNetwork(totalInputs, 2, rootOutputs);
+            rootNetwork.RandomizeWeights(Random);
+            var rootNeuralOrgan = new RootNeuralOrgan(rootNetwork);
+            
+            body.NervousSystem = new NervousSystem(body, rootNeuralOrgan, organs);
+            
+            return body;
+        }
+
+
+
+        private bool AutoConnectPart(Body body, BodyPart part)
+        {
+            if (!body.Parts.Any())
+            {
+                body.Parts.Add(part);
+                return true;
+            }
+
+            foreach (var foreignSocket in part.Sockets)
+            {
+                if (!foreignSocket.HasAvailable) continue;
+                foreach (var bPart in body.Parts)
+                {
+                    BodyPartSocket winner = bPart.Sockets.FirstOrDefault(socket => socket.HasAvailable && body.WillFit(socket, foreignSocket));
+                    if (winner != null)
+                    {
+                        winner.ConnectSocket(foreignSocket);
+                        body.Parts.Add(part);
+                        return true;
+                    }
+                }
+            }
+            return false;
+
+        }
+
+
+        #region BodyPart strategies
 
         float SCALE = 1f;
 
@@ -305,24 +384,27 @@ namespace Aquarium
 
         }
 
-        private void RegisterSamples()
+        private void RegisterBodyPartFabs()
         {
 
             
-            Samples.Add(BarShape);
+            PartFactories.Add(BarShape);
             
-            Samples.Add(FlatShape);
+            PartFactories.Add(FlatShape);
             
-            Samples.Add(ChiefPart);
+            PartFactories.Add(ChiefPart);
             
-            Samples.Add(BoxWithEdges);
-            Samples.Add(BoxWithCorners);
+            PartFactories.Add(BoxWithEdges);
+            PartFactories.Add(BoxWithCorners);
             
-            Samples.Add(OblongBlock);
+            PartFactories.Add(OblongBlock);
 
-            Samples.Add(SpikeyThingLeft);
-            Samples.Add(SpikeyThingRight);
+            PartFactories.Add(SpikeyThingLeft);
+            PartFactories.Add(SpikeyThingRight);
         }
+        #endregion
+
+
 
     }
 }

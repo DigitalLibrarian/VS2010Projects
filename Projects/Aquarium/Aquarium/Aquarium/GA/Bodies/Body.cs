@@ -17,11 +17,12 @@ namespace Aquarium.GA.Bodies
         public int Energy { get; protected set; }
 
         public BodyGenome Genome { get; private set; }
-
         public List<BodyPart> Parts { get; private set; }
 
         public Vector3 Position { get; set; }
         public Matrix World { get; set; }
+
+        public NervousSystem NervousSystem { get; set; }
 
         public Body()
         {
@@ -30,7 +31,8 @@ namespace Aquarium.GA.Bodies
 
         public void Update(float duration)
         {
-
+            Parts.ForEach(part => part.Update(this, duration));
+            NervousSystem.Update();
         }
 
         public void Render(RenderContext renderContext)

@@ -4,38 +4,18 @@ using System.Linq;
 using System.Text;
 using Forever.Neural;
 using Aquarium.GA.Signals;
+using Aquarium.GA.Bodies;
 
 namespace Aquarium.GA.Organs
 {
 
-    abstract class SignalNode : ISignalConsumer, ISignalProducer
+
+    abstract public class Organ : SignalNode 
     {
-        public Signal LastInput { get; private set; }
-        public Signal OutputSignal { get; protected set; }
-
-        public virtual void ReceiveSignal(Signal signal)
-        {
-            LastInput = signal;
-        }
-
-        public Signal ProduceSignal()
-        {
-            return OutputSignal;
-        }
-    }
-
-    abstract class Organ : SignalNode 
-    {
+        #region madness
         /*
          * 
          * 
-the self organ: Every body gets a single organ with a single network w/ no inputs that constantly emits a single unique number.  It automatically connects
-to any organs that fit the processing profile.
-
-the species organ: every body gets a single organ with a single output of race id. It automatically connects
-to any organs that fit the processing profile.
-
-
 
 A processor organ is one that is all inputs and outputs around a single network or memory node.
 
@@ -92,7 +72,14 @@ Each sensory organ must  have a processor in front of it's input, and also behin
          * 
          * */
 
+        #endregion
+
         public virtual bool HasAbility { get { return false; } }
+
+
+        public bool TakesNeuralInput { get { return HasAbility; } }
+
+        public abstract void Update(NervousSystem nervousSystem);
 
     }
         
@@ -117,14 +104,13 @@ Each sensory organ must  have a processor in front of it's input, and also behin
     }
 
 
-    abstract class NeuralProcessorOrgan : Organ
+    public class NeuralOrgan : Organ
     {
-        NeuralNetwork Network { get; set; }
+        protected NeuralNetwork Network { get; set; }
 
-        public NeuralProcessorOrgan(NeuralNetwork network) : base()
+        public NeuralOrgan(NeuralNetwork network) : base()
         {
             Network = network;
-
         }
 
         public override void ReceiveSignal(Signal signal)
@@ -133,9 +119,34 @@ Each sensory organ must  have a processor in front of it's input, and also behin
             base.ReceiveSignal(signal);
         }
 
-        public void UpdateNetwork()
+        public override void Update(NervousSystem nervousSystem)
         {
-            OutputSignal = new Signal(Network.ComputeOutputs(LastInput.Value.ToArray()).ToList());
+            if(LastInput != null) OutputSignal = new Signal(Network.ComputeOutputs(LastInput.Value.ToArray()).ToList());
+        }
+    }
+
+    public class RootNeuralOrgan : NeuralOrgan
+    {
+        public RootNeuralOrgan(NeuralNetwork network)
+            : base(network)
+        {
+
+        }
+
+        public override void Update(NervousSystem nervousSystem)
+        {
+         //   PropagateOutput(new Signal(Network.ComputeOutputs(GetInput()).ToList()));
+        }
+
+        private double[] GetInput()
+        {
+            return null;
+        }
+
+        private void PropagateOutput(Signal output)
+        {
+
+
         }
 
     }

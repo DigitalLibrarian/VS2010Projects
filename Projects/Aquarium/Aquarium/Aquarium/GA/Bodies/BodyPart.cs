@@ -30,7 +30,7 @@ namespace Aquarium.GA.Bodies
             Rotation = Matrix.Identity;
         }
 
-        public void Update(float duration)
+        public void Update(Body body, float duration)
         {
 
         }
