@@ -14,21 +14,43 @@ namespace Aquarium.GA.GeneParsers
             Testers = testers;
         }
 
+
         List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon codon, int startIndex)
         {
+            return ReadUntilOrEnd( genome, template, new Codon[] { codon },  startIndex);
+        }
+        List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
+        {
             List<double> dataRead = new List<double>();
+            Traversal(genome, template, startIndex, (name) =>
+            {
+                var found = RecognizeCodons(genome, template, name);
+                if (found == Codon.None)
+                {
+                    var data = genome.ByName(name, template).Value;
+                    dataRead.Add(data);
+                }
 
+                if (codons.Contains(found))
+                {
+                    return false;
+                }
+
+                return true;
+            });
+
+            /*
             // we know the entire number of genes in the genome.
-            // so we will go until we are twice that to allow for it to reuse existing genetic material 
+            // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
             int index = startIndex;
             int traversed = 0;
-            var numGenes = genome.Size;
-            while (traversed < numGenes)
+            var maxTraversal = genome.Size * 5;
+            while (traversed < maxTraversal)
             {
-                var found = RecognizeCodons(genome, template, index);
+                var found = RecognizeCodons(genome, template, index + traversed);
                 if(found == Codon.None)
                 {
-                    dataRead.Add(genome.ByName(index,  template).Value);
+                    dataRead.Add(genome.ByName(index + traversed,  template).Value);
                 }
 
                 if (found == codon)
@@ -37,16 +59,39 @@ namespace Aquarium.GA.GeneParsers
                 }
                 
                 traversed++;
+            }*/
+
+            return dataRead;
+        }
+
+        private void Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
+        {
+
+            // we know the entire number of genes in the genome.
+            // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
+            int index = startIndex;
+            int traversed = 0;
+            var maxTraversal = genome.Size * 2;
+            while (traversed < maxTraversal)
+            {
+                var found = RecognizeCodons(genome, template, index + traversed);
+                if (found == Codon.None)
+                {
+                    if (!nameVisitor(index + traversed))
+                    {
+                        return;
+                    }
+                }
+
+                traversed++;
             }
 
-            return null;
         }
 
         private List<double> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<double> template, int startIndex)
         {
             return ReadUntilOrEnd(genome, template, Codon.BodyPartEnd, startIndex);
         }
-
 
 
         private Codon RecognizeCodons(BodyGenome genome, GenomeTemplate<double> template, int index)
