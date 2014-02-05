@@ -8,9 +8,7 @@ namespace Aquarium.GA.Genomes
 {
     public interface IBodyPhenotype
     {
-        int NumBodyParts { get; }
-        List<IBodyPartPhenotype> BodyPartGenomes { get; set; }
-
+        List<IBodyPartPhenotype> BodyPartPhenos { get; set; }
     }
 
     public interface IBodyPartPhenotype
@@ -40,6 +38,11 @@ namespace Aquarium.GA.Genomes
         IInstancePointer BodyPart { get; set; }
     }
 
+    /// <summary>
+    /// This is a  "safe" index into some list during fabrication time.
+    /// 
+    /// It's safe in that you can count on it to return something.
+    /// </summary>
     public interface IInstancePointer
     {
         int InstanceId { get; set; }
@@ -48,9 +51,7 @@ namespace Aquarium.GA.Genomes
 
     public interface IOrganGenome
     {
-
         IInstancePointer BodyPointer { get; set; }
-
         IOrganAbilityGenome OrganAbilityGenome { get;  }
     }
 

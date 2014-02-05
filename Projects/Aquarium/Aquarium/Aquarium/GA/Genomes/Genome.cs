@@ -111,6 +111,20 @@ namespace Aquarium.GA.Genomes
     }
 
 
+    public class RandomDoubleGenomeTemplate : GenomeTemplate<double>
+    {
+        Random R;
+        public RandomDoubleGenomeTemplate(Random r)
+        {
+            R = r;
+        }
+
+
+        public override Gene<double> ByName(int name)
+        {
+            return new Gene<double> { Name = name, Value = R.NextDouble() };
+        }
+    }
 
 
     
@@ -210,16 +224,16 @@ namespace Aquarium.GA.Genomes
 
     public class BodyPhenotype : BodyPheno, IBodyPhenotype
     {
-        public List<IBodyPartPhenotype> BodyPartGenomes { get; set; }
+        public List<IBodyPartPhenotype> BodyPartPhenos { get; set; }
 
         public BodyPhenotype()
         {
-            BodyPartGenomes = new List<IBodyPartPhenotype>();
+            BodyPartPhenos = new List<IBodyPartPhenotype>();
         }
 
         public int NumBodyParts
         {
-            get { return BodyPartGenomes.Count(); }
+            get { return BodyPartPhenos.Count(); }
         }
 
 

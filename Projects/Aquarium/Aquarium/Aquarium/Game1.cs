@@ -34,7 +34,12 @@ namespace Aquarium
         Timer GenerateTimer = new Timer(1000);
 
         BodyGenerator BodyGen = new BodyGenerator();
-       
+        Random Random = new Random();
+        RenderContext RenderContext;
+        ICamera Camera;
+
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -47,46 +52,179 @@ namespace Aquarium
         {
             Generate();
         }
+
+
         private void Generate()
         {
-           var bodyPheno = CreateBodyFromRawGenome();
-          // var bodyPheno = CreateHandCraftedGenome();
 
+            SpawnBodyFromGenePool();
 
-          GenomeReader gR = new GenomeReader();
-           var body = gR.ProduceBody(bodyPheno);
-
-
-
-         // var body = BodyGen.GenerateBody(40);
-
-            
-
-            Body = body;
-            
+            Body = GetBestHitter();
         }
 
-        private IBodyPhenotype CreateBodyFromRawGenome()
+        private Body GenerateNewSpecimen()
+        {
+            var genome = RandomGenome(1 * 9);
+            // this takes the genome  out of the equation
+            // var bodyPheno = CreateHandCraftedGenome();
+
+
+            GenomeReader gR = new GenomeReader();
+
+            var body = gR.ProduceBody(GenomeToPheno(genome));
+            RegisterBodyGenome(genome, body);
+         
+            
+            
+            return body;
+        }
+
+
+        private void GenerateRandomPopulation(int popSize)
+        {
+            int geneSize = 1 * 9;
+
+            int generated = 0;
+            while (generated < popSize)
+            {
+                var genome = RandomGenome(geneSize);
+
+                GenomeReader gR = new GenomeReader();
+
+                var body = gR.ProduceBody(GenomeToPheno(genome));
+
+                RegisterBodyGenome(genome, body);
+                generated++;
+            }
+        }
+
+        public void SpawnBodyFromGenePool()
         {
 
-            int numObjects = 20;
+            int popSize = PopGenomes.Count();
+            var parent1Gen = Random.NextElement(BestGenomes.GetRange(0, Math.Min(10, BestBodies.Count())));
+            //var parent2Gen = Random.NextElement(BestGenomes.GetRange(0, Math.Min(10, BestBodies.Count())));
+
+            var strangeList = PopGenomes;
+            if (!strangeList.Any()) strangeList = BestGenomes;
+
+            var parent2Gen = Random.NextElement(strangeList);
+            //parent2Gen is  some strange from general pop
+
+            int wiggle = 9;
+            int parent1Snip = (-wiggle + Random.Next(wiggle*2)) + (parent1Gen.Genes.Count / 2);
+            int parent2Snip = (-wiggle + Random.Next(wiggle*2)) + (parent2Gen.Genes.Count / 2);
+
+
+            var parent1Prefix = parent1Gen.Genes.Take(parent1Snip);
+            var parent1Suffix = parent1Gen.Genes.Skip(parent1Snip);
+            var parent2Prefix = parent2Gen.Genes.Take(parent2Snip);
+            var parent2Suffix = parent2Gen.Genes.Skip(parent2Snip);
+
+
+            var offspring1Genes = parent1Prefix.Concat(parent2Suffix).ToList();
+            var offspring2Genes = parent2Prefix.Concat(parent1Suffix).ToList();
+
+            if (Random.Next(100) == 0)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    var name =  offspring1Genes.Count() +  -i/2 + Random.Next(i);
+                    var value = Random.NextDouble();
+                    offspring1Genes.Add(new Gene<double> { Name = name, Value = value });
+                    offspring2Genes.Add(new Gene<double> { Name = name, Value = value });
+
+                }
+            }
+
+
+            GenomeReader gR = new GenomeReader();
+            foreach (var genes in new[] { offspring1Genes, offspring2Genes })
+            {
+                var genome = new BodyGenome(genes);
+                var body = gR.ProduceBody(GenomeToPheno(genome));
+                RegisterBodyGenome(genome, body);
+            }
+
+        }
+
+        int MaxPop = 1000;
+        int NumBest = 50;
+        List<Body> BestBodies = new List<Body>();
+        List<BodyGenome> BestGenomes = new List<BodyGenome>();
+
+        List<BodyGenome> PopGenomes = new List<BodyGenome>();
+
+        private void RegisterBodyGenome(BodyGenome genome, Body body)
+        {
+            int numParts = body.Parts.Count();
+            bool foundFit = false;
+            for (int i = 0; i < BestGenomes.Count(); i++)
+            {
+                if (BestBodies[i].Parts.Count() <= numParts)
+                {
+                    BestBodies[i] = body;
+                    BestGenomes[i] = genome;
+                    foundFit = true;
+                }
+            }
+
+            if (!foundFit && BestGenomes.Count() < NumBest)
+            {
+                BestBodies.Add(body);
+                BestGenomes.Add(genome);
+
+                foundFit = true;
+            }
+
+            if (!foundFit)
+            {
+                if (PopGenomes.Count() < MaxPop)
+                {
+                    PopGenomes.Add(genome);
+                }
+                else
+                {
+                    var index = Random.Next(PopGenomes.Count());
+                    PopGenomes[index] = genome;
+                }
+            }
+
+        }
+
+        private Body GetBestHitter()
+        {
+            return BestBodies.First();
+        }
+
+        BodyGenome RandomGenome(int length)
+        {
             var gContents = new List<Gene<double>>();
 
-            for (int i = 0; i < 6 * numObjects; i++)
+            for (int i = 0; i < length; i++)
             {
                 var v = Random.NextDouble();
                 gContents.Add(
                         new Gene<double> { Name = i, Value = v }
                     );
             };
+            return new BodyGenome(gContents);
+            
+        }
 
-            BodyGenome g = new BodyGenome(gContents);
+        private IBodyPhenotype CreateRandomRawGenome(int numObjects  = 20)
+        {
+            var g = RandomGenome(9 * numObjects);
+            return GenomeToPheno(g);
+        }
 
-            var t = new ZeroDoubleGenomeTemplate();
+        private IBodyPhenotype GenomeToPheno(BodyGenome g)
+        {
+            var t = new RandomDoubleGenomeTemplate(Random);
 
             var p = new BodyPartGeneParser();
             var headers = p.ReadBodyPartHeaders(g, t);
- 
+
 
             BodyPhenotype bodyP = new BodyPhenotype();
             headers.ForEach(header =>
@@ -97,17 +235,16 @@ namespace Aquarium
                 partOne.BodyPartGeometryIndex = header.GeomIndex;
                 partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
                 partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
+                partOne.Scale = header.Scale;
 
-                bodyP.BodyPartGenomes.Add(partOne);
+                bodyP.BodyPartPhenos.Add(partOne);
 
             });
-
             return bodyP;
         }
 
-        private Random Random = new Random();
         
-        private IBodyPhenotype CreateHandCraftedGenome()
+        private IBodyPhenotype CreateHandCraftedPhenotype()
         {
             var g = new BodyPhenotype();
 
@@ -127,7 +264,7 @@ namespace Aquarium
             partOne.ChanneledSignalGenome = chanSig0;
             partOne.Color = Color.Green;
 
-            g.BodyPartGenomes.Add(partOne);
+            g.BodyPartPhenos.Add(partOne);
 
 
             var nog = new NeuralOrganGenome();
@@ -147,7 +284,7 @@ namespace Aquarium
                 var partTwo = new BodyPartPhenotype();
                 partTwo.PlacementPartSocket = new InstancePointer(i);
                 partTwo.AnchorPart = new InstancePointer(0);
-                g.BodyPartGenomes.Add(partTwo);
+                g.BodyPartPhenos.Add(partTwo);
                 partTwo.ChanneledSignalGenome = chanSig0;
                 partTwo.Color = Color.Blue;
 
@@ -171,7 +308,7 @@ namespace Aquarium
                 var partTwo = new BodyPartPhenotype();
                 partTwo.PlacementPartSocket = new InstancePointer(1);
                 partTwo.AnchorPart = new InstancePointer(1 + i);
-                g.BodyPartGenomes.Add(partTwo);
+                g.BodyPartPhenos.Add(partTwo);
                 partTwo.ChanneledSignalGenome = chanSig1;
                 partTwo.Color = Color.Yellow;
 
@@ -198,7 +335,7 @@ namespace Aquarium
                     var partTwo = new BodyPartPhenotype();
                     partTwo.PlacementPartSocket = new InstancePointer(1 + j);
                     partTwo.AnchorPart = new InstancePointer(1 + 6 + i);
-                    g.BodyPartGenomes.Add(partTwo);
+                    g.BodyPartPhenos.Add(partTwo);
                     partTwo.ChanneledSignalGenome = chanSig2;
                     partTwo.Color = Color.WhiteSmoke;
 
@@ -250,19 +387,14 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-
-
             SetupRenderContextAndCamera();
 
-            Generate();
-
+            GenerateRandomPopulation(MaxPop + NumBest);
+            Body = GetBestHitter();
 
             GenerateTimer.Enabled = true;
         }
 
-
-        RenderContext RenderContext;
-        ICamera Camera;
         protected void SetupRenderContextAndCamera()
         {
             Camera = new EyeCamera();
@@ -272,16 +404,13 @@ namespace Aquarium
                 Camera,
                 GraphicsDevice
                 );
-
-
-
         }
-        private void CamTrackBody()
-        {
 
+        private void CamTrackBody(Body body)
+        {
             var min = new Vector3();
             var max = new Vector3();
-            foreach (var part in Body.Parts)
+            foreach (var part in body.Parts)
             {
                 var bsc = part.BodySpaceCorners();
 
@@ -322,8 +451,7 @@ namespace Aquarium
 
             base.Update(gameTime);
 
-
-            CamTrackBody();
+            CamTrackBody(Body);
         }
 
         float rot = 0;
@@ -333,6 +461,8 @@ namespace Aquarium
                 * Matrix.CreateRotationX(rot);
 
             Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
+
+
         }
 
         Body Body { get; set; }

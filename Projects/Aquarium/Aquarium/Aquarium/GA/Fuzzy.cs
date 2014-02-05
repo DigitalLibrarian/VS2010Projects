@@ -24,14 +24,42 @@ namespace Aquarium.GA
             return Math.Abs(RoundToInt(d * 1000));
         }
 
-        public static float ColorValue(double d)
+        public static float PositiveFloat(double d)
         {
             return (float)Math.Abs(d);
+        }
+
+        public static float ColorValue(double d)
+        {
+            return ToFractionalFloat(d);
         }
 
         public static Color ToColor(double r, double g, double b)
         {
             return new Color(ColorValue(r), ColorValue(g), ColorValue(b));
+        }
+        
+        public static float ToFractionalFloat(double d)
+        {
+            return (float)(d - Math.Floor(d));
+        }
+
+        public static Vector3 ToScaleVector(double x, double y, double z)
+        {
+
+            return new Vector3(
+                .75f + PositiveFloat(x),
+                .75f + PositiveFloat(y),
+                .75f + PositiveFloat(z)
+                );
+
+            /*
+            return new Vector3(
+                .5f + ToFractionalFloat(x),
+                .5f + ToFractionalFloat(y),
+                .5f + ToFractionalFloat(z)
+                );
+             * */
         }
 
     }

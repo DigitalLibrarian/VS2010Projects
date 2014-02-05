@@ -31,10 +31,10 @@ namespace Aquarium.GA.Genomes
         public Body ProduceBody(IBodyPhenotype genome)
         {
             var body = new Body();
-            var partsToMake = genome.BodyPartGenomes.ToList();
+            var partsToMake = genome.BodyPartPhenos.ToList();
 
 
-            var gennedParts = genome.BodyPartGenomes.Select(partGenome => 
+            var gennedParts = genome.BodyPartPhenos.Select(partGenome => 
             {
                  var part = NewPartFromIndex(partGenome.BodyPartGeometryIndex);
                  part.UCTransform = Matrix.CreateScale(partGenome.Scale) * part.UCTransform;
