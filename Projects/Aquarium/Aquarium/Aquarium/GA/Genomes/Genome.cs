@@ -23,6 +23,8 @@ namespace Aquarium.GA.Genomes
         // ((1 1) (2 1) (3 0) (4 0) (5 0) (6 1) (7 1))
         public List<Gene<T>> Genes { get; private set; }
 
+        public int Size { get { return Genes.Count(); } }
+
         public Genome(List<Gene<T>> genes)
         {
             Genes = genes;

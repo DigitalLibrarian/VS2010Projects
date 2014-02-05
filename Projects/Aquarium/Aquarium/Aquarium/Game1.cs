@@ -20,6 +20,7 @@ using Forever.Neural;
 using Aquarium.GA.Signals;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
+using Aquarium.GA.GeneParsers;
 
 namespace Aquarium
 {
