@@ -5,37 +5,36 @@ using System.Text;
 
 using Aquarium.GA.Organs;
 using Forever.Neural;
+using Aquarium.GA.Signals;
 
 namespace Aquarium.GA.Bodies
 {
     public class NervousSystem
     {
-        public List<Organ> Organs { get; private set; }
-        public RootNeuralOrgan RootNeuralOrgan { get; private set; }
+        List<Organ> _organs = new List<Organ>();
         public Body Body { get; private set; }
 
 
-        public NervousSystem(Body body, RootNeuralOrgan rootNeuralOrgan, List<Organ> organs)
+
+        public NervousSystem(Body body)
         {
             Body = body;
-            RootNeuralOrgan = rootNeuralOrgan;
-            Organs = organs;
         }
-
 
 
         public void Update()
         {
-
-            RootNeuralOrgan.Update(this);
-            Organs.ForEach(organ => organ.Update(this));
+            foreach (var part in Body.Parts)
+            {
+                foreach (var organ in part.Organs)
+                {
+                    organ.Update(this);
+                }
+            }
         }
 
-        public List<BodyPartSocket> GetSocketsInUse()
-        {
-            var sockets = new List<BodyPartSocket>();
-            Body.Parts.ForEach(p => sockets.AddRange(p.Sockets.Where(x => !x.HasAvailable)));
-            return sockets;
-        }
+        
+        
+        
     }
 }

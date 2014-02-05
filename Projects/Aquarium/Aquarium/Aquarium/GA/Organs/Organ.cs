@@ -8,7 +8,7 @@ using Aquarium.GA.Bodies;
 
 namespace Aquarium.GA.Organs
 {
-
+    public enum OrganType { NA, Neural, Ability };
 
     abstract public class Organ : SignalNode 
     {
@@ -76,20 +76,54 @@ Each sensory organ must  have a processor in front of it's input, and also behin
 
         public virtual bool HasAbility { get { return false; } }
 
-
-        public bool TakesNeuralInput { get { return HasAbility; } }
+        public BodyPart Part { get; private set; }
+        abstract public OrganType OrganType { get; }
+        public Organ(BodyPart bodyPart)
+        {
+            Part = bodyPart;
+        }
 
         public abstract void Update(NervousSystem nervousSystem);
 
     }
-        
-
-    abstract class AbilityOrgan : Organ
+    public abstract class IOOrgan : Organ
     {
+
+        public ChannelReader InputReader { get; set; }
+        public ChannelWriter OutputWriter { get; set; }
+
+        abstract public int NumInputs { get; }
+        abstract public int NumOutputs { get; }
+
+        public IOOrgan(BodyPart bodyPart) : base(bodyPart) { }
+
+        
+        public override void Update(NervousSystem nervousSystem)
+        {
+            var readSignal = InputReader.Read();
+            if (readSignal.Band > 0)
+            {
+                ReceiveSignal(readSignal);
+                OutputWriter.Write(OutputSignal);
+
+            }
+
+
+        }
+    }
+
+    public class AbilityOrgan : IOOrgan
+    {
+        public override OrganType OrganType
+        {
+            get { return OrganType.Ability; }
+        }
         public OrganAbility Ability { get; private set; }
 
         public override bool HasAbility { get { return Ability != null; } }
-        
+
+        public AbilityOrgan(BodyPart bodyPart, OrganAbility ability) : base(bodyPart) { Ability = ability; }
+
         public override void ReceiveSignal(Signal signal)
         {
             if (HasAbility)
@@ -99,56 +133,20 @@ Each sensory organ must  have a processor in front of it's input, and also behin
 
             base.ReceiveSignal(signal);
         }
-        
-
-    }
 
 
-    public class NeuralOrgan : Organ
-    {
-        protected NeuralNetwork Network { get; set; }
 
-        public NeuralOrgan(NeuralNetwork network) : base()
+
+        public override int NumInputs
         {
-            Network = network;
+            get { return Ability.NumInputs; }
         }
 
-        public override void ReceiveSignal(Signal signal)
+        public override int NumOutputs
         {
-            if (signal.Band != Network.NumInputs) throw new SignalOutOfBandException();
-            base.ReceiveSignal(signal);
-        }
-
-        public override void Update(NervousSystem nervousSystem)
-        {
-            if(LastInput != null) OutputSignal = new Signal(Network.ComputeOutputs(LastInput.Value.ToArray()).ToList());
+            get { return Ability.NumOutputs; }
         }
     }
 
-    public class RootNeuralOrgan : NeuralOrgan
-    {
-        public RootNeuralOrgan(NeuralNetwork network)
-            : base(network)
-        {
-
-        }
-
-        public override void Update(NervousSystem nervousSystem)
-        {
-         //   PropagateOutput(new Signal(Network.ComputeOutputs(GetInput()).ToList()));
-        }
-
-        private double[] GetInput()
-        {
-            return null;
-        }
-
-        private void PropagateOutput(Signal output)
-        {
-
-
-        }
-
-    }
 
 }

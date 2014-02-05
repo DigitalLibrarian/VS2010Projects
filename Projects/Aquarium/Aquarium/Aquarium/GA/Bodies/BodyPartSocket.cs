@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.Signals;
 
 namespace Aquarium.GA.Bodies
 {
-    public class BodyPartSocket
+    public class BodyPartSocket 
     {
-        public BodyPartSocket(BodyPart part, Vector3 bodyPartUCPosition, Vector3 bodyUCNormal)
+        public BodyPartSocket(BodyPart part, Vector3 bodyPartUCPosition, Vector3 bodyUCNormal) : base()
         {
             Part = part;
             _ucPos = bodyPartUCPosition;

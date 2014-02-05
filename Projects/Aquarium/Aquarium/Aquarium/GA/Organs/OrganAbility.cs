@@ -6,9 +6,11 @@ using Aquarium.GA.Signals;
 
 namespace Aquarium.GA.Organs
 {
-    abstract class OrganAbility
+    public abstract class OrganAbility
     {
-        abstract public Signal Fire(Organ parent, Signal signal);
+        public abstract int NumInputs { get; }
+        public abstract int NumOutputs { get; }
+        public abstract Signal Fire(Organ parent, Signal signal);
     }
 
 }

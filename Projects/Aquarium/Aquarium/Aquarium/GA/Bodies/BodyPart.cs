@@ -6,6 +6,8 @@ using System.Text;
 using Microsoft.Xna.Framework;
 
 using Forever.Render;
+using Aquarium.GA.Organs;
+using Aquarium.GA.Signals;
 
 namespace Aquarium.GA.Bodies
 {
@@ -18,16 +20,43 @@ namespace Aquarium.GA.Bodies
         public Matrix UCTransform { get; set; }
         public Matrix Rotation { get; set; }
         public Matrix BodyWorld { get { return UCTransform * Rotation; } }
-    
         public List<BodyPartSocket> Sockets { get; set; }
-
+        public List<Organ> Organs { get; set; }
         public Color Color { get; set; }
 
+        public ChanneledSignal ChanneledSignal { get; set; }
+        
         public BodyPart()
         {
             Sockets = new List<BodyPartSocket>();
+            Organs = new List<Organ>();
             UCTransform = Matrix.Identity;
             Rotation = Matrix.Identity;
+
+            ChanneledSignal = new ChanneledSignal(new List<double>());
+        }
+
+        public void AddOrgan(Organ organ)
+        {
+            Organs.Add(organ);
+        }
+
+        IEnumerable<Organ> FindReachable(BodyPart bodypart, Predicate<Organ> tester)
+        {
+            var list = new List<Organ>();
+            foreach (var sock in Sockets)
+            {
+                if (sock.HasAvailable) continue;
+
+                var fPart = sock.ForeignSocket.Part;
+
+                foreach (var organ in fPart.Organs)
+                {
+                    if (tester(organ)) list.Add(organ);
+                }
+
+            }
+            return list;
         }
 
         public void Update(Body body, float duration)
@@ -38,8 +67,11 @@ namespace Aquarium.GA.Bodies
 
         public virtual void Render(Body body, RenderContext renderContext)
         {
+            var color = Color;
+
+
             var world = Matrix.CreateTranslation(body.Position + LocalPosition) * body.World;
-            Renderer.RenderUnitCubeTransform(renderContext, BodyWorld, world, Color);
+            Renderer.RenderUnitCubeTransform(renderContext, BodyWorld, world, color);
 
             foreach (var socket in Sockets)
             {

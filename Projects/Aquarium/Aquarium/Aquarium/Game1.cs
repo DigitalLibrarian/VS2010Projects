@@ -18,6 +18,8 @@ using System.Timers;
 using Aquarium.GA.Organs;
 using Forever.Neural;
 using Aquarium.GA.Signals;
+using Aquarium.GA.Genomes;
+using Aquarium.GA.Phenotypes;
 
 namespace Aquarium
 {
@@ -29,7 +31,7 @@ namespace Aquarium
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Timer GenerateTimer = new Timer(30000);
+        Timer GenerateTimer = new Timer(1000);
 
         BodyGenerator BodyGen = new BodyGenerator();
        
@@ -47,48 +49,179 @@ namespace Aquarium
         }
         private void Generate()
         {
-            var body = BodyGen.GenerateBody();
+           var bodyPheno = CreateBodyFromRawGenome();
+          // var bodyPheno = CreateHandCraftedGenome();
 
-            var min = new Vector3();
-            var max = new Vector3();
-            foreach (var part in body.Parts)
-            {
-                var bsc = part.BodySpaceCorners();
 
-                foreach (var vec in bsc)
-                {
-                    min = Vector3.Min(vec, min);
-                    max = Vector3.Max(vec, max);
-                }
-            }
-            var s = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
-            Camera.Position = Vector3.UnitZ * s.Radius * 3f;
+          GenomeReader gR = new GenomeReader();
+           var body = gR.ProduceBody(bodyPheno);
+
+
+
+         // var body = BodyGen.GenerateBody(40);
+
+            
 
             Body = body;
-            /*
-            var organs = new List<Organ>();
-
-            body.Parts.ForEach(part =>
-            {
-                var network = new NeuralNetwork(2, 2, 2);
-                network.RandomizeWeights(this.BodyGen.Random);
-                var organ = new NeuralOrgan(network);
-                organ.ReceiveSignal(new Signal(new List<double> { 0.0, 0.0 }));
-                organs.Add(organ);
-            });
-
-
-            var network = new NeuralNetwork(2, 2, 2);
-            network.RandomizeWeights(this.BodyGen.Random);
-            var organ = new NeuralOrgan(network);
-            organ.ReceiveSignal(new Signal(new List<double> { 0.0, 0.0 }));
-
-          
-            */
+            
         }
 
+        private IBodyPhenotype CreateBodyFromRawGenome()
+        {
+
+            int numObjects = 20;
+            var gContents = new List<Gene<double>>();
+
+            for (int i = 0; i < 6 * numObjects; i++)
+            {
+                var v = Random.NextDouble();
+                gContents.Add(
+                        new Gene<double> { Name = i, Value = v }
+                    );
+            };
+
+            BodyGenome g = new BodyGenome(gContents);
+
+            var t = new ZeroDoubleGenomeTemplate();
+
+            var p = new BodyPartGeneParser();
+            var headers = p.ReadBodyPartHeaders(g, t);
+ 
+
+            BodyPhenotype bodyP = new BodyPhenotype();
+            headers.ForEach(header =>
+            {
+
+                var partOne = new BodyPartPhenotype();
+                partOne.Color = header.Color;
+                partOne.BodyPartGeometryIndex = header.GeomIndex;
+                partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
+                partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
+
+                bodyP.BodyPartGenomes.Add(partOne);
+
+            });
+
+            return bodyP;
+        }
+
+        private Random Random = new Random();
+        
+        private IBodyPhenotype CreateHandCraftedGenome()
+        {
+            var g = new BodyPhenotype();
+
+            var chanSig0 = new ChanneledSignalGenome();
+            chanSig0.InstanceId = 0;
 
 
+            var chanSig1 = new ChanneledSignalGenome();
+            chanSig1.InstanceId = 1;
+
+
+            var chanSig2 = new ChanneledSignalGenome();
+            chanSig2.InstanceId = 2;
+
+
+            var partOne = new BodyPartPhenotype();
+            partOne.ChanneledSignalGenome = chanSig0;
+            partOne.Color = Color.Green;
+
+            g.BodyPartGenomes.Add(partOne);
+
+
+            var nog = new NeuralOrganGenome();
+            nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 4, NumHidden = 1, NumOutputs = 4 };
+            nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
+            nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
+            var tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
+            tNet.RandomizeWeights(Random);
+            nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
+
+            partOne.OrganGenomes.Add(nog);
+            partOne.Scale = new Vector3(3f, 3f,  3f);
+
+            partOne.BodyPartGeometryIndex = 0;
+            for (int i = 0; i < 6; i++)
+            {
+                var partTwo = new BodyPartPhenotype();
+                partTwo.PlacementPartSocket = new InstancePointer(i);
+                partTwo.AnchorPart = new InstancePointer(0);
+                g.BodyPartGenomes.Add(partTwo);
+                partTwo.ChanneledSignalGenome = chanSig0;
+                partTwo.Color = Color.Blue;
+
+                nog = new NeuralOrganGenome();
+                nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig2 };
+                nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
+
+                 tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
+                tNet.RandomizeWeights(Random);
+                nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
+
+                 partTwo.OrganGenomes.Add(nog);
+                partTwo.Scale = new Vector3(0.8f, .2f, 0.8f);
+
+                partTwo.BodyPartGeometryIndex = 1;
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                var partTwo = new BodyPartPhenotype();
+                partTwo.PlacementPartSocket = new InstancePointer(1);
+                partTwo.AnchorPart = new InstancePointer(1 + i);
+                g.BodyPartGenomes.Add(partTwo);
+                partTwo.ChanneledSignalGenome = chanSig1;
+                partTwo.Color = Color.Yellow;
+
+                nog = new NeuralOrganGenome();
+                nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
+                nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
+
+                 tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
+                tNet.RandomizeWeights(Random);
+                nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
+
+                partTwo.OrganGenomes.Add(nog);
+
+                partTwo.BodyPartGeometryIndex = 6;
+            }
+
+
+            for (int i = 0; i < 6; i++)
+            {
+
+                for (int j = 0; j < 7; j++)
+                {
+                    var partTwo = new BodyPartPhenotype();
+                    partTwo.PlacementPartSocket = new InstancePointer(1 + j);
+                    partTwo.AnchorPart = new InstancePointer(1 + 6 + i);
+                    g.BodyPartGenomes.Add(partTwo);
+                    partTwo.ChanneledSignalGenome = chanSig2;
+                    partTwo.Color = Color.WhiteSmoke;
+
+                    nog = new NeuralOrganGenome();
+                    nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                    nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
+                    nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig2 };
+                     tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
+                    tNet.RandomizeWeights(Random);
+                    nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
+
+                    partTwo.OrganGenomes.Add(nog);
+                    partTwo.Scale = new Vector3(0.8f, .2f, 0.8f);
+
+                    partTwo.BodyPartGeometryIndex = 6;
+                }
+            }
+
+
+
+            return g;
+        }
+        
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -143,7 +276,24 @@ namespace Aquarium
 
 
         }
+        private void CamTrackBody()
+        {
 
+            var min = new Vector3();
+            var max = new Vector3();
+            foreach (var part in Body.Parts)
+            {
+                var bsc = part.BodySpaceCorners();
+
+                foreach (var vec in bsc)
+                {
+                    min = Vector3.Min(vec, min);
+                    max = Vector3.Max(vec, max);
+                }
+            }
+            var s = BoundingSphere.CreateFromBoundingBox(new BoundingBox(min, max));
+            Camera.Position = Vector3.UnitZ * s.Radius * 3f;
+        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -172,6 +322,8 @@ namespace Aquarium
 
             base.Update(gameTime);
 
+
+            CamTrackBody();
         }
 
         float rot = 0;
@@ -179,6 +331,7 @@ namespace Aquarium
         {
             Body.World = Matrix.CreateRotationY(rot += 0.01f)
                 * Matrix.CreateRotationX(rot);
+
             Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
         }
 

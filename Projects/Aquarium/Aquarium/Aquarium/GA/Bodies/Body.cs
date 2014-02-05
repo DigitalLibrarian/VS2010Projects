@@ -16,7 +16,6 @@ namespace Aquarium.GA.Bodies
         public int Age { get; protected set; }
         public int Energy { get; protected set; }
 
-        public BodyGenome Genome { get; private set; }
         public List<BodyPart> Parts { get; private set; }
 
         public Vector3 Position { get; set; }
@@ -27,12 +26,13 @@ namespace Aquarium.GA.Bodies
         public Body()
         {
             Parts = new List<BodyPart>();
+            NervousSystem = new NervousSystem(this);
         }
 
         public void Update(float duration)
         {
-            Parts.ForEach(part => part.Update(this, duration));
             NervousSystem.Update();
+            Parts.ForEach(part => part.Update(this, duration));
         }
 
         public void Render(RenderContext renderContext)
@@ -45,27 +45,24 @@ namespace Aquarium.GA.Bodies
         {
             var fPart = foreignSocket.Part;
 
-
             foreach (var part in Parts)
             {
-
                 if (part == connectedSocket.Part) continue;
 
                 var pBox = part.BodyBB();
                 var fBox = fPart.BodyBB();
-
-
-
                 
                 var f = fBox;
                 var p = pBox;
+               
                 if(f.Intersects(p)) return false;
 
                 var corners = fPart.BodySpaceCorners().ToList();
                 corners.Add(fPart.LocalPosition);
                 foreach (var point in corners)
                 {
-                    var pointTest = p.Contains(point); if (pointTest != ContainmentType.Disjoint)
+                    var pointTest = p.Contains(point); 
+                    if (pointTest != ContainmentType.Disjoint)
                     {
                         return false;
                     }
