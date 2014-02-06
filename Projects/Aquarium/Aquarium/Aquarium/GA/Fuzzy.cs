@@ -48,9 +48,9 @@ namespace Aquarium.GA
         {
 
             return new Vector3(
-                .75f + PositiveFloat(x),
-                .75f + PositiveFloat(y),
-                .75f + PositiveFloat(z)
+                .75f + ToFractionalFloat(x),
+                .75f + ToFractionalFloat(y),
+                .75f + ToFractionalFloat(z)
                 );
 
             /*

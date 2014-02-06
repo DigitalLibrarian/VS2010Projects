@@ -45,27 +45,28 @@ namespace Aquarium.GA.Genomes
             }).ToList();
 
             bool first = true;
-            var fittedParts = new List<BodyPart>();
+            
             foreach(var part in gennedParts)
             {
                 var partGenome = partsToMake.First();
-                partsToMake.Remove(partGenome); 
+                partsToMake.Remove(partGenome);
 
-               
-                if (!first)
+
+                if (first)
                 {
-                    var anchorPart = Fuzzy.CircleIndex(fittedParts, partGenome.AnchorPart.InstanceId);
-                    if (anchorPart != null)
+                    body.Parts.Add(part);
+                }
+                else
+                {
+                    var anchorPart = Fuzzy.CircleIndex(body.Parts, partGenome.AnchorPart.InstanceId);
+                    if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part, autoTryOthers: false))
                     {
-                        if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part))
-                        {
-                            continue;
-                           // throw new CouldNotConnectPartException();
-                        }
+                        // throw new CouldNotConnectPartException();
+                        // don't care under GA
                     }
+
                 }
 
-                fittedParts.Add(part);
                 /*
                 // parts are placed, and anchor sockets have been taken
                 foreach (var socketGenome in partGenome.SocketGenomes)
@@ -85,7 +86,7 @@ namespace Aquarium.GA.Genomes
 
                 }
                  * */
-                body.Parts.AddRange(fittedParts);
+               // body.Parts.AddRange(fittedParts);
                 first = false;
 
 
@@ -134,7 +135,7 @@ namespace Aquarium.GA.Genomes
             {
                 if (BodyGenerator.MoveToFitLocalSocket(body, socket, part))
                 {
-                    return (BodyGenerator.AutoConnectPartSockets(body, part));
+                    return BodyGenerator.AutoConnectPartSockets(body, part);
                 }
             }
             return false;

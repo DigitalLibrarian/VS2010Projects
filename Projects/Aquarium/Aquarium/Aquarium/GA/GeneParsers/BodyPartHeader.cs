@@ -25,6 +25,8 @@ namespace Aquarium.GA.GeneParsers
             AnchorInstance = Fuzzy.PositiveInteger(anchor);
             PlacementSocket = Fuzzy.PositiveInteger(placement);
             Scale = Fuzzy.ToScaleVector(scaleX, scaleY, scaleZ);
+            Scale = Vector3.Max(Scale, new Vector3(0.01f, 0.01f, 0.01f)); //minimum cap
+            Scale = Vector3.Min(Scale, new Vector3(10f, 100f, 10f)); //maximum cap
         }
 
         public static BodyPartHeader FromGenes(List<double> partGene)

@@ -39,7 +39,14 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
+        int MaxPop = 20;
+        int NumBest = 15;
+        List<Body> BestBodies = new List<Body>();
+        List<BodyGenome> BestGenomes = new List<BodyGenome>();
 
+        List<BodyGenome> PopGenomes = new List<BodyGenome>();
+
+        long Births = 0;
 
         public Game1()
         {
@@ -57,8 +64,10 @@ namespace Aquarium
 
         private void Generate()
         {
-
-            SpawnBodyFromGenePool();
+            for (int i = 0; i < 10; i++)
+            {
+                SpawnBodyFromGenePool();
+            }
 
             Body = GetBestHitter();
         }
@@ -111,6 +120,7 @@ namespace Aquarium
 
             var parent2Gen = Random.NextElement(strangeList);
             //parent2Gen is  some strange from general pop
+            parent2Gen.Mutate(Random);
 
             int wiggle = 9;
             int parent1Snip = (-wiggle + Random.Next(wiggle*2)) + (parent1Gen.Genes.Count / 2);
@@ -126,18 +136,7 @@ namespace Aquarium
             var offspring1Genes = parent1Prefix.Concat(parent2Suffix).ToList();
             var offspring2Genes = parent2Prefix.Concat(parent1Suffix).ToList();
 
-            if (Random.Next(100) == 0)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    var name =  offspring1Genes.Count() +  -i/2 + Random.Next(i);
-                    var value = Random.NextDouble();
-                    offspring1Genes.Add(new Gene<double> { Name = name, Value = value });
-                    offspring2Genes.Add(new Gene<double> { Name = name, Value = value });
-
-                }
-            }
-
+            
 
             GenomeReader gR = new GenomeReader();
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
@@ -149,12 +148,7 @@ namespace Aquarium
 
         }
 
-        int MaxPop = 1000;
-        int NumBest = 50;
-        List<Body> BestBodies = new List<Body>();
-        List<BodyGenome> BestGenomes = new List<BodyGenome>();
-
-        List<BodyGenome> PopGenomes = new List<BodyGenome>();
+        
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
@@ -190,6 +184,8 @@ namespace Aquarium
                     PopGenomes[index] = genome;
                 }
             }
+
+            Births++;
 
         }
 
@@ -373,7 +369,7 @@ namespace Aquarium
             base.Initialize();
 
         }
-
+        SpriteFont spriteFont;
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
@@ -382,7 +378,7 @@ namespace Aquarium
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            SpriteFont spriteFont = Content.Load<SpriteFont>("TerminalFont");
+            spriteFont = Content.Load<SpriteFont>("TerminalFont");
             TerminalSkin skin = new TerminalSkin(TerminalThemeType.HALLOWEEN_TWO);
 
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
@@ -482,9 +478,22 @@ namespace Aquarium
 
             Body.Render(RenderContext);
 
+
             base.Draw(gameTime);
 
             Set2DRenderStates();
+
+            spriteBatch.Begin();
+
+            string text;
+
+            text = string.Format("Births : {0}", Births);
+            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 0), Color.Yellow);
+
+            text = string.Format("Parts : {0}", Body.Parts.Count);
+            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 16), Color.Yellow);
+
+            spriteBatch.End();
             Terminal.CheckDraw(true);
         }
 

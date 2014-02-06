@@ -140,9 +140,9 @@ namespace Forever.Render
     private static BoundingBox UnitBox = new BoundingBox(new Vector3(-1f, -1f, -1f), new Vector3(1f, 1f, 1f));
     #endregion
 
-    public static void RenderUnitCubeTransform(RenderContext renderContext, Matrix unitCubeTransform,  Matrix world, Color color)
+    public static void RenderUnitCubeTransform(RenderContext renderContext, Matrix unitCubeTransform,  Matrix world, Color color, bool wireFrame = false)
     {
-        RenderUnitCubeTransform(renderContext.GraphicsDevice, unitCubeTransform, world, renderContext.Camera.View, renderContext.Camera.Projection, color);
+        RenderUnitCubeTransform(renderContext.GraphicsDevice, unitCubeTransform, world, renderContext.Camera.View, renderContext.Camera.Projection, color, wireFrame);
     }
 
     public static void RenderUnitCubeTransform(
@@ -151,7 +151,8 @@ namespace Forever.Render
         Matrix world,
         Matrix view,
         Matrix projection,
-        Color color)
+        Color color,
+        bool wireFrame)
     {
         if (effect == null)
         {
@@ -180,15 +181,31 @@ namespace Forever.Render
         {
             pass.Apply();
 
+            if (wireFrame)
+            {
 
-            graphicsDevice.DrawUserIndexedPrimitives(
-              PrimitiveType.TriangleList,
-               verts,
-                0,
-                8,
-                solidIndices,
-                0,
-                24);
+
+                graphicsDevice.DrawUserIndexedPrimitives(
+                  PrimitiveType.LineList,
+                   verts,
+                    0,
+                    8,
+                    wireframeIndices,
+                    0,
+                    wireframeIndices.Length / 2);
+            }
+            else
+            {
+
+                graphicsDevice.DrawUserIndexedPrimitives(
+                  PrimitiveType.TriangleList,
+                   verts,
+                    0,
+                    8,
+                    solidIndices,
+                    0,
+                    24);
+            }
 
         }
     }

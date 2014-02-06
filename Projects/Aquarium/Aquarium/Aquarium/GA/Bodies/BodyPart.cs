@@ -68,16 +68,14 @@ namespace Aquarium.GA.Bodies
         public virtual void Render(Body body, RenderContext renderContext)
         {
             var color = Color;
-
-
             var world = Matrix.CreateTranslation(body.Position + LocalPosition) * body.World;
-            Renderer.RenderUnitCubeTransform(renderContext, BodyWorld, world, color);
+            Renderer.RenderUnitCubeTransform(renderContext, BodyWorld, world, color, wireFrame: false);
 
             foreach (var socket in Sockets)
             {
                 world = Matrix.CreateTranslation(body.Position + LocalPosition + socket.LocalPosition) * body.World;
                 var ucTransform = Matrix.CreateScale(0.05f) * UCTransform;
-                Renderer.RenderUnitCubeTransform(renderContext, ucTransform, world, Color.Red);
+                Renderer.RenderUnitCubeTransform(renderContext, ucTransform, world, Color.Red, wireFrame: true);
             }
         }
 

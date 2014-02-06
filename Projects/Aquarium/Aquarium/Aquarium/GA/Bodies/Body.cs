@@ -47,15 +47,14 @@ namespace Aquarium.GA.Bodies
 
             foreach (var part in Parts)
             {
-                if (part == connectedSocket.Part) continue;
-
                 var pBox = part.BodyBB();
                 var fBox = fPart.BodyBB();
                 
                 var f = fBox;
                 var p = pBox;
-               
-                if(f.Intersects(p)) return false;
+
+                if (p.Intersects(f)) return false;
+                
 
                 var corners = fPart.BodySpaceCorners().ToList();
                 corners.Add(fPart.LocalPosition);

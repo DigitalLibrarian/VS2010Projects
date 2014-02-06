@@ -13,11 +13,7 @@ namespace Aquarium.GA.Genomes
         public T Value;
     }
 
-    public class BodyGenome : Genome<double>
-    {
-        public BodyGenome(List<Gene<double>> genes) : base(genes) { }
-    }
-
+   
     public class Genome<T>
     {
         // ((1 1) (2 1) (3 0) (4 0) (5 0) (6 1) (7 1))
@@ -90,6 +86,12 @@ namespace Aquarium.GA.Genomes
             }
             return result;
         }
+
+        /// <summary>
+        /// Mutator mutator
+        /// </summary>
+        /// <param name="random"></param>
+        public virtual void Mutate(Random random) { }
     }
 
     public abstract class GenomeTemplate<T>

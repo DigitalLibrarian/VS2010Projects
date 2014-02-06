@@ -78,7 +78,10 @@ namespace Aquarium.GA.Bodies
                 var c = testSocket.LocalPosition; // from free part to it's socket
                 if (float.IsNaN(testSocket.LocalPosition.X)) throw new Exception();
 
+
                 test.LocalPosition = a + b - c;
+                // we need to add a little so that there won't be overlap with the piece we are connecting with
+                test.LocalPosition += socket.Normal * 0.001f;
 
                 if (body.WillFit(socket, testSocket))
                 {
@@ -322,7 +325,7 @@ namespace Aquarium.GA.Bodies
         {
             var part = new TestBodyPart();
 
-            var scale = SCALE * 7f;
+            var scale = SCALE * 2f;
             part.UCTransform = Matrix.CreateScale(scale / 10f, scale, scale / 10f);
            // part.Color = RandomColor();
 
@@ -337,7 +340,7 @@ namespace Aquarium.GA.Bodies
         {
             var part = new TestBodyPart();
 
-            var scale = SCALE * 5f;
+            var scale = SCALE * 2f;
             part.UCTransform = Matrix.CreateScale(scale, scale / 10f, scale);
             //part.Color = RandomColor();
             var up = Vector3.Up;
@@ -422,7 +425,7 @@ namespace Aquarium.GA.Bodies
         {
             var part = new TestBodyPart();
 
-            var scale = SCALE * 0.35f;
+            var scale = SCALE * 0.5f;
 
             AddAllCorners(part);
             part.UCTransform = Matrix.CreateScale(scale) * new Matrix(
@@ -433,14 +436,13 @@ namespace Aquarium.GA.Bodies
                 );
             
 
-            //part.Color = RandomColor();
             return part;
         }
 
          public static  BodyPart SpikeyThingRight()
         {
             var part = new TestBodyPart();
-            var scale = SCALE * 0.35f;
+            var scale = SCALE * 0.5f;
 
             AddAllCorners(part);
 
@@ -450,7 +452,6 @@ namespace Aquarium.GA.Bodies
                 0f, 0f, 1f, 0,
                 0f, 0f, 0f, -1f
                 );
-           // part.Color = RandomColor();
             return part;
         }
 
@@ -469,8 +470,7 @@ namespace Aquarium.GA.Bodies
          public static BodyPart BoxWithCorners()
         {
             var part = new TestBodyPart();
-            //part.Color = RandomColor();
-            var scale = SCALE * 0.35f;
+            var scale = SCALE * 0.5f;
             part.UCTransform = Matrix.Identity;
 
             AddAllCorners(part);

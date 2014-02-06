@@ -39,28 +39,6 @@ namespace Aquarium.GA.GeneParsers
                 return true;
             });
 
-            /*
-            // we know the entire number of genes in the genome.
-            // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
-            int index = startIndex;
-            int traversed = 0;
-            var maxTraversal = genome.Size * 5;
-            while (traversed < maxTraversal)
-            {
-                var found = RecognizeCodons(genome, template, index + traversed);
-                if(found == Codon.None)
-                {
-                    dataRead.Add(genome.ByName(index + traversed,  template).Value);
-                }
-
-                if (found == codon)
-                {
-                    return dataRead;
-                }
-                
-                traversed++;
-            }*/
-
             return dataRead;
         }
 
