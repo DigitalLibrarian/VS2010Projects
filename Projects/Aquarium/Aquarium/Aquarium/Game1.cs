@@ -50,7 +50,7 @@ namespace Aquarium
 
         float rot = 0;
         Body Body { get; set; }
-
+        BodyGenome Genome { get; set; }
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -64,15 +64,19 @@ namespace Aquarium
             Generate();
         }
 
-
+        bool goingOff = false;
         private void Generate()
         {
+            if (goingOff) return;
+            goingOff = true;
             for (int i = 0; i < MaxPop; i++)
             {
                 SpawnBodyFromGenePool();
             }
 
-            Body = GetBestHitter();
+            Body = GetBestHitterBody();
+            Genome = GetBestHitterGenome();
+            goingOff = false;
         }
 
         private Body GenerateNewSpecimen()
@@ -85,8 +89,10 @@ namespace Aquarium
             PhenotypeReader gR = new PhenotypeReader();
 
             var body = gR.ProduceBody(GenomeToPheno(genome));
-            RegisterBodyGenome(genome, body);
-         
+            if (body != null)
+            {
+                RegisterBodyGenome(genome, body);
+            }
             
             
             return body;
@@ -105,36 +111,44 @@ namespace Aquarium
                 var genome = RandomGenome(geneSize);
 
                 PhenotypeReader gR = new PhenotypeReader();
-
-                var body = gR.ProduceBody(GenomeToPheno(genome));
-
-                RegisterBodyGenome(genome, body);
-                generated++;
+                var pheno = GenomeToPheno(genome);
+                if (pheno != null)
+                {
+                    var body = gR.ProduceBody(pheno);
+                    if (body != null)
+                    {
+                        RegisterBodyGenome(genome, body);
+                        generated++;
+                    }
+                }
             }
+            var bak = 9;
         }
 
         public void SpawnBodyFromGenePool()
         {
 
             int popSize = PopGenomes.Count();
-            var parent1Gen = Random.NextElement(BestGenomes.GetRange(0, Math.Min(10, BestBodies.Count())));
+            var parent1Gen = Random.NextElement(BestGenomes);
 
             var strangeList = PopGenomes;
-            if (!strangeList.Any()) strangeList = BestGenomes;
+            if (!strangeList.Any() || Random.Next(4) == 0) strangeList = BestGenomes;
 
             var parent2Gen = Random.NextElement(strangeList);
+
             //parent2Gen is  some strange from general pop
             parent2Gen.Mutate(Random);
 
-            int wiggle = 9;
-            int parent1Snip = (-wiggle + Random.Next(wiggle*2)) + (parent1Gen.Genes.Count / 2);
-            int parent2Snip = (-wiggle + Random.Next(wiggle*2)) + (parent2Gen.Genes.Count / 2);
+            
+            int minCount = Math.Min(parent1Gen.Size, parent2Gen.Size);
+            int wiggle = Random.Next(minCount/8);
+            int snip = (-wiggle + Random.Next(wiggle*2)) + (minCount / 2);
 
 
-            var parent1Prefix = parent1Gen.Genes.Take(parent1Snip);
-            var parent1Suffix = parent1Gen.Genes.Skip(parent1Snip);
-            var parent2Prefix = parent2Gen.Genes.Take(parent2Snip);
-            var parent2Suffix = parent2Gen.Genes.Skip(parent2Snip);
+            var parent1Prefix = parent1Gen.Genes.Take(snip);
+            var parent1Suffix = parent1Gen.Genes.Skip(snip);
+            var parent2Prefix = parent2Gen.Genes.Take(snip);
+            var parent2Suffix = parent2Gen.Genes.Skip(snip);
 
 
             var offspring1Genes = parent1Prefix.Concat(parent2Suffix).ToList();
@@ -150,20 +164,31 @@ namespace Aquarium
                 if (pheno != null)
                 {
                     var body = gR.ProduceBody(pheno);
-                    RegisterBodyGenome(genome, body);
+                    if (body != null)
+                    {
+                        RegisterBodyGenome(genome, body);
+                    }
                 }
             }
 
         }
         private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
         {
-            double ratio1 = b1.Parts.Count() + (b1.Parts.Count() / g1.Genes.Count());
-            double ratio2 = b2.Parts.Count() + (b2.Parts.Count() / g2.Genes.Count());
-            return ratio1 <= ratio2;
+            var c1 = b1.Parts.Count();
+            var c2 = b2.Parts.Count();
+            if (c2 > c1) return true;
+            if (c2 < c1) return false;
+
+            // (genes / part) breaks the tie
+            double ratio1 =  g1.Genes.Count() / c1;
+            double ratio2 = g2.Genes.Count() / c2;
+            return ratio1 >= ratio2;
+
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
+            if (!body.Parts.Any()) return;
             int numParts = body.Parts.Count();
             bool foundFit = false;
             for (int i = 0; i < BestGenomes.Count(); i++)
@@ -201,9 +226,14 @@ namespace Aquarium
 
         }
 
-        private Body GetBestHitter()
+        private Body GetBestHitterBody()
         {
             return BestBodies.First();
+        }
+
+        private BodyGenome GetBestHitterGenome()
+        {
+            return BestGenomes.First();
         }
 
         #endregion
@@ -384,7 +414,8 @@ namespace Aquarium
             SetupRenderContextAndCamera();
 
             GenerateRandomPopulation(MaxPop + NumBest);
-            Body = GetBestHitter();
+            Body = GetBestHitterBody();
+            Genome = GetBestHitterGenome();
 
             GenerateTimer.Enabled = true;
         }
@@ -485,8 +516,12 @@ namespace Aquarium
             text = string.Format("Births : {0}", Births);
             spriteBatch.DrawString(spriteFont, text, new Vector2(0, 0), Color.Yellow);
 
-            text = string.Format("Parts : {0}", Body.Parts.Count);
+            text = string.Format("GenomeSize : {0}", Genome.Size);
             spriteBatch.DrawString(spriteFont, text, new Vector2(0, 16), Color.Yellow);
+
+            text = string.Format("Parts : {0}", Body.Parts.Count);
+            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 32), Color.Yellow);
+
 
             spriteBatch.End();
             Terminal.CheckDraw(true);

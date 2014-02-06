@@ -23,6 +23,10 @@ namespace Aquarium.GA.Phenotypes
 
         public Body ProduceBody(IBodyPhenotype genome)
         {
+            if (!genome.BodyPartPhenos.Any())
+            {
+                return null;
+            }
             var body = new Body();
             var partsToMake = genome.BodyPartPhenos.ToList();
 

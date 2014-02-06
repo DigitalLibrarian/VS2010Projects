@@ -11,8 +11,10 @@ namespace Aquarium.GA.Genomes
 
         public override void Mutate(Random random)
         {
+            Genes.ForEach(gene => gene.Value = Math.Round(gene.Value, 9));
+
             int chance = 20; // one in X
-            int numAffected = Genes.Count() / 10;
+            int numAffected = random.Next(1 + Genes.Count() / 3);
 
             for (int i = 0; i < numAffected; i++)
             {
@@ -25,10 +27,19 @@ namespace Aquarium.GA.Genomes
                 if (random.Next(chance) == 0)
                 {
                     var r = -0.5f + random.NextDouble();//  (-0.5f, 0.5f) is range
-                    // we are going change it by a porportion of it's own dist from zero
-                    double offset = gene.Value * r * 0.01f;
-                    offset = (gene.Value / 10f) * (float)random.NextDouble();
-                    gene.Value = (float)Math.Round(gene.Value + offset, 5);
+                    gene.Value += r;   
+                }
+
+                if (random.Next(chance) == 0)
+                {
+                    var one = random.NextElement(Genes);
+                    var two = random.NextElement(Genes);
+
+                    Genes.Add(new Gene<double>
+                    {
+                        Name = one.Name + two.Name,
+                        Value = one.Value
+                    });
                 }
             }       
         }
