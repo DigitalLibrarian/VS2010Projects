@@ -5,9 +5,8 @@ using System.Text;
 
 namespace Aquarium.GA.Codons
 {
-    public class BodyEndCodon : Codon
-    {
-        
+    public class BodyEndCodon : BodyCodon
+    {    
 
         public override int FrameSize
         {

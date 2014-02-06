@@ -21,6 +21,7 @@ using Aquarium.GA.Signals;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
 using Aquarium.GA.GeneParsers;
+using Aquarium.GA.Codons;
 
 namespace Aquarium
 {
@@ -142,7 +143,8 @@ namespace Aquarium
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
             {
                 var genome = new BodyGenome(genes);
-                var body = gR.ProduceBody(GenomeToPheno(genome));
+                var pheno = GenomeToPheno(genome);
+                var body = gR.ProduceBody(pheno);
                 RegisterBodyGenome(genome, body);
             }
 
@@ -217,26 +219,11 @@ namespace Aquarium
 
         private IBodyPhenotype GenomeToPheno(BodyGenome g)
         {
+
             var t = new RandomDoubleGenomeTemplate(Random);
+            var parser = new BodyCodonParser();
 
-            var p = new BodyPartGeneParser();
-            var headers = p.ReadBodyPartHeaders(g, t);
-
-
-            BodyPhenotype bodyP = new BodyPhenotype();
-            headers.ForEach(header =>
-            {
-                var partOne = new BodyPartPhenotype();
-                partOne.Color = header.Color;
-                partOne.BodyPartGeometryIndex = header.GeomIndex;
-                partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
-                partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
-                partOne.Scale = header.Scale;
-
-                bodyP.BodyPartPhenos.Add(partOne);
-
-            });
-            return bodyP;
+            return parser.ParseBodyPhenotype(g, t);
         }
 
         

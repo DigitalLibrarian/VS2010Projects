@@ -7,22 +7,15 @@ using Aquarium.GA.Codons;
 
 namespace Aquarium.GA.Codons
 {
-    public abstract class CodonParser
+    public abstract class CodonParser<TGene>
     {
-        List<Codon> Testers { get; set; }
-        public CodonParser(List<Codon> testers)
+        protected List<TGene> ReadUntilOrEnd(Genome<TGene> genome, GenomeTemplate<TGene> template, Codon<TGene> tester, int startIndex)
         {
-            Testers = testers;
+            return ReadUntilOrEnd(genome, template, new Codon<TGene>[] { tester }, startIndex);
         }
-
-        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon tester, int startIndex)
+        protected List<TGene> ReadUntilOrEnd(Genome<TGene> genome, GenomeTemplate<TGene> template, Codon<TGene>[] testers, int startIndex)
         {
-            return ReadUntilOrEnd( genome, template, new Codon[] { tester },  startIndex);
-        }
-        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] testers, int startIndex)
-        //protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
-        {
-            List<double> dataRead = new List<double>();
+            List<TGene> dataRead = new List<TGene>();
             Traversal(genome, template, startIndex, (name) =>
             {
                 foreach (var tester in testers)
@@ -41,7 +34,7 @@ namespace Aquarium.GA.Codons
             return dataRead;
         }
 
-        protected int Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
+        protected int Traversal(Genome<TGene> genome, GenomeTemplate<TGene> template, int startIndex, Predicate<int> nameVisitor)
         {
             // we know the entire number of genes in the genome.
             // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
@@ -61,7 +54,7 @@ namespace Aquarium.GA.Codons
             return traversed;
         }
 
-        public bool RecognizeCodonDefinition(BodyGenome genome, GenomeTemplate<double> template, int index, Codon defn)
+        protected bool RecognizeCodonDefinition(Genome<TGene> genome, GenomeTemplate<TGene> template, int index, Codon<TGene> defn)
         {
              var sequence = 
                     genome

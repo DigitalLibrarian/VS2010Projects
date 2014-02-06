@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Aquarium.GA.Codons
 {
-    public class BodyPartStartCodon : Codon
+    public class BodyPartStartCodon : BodyCodon
     {
         public override int FrameSize
         {
@@ -29,7 +29,7 @@ namespace Aquarium.GA.Codons
        
     }
 
-    public class BodyPartEndCodon : Codon
+    public class BodyPartEndCodon : BodyCodon
     {   
         public override int FrameSize
         {
