@@ -79,7 +79,7 @@ namespace Aquarium
             // var bodyPheno = CreateHandCraftedGenome();
 
 
-            GenomeReader gR = new GenomeReader();
+            PhenotypeReader gR = new PhenotypeReader();
 
             var body = gR.ProduceBody(GenomeToPheno(genome));
             RegisterBodyGenome(genome, body);
@@ -99,7 +99,7 @@ namespace Aquarium
             {
                 var genome = RandomGenome(geneSize);
 
-                GenomeReader gR = new GenomeReader();
+                PhenotypeReader gR = new PhenotypeReader();
 
                 var body = gR.ProduceBody(GenomeToPheno(genome));
 
@@ -138,7 +138,7 @@ namespace Aquarium
 
             
 
-            GenomeReader gR = new GenomeReader();
+            PhenotypeReader gR = new PhenotypeReader();
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
             {
                 var genome = new BodyGenome(genes);
@@ -226,7 +226,6 @@ namespace Aquarium
             BodyPhenotype bodyP = new BodyPhenotype();
             headers.ForEach(header =>
             {
-
                 var partOne = new BodyPartPhenotype();
                 partOne.Color = header.Color;
                 partOne.BodyPartGeometryIndex = header.GeomIndex;
@@ -245,15 +244,15 @@ namespace Aquarium
         {
             var g = new BodyPhenotype();
 
-            var chanSig0 = new ChanneledSignalGenome();
+            var chanSig0 = new ChanneledSignalPhenotype();
             chanSig0.InstanceId = 0;
 
 
-            var chanSig1 = new ChanneledSignalGenome();
+            var chanSig1 = new ChanneledSignalPhenotype();
             chanSig1.InstanceId = 1;
 
 
-            var chanSig2 = new ChanneledSignalGenome();
+            var chanSig2 = new ChanneledSignalPhenotype();
             chanSig2.InstanceId = 2;
 
 
@@ -265,9 +264,9 @@ namespace Aquarium
 
 
             var nog = new NeuralOrganGenome();
-            nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 4, NumHidden = 1, NumOutputs = 4 };
-            nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
-            nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
+            nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 4, NumHidden = 1, NumOutputs = 4 };
+            nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
+            nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
             var tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
             tNet.RandomizeWeights(Random);
             nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
@@ -286,9 +285,9 @@ namespace Aquarium
                 partTwo.Color = Color.Blue;
 
                 nog = new NeuralOrganGenome();
-                nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig2 };
-                nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
+                nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig2 };
+                nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
 
                  tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
                 tNet.RandomizeWeights(Random);
@@ -310,9 +309,9 @@ namespace Aquarium
                 partTwo.Color = Color.Yellow;
 
                 nog = new NeuralOrganGenome();
-                nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig0 };
-                nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
+                nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
+                nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
 
                  tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
                 tNet.RandomizeWeights(Random);
@@ -337,9 +336,9 @@ namespace Aquarium
                     partTwo.Color = Color.WhiteSmoke;
 
                     nog = new NeuralOrganGenome();
-                    nog.NeuralNetworkGenome = new NeuralNetworkGenome { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                    nog.InputGenome = new NeuralInputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig1 };
-                    nog.OutputGenome = new NeuralOutputSocketGenome { Channel = 0, ChanneledSignalGenome = chanSig2 };
+                    nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
+                    nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
+                    nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig2 };
                      tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
                     tNet.RandomizeWeights(Random);
                     nog.NeuralNetworkGenome.Weights = tNet.GetWeights();

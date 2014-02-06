@@ -7,22 +7,15 @@ using Forever.Neural;
 using Aquarium.GA.Organs;
 using Aquarium.GA.Signals;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.Phenotypes;
 
-namespace Aquarium.GA.Genomes
+namespace Aquarium.GA.Phenotypes
 {
-    public class CouldNotConnectPartException : Exception { } 
-    
-
-    //TODO
-    // - missing UCTransform and rotation matrices
-    // - part order
-    // - neural input part
-    
-    public class GenomeReader
+       
+    public class PhenotypeReader
     {
-
         List<Func<BodyPart>> PartIndex { get; set; }
-        public GenomeReader()
+        public PhenotypeReader()
         {
             PartIndex = BodyGenerator.ProduceLibraryOfParts();
         }
@@ -61,8 +54,7 @@ namespace Aquarium.GA.Genomes
                     var anchorPart = Fuzzy.CircleIndex(body.Parts, partGenome.AnchorPart.InstanceId);
                     if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part, autoTryOthers: false))
                     {
-                        // throw new CouldNotConnectPartException();
-                        // don't care under GA
+                        // don't care under GA, means a loss  of the benfit of the limb
                     }
 
                 }

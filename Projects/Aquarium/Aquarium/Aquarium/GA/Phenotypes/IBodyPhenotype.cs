@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace Aquarium.GA.Genomes
+namespace Aquarium.GA.Phenotypes
 {
     public interface IBodyPhenotype
     {
@@ -19,21 +19,21 @@ namespace Aquarium.GA.Genomes
         IInstancePointer AnchorPart { get; set; }
         IInstancePointer PlacementPartSocket { get; set; }
 
-        List<IOrganGenome> OrganGenomes { get; set; }
-        List<IBodyPartSocketGenome> SocketGenomes { get; set; }
-        IChanneledSignalGenome ChanneledSignalGenome { get; set; }
+        List<IOrganPhenotype> OrganGenomes { get; set; }
+        List<IBodyPartSocketPhenotype> SocketGenomes { get; set; }
+        IChanneledSignalPhenotype ChanneledSignalGenome { get; set; }
 
         Vector3 Scale { get; set; }
 
     }
 
-    public interface IChanneledSignalGenome : IInstancePointer { }
+    public interface IChanneledSignalPhenotype : IInstancePointer { }
 
-    public interface IBodyPartSocketGenome : IInstancePointer
+    public interface IBodyPartSocketPhenotype : IInstancePointer
     {
-        IForeignBodyPartSocketGenome ForeignSocket { get; set; }
+        IForeignBodyPartSocketPhenotype ForeignSocket { get; set; }
     }
-    public interface IForeignBodyPartSocketGenome : IInstancePointer
+    public interface IForeignBodyPartSocketPhenotype : IInstancePointer
     {
         IInstancePointer BodyPart { get; set; }
     }
@@ -49,18 +49,18 @@ namespace Aquarium.GA.Genomes
     }
 
 
-    public interface IOrganGenome
+    public interface IOrganPhenotype
     {
         IInstancePointer BodyPointer { get; set; }
-        IOrganAbilityGenome OrganAbilityGenome { get;  }
+        IOrganAbilityPhenotype OrganAbilityGenome { get;  }
     }
 
-    public interface IOrganAbilityGenome
+    public interface IOrganAbilityPhenotype
     {
 
     }
 
-    public interface INeuralNetworkGenome
+    public interface INeuralNetworkPhenotype
     {
         int NumHidden { get; set; }
 

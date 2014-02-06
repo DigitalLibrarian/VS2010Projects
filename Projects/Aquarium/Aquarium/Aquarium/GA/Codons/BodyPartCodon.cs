@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aquarium.GA.GeneParsers
+namespace Aquarium.GA.Codons
 {
     public class BodyPartStartCodon : CodonDefinition
     {
@@ -32,7 +32,6 @@ namespace Aquarium.GA.GeneParsers
         }
     }
 
-
     public class BodyPartEndCodon : CodonDefinition
     {   
         public override int FrameSize
@@ -60,4 +59,7 @@ namespace Aquarium.GA.GeneParsers
             get { return Codon.BodyPartEnd; }
         }
     }
+
+
+
 }

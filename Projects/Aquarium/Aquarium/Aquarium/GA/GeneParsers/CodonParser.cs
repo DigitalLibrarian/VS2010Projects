@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA.Genomes;
+using Aquarium.GA.Codons;
 
 namespace Aquarium.GA.GeneParsers
 {
@@ -14,11 +15,11 @@ namespace Aquarium.GA.GeneParsers
             Testers = testers;
         }
 
-
         List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon codon, int startIndex)
         {
             return ReadUntilOrEnd( genome, template, new Codon[] { codon },  startIndex);
         }
+
         List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
         {
             List<double> dataRead = new List<double>();
@@ -49,7 +50,8 @@ namespace Aquarium.GA.GeneParsers
             // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
             int index = startIndex;
             int traversed = 0;
-            var maxTraversal = genome.Size * 2;
+            var maxTraversal = genome.Size * 20;
+
             while (traversed < maxTraversal)
             {
                 var found = RecognizeCodons(genome, template, index + traversed);
