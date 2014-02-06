@@ -45,7 +45,7 @@ namespace Aquarium.GA.Codons
             var two = genes[1];
             var three = genes[2];
 
-            return one > 100 && two < 100 && three > 100;
+            return one > 100 && two < 100 && three < 100;
         }
 
         public override List<double> Example()

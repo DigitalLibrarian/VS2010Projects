@@ -5,7 +5,7 @@ using System.Text;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Codons;
 
-namespace Aquarium.GA.GeneParsers
+namespace Aquarium.GA.Codons
 {
     public abstract class CodonParser
     {
@@ -15,12 +15,12 @@ namespace Aquarium.GA.GeneParsers
             Testers = testers;
         }
 
-        List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon codon, int startIndex)
+        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon codon, int startIndex)
         {
             return ReadUntilOrEnd( genome, template, new Codon[] { codon },  startIndex);
         }
 
-        List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
+        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
         {
             List<double> dataRead = new List<double>();
             Traversal(genome, template, startIndex, (name) =>
@@ -43,7 +43,7 @@ namespace Aquarium.GA.GeneParsers
             return dataRead;
         }
 
-        private void Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
+        protected void Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
         {
 
             // we know the entire number of genes in the genome.
@@ -68,13 +68,10 @@ namespace Aquarium.GA.GeneParsers
 
         }
 
-        private List<double> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<double> template, int startIndex)
-        {
-            return ReadUntilOrEnd(genome, template, Codon.BodyPartEnd, startIndex);
-        }
+      
 
 
-        private Codon RecognizeCodons(BodyGenome genome, GenomeTemplate<double> template, int index)
+        protected Codon RecognizeCodons(BodyGenome genome, GenomeTemplate<double> template, int index)
         {
             foreach (var tester in Testers)
             {
