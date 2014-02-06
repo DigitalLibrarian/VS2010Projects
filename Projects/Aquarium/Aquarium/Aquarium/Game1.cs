@@ -40,14 +40,16 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 20;
-        int NumBest = 15;
+        int MaxPop = 10;
+        int NumBest = 250;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
-
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
 
         long Births = 0;
+
+        float rot = 0;
+        Body Body { get; set; }
 
         public Game1()
         {
@@ -91,6 +93,8 @@ namespace Aquarium
         }
 
 
+        #region Population
+
         private void GenerateRandomPopulation(int popSize)
         {
             int geneSize = 1 * 9;
@@ -114,7 +118,6 @@ namespace Aquarium
 
             int popSize = PopGenomes.Count();
             var parent1Gen = Random.NextElement(BestGenomes.GetRange(0, Math.Min(10, BestBodies.Count())));
-            //var parent2Gen = Random.NextElement(BestGenomes.GetRange(0, Math.Min(10, BestBodies.Count())));
 
             var strangeList = PopGenomes;
             if (!strangeList.Any()) strangeList = BestGenomes;
@@ -149,8 +152,6 @@ namespace Aquarium
             }
 
         }
-
-        
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
@@ -196,6 +197,8 @@ namespace Aquarium
             return BestBodies.First();
         }
 
+        #endregion
+
         BodyGenome RandomGenome(int length)
         {
             var gContents = new List<Gene<double>>();
@@ -219,7 +222,6 @@ namespace Aquarium
 
         private IBodyPhenotype GenomeToPheno(BodyGenome g)
         {
-
             var t = new RandomDoubleGenomeTemplate(Random);
             var parser = new BodyCodonParser();
 
@@ -437,7 +439,6 @@ namespace Aquarium
             CamTrackBody(Body);
         }
 
-        float rot = 0;
         private void UpdateSimulation(GameTime gameTime)
         {
             Body.World = Matrix.CreateRotationY(rot += 0.01f)
@@ -448,7 +449,6 @@ namespace Aquarium
 
         }
 
-        Body Body { get; set; }
       
 
         /// <summary>
