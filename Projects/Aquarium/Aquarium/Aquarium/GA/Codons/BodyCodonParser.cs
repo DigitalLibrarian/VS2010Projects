@@ -17,24 +17,33 @@ namespace Aquarium.GA.Codons
 
         public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<double> t)
         {
-            
-            var p = new BodyPartGeneParser();
-            var headers = p.ReadBodyPartHeaders(g, t);
-
-
-            BodyPhenotype bodyP = new BodyPhenotype();
-            headers.ForEach(header =>
+            BodyPhenotype bodyP = null;
+            if (!g.Genes.Any()) return bodyP;
+            try
             {
-                var partOne = new BodyPartPhenotype();
-                partOne.Color = header.Color;
-                partOne.BodyPartGeometryIndex = header.GeomIndex;
-                partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
-                partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
-                partOne.Scale = header.Scale;
+                var p = new BodyPartGeneParser();
+                var headers = p.ReadBodyPartHeaders(g, t);
 
-                bodyP.BodyPartPhenos.Add(partOne);
 
-            });
+                bodyP = new BodyPhenotype();
+                headers.ForEach(header =>
+                {
+                    var partOne = new BodyPartPhenotype();
+                    partOne.Color = header.Color;
+                    partOne.BodyPartGeometryIndex = header.GeomIndex;
+                    partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
+                    partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
+                    partOne.Scale = header.Scale;
+
+                    bodyP.BodyPartPhenos.Add(partOne);
+
+                });
+            }
+            catch (OverflowException)
+            {
+                //If the fuzzy math fails, then we treat the parse run as a failure.  Don't do that evolution!
+                //This might mean that it selects for numbers that haven't been combined or mutated too many times
+            }
 
 
             return bodyP;

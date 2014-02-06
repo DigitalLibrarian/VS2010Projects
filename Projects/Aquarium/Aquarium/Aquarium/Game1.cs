@@ -40,8 +40,8 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 10;
-        int NumBest = 250;
+        int MaxPop = 100;
+        int NumBest = 10;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
@@ -67,7 +67,7 @@ namespace Aquarium
 
         private void Generate()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < MaxPop; i++)
             {
                 SpawnBodyFromGenePool();
             }
@@ -147,10 +147,19 @@ namespace Aquarium
             {
                 var genome = new BodyGenome(genes);
                 var pheno = GenomeToPheno(genome);
-                var body = gR.ProduceBody(pheno);
-                RegisterBodyGenome(genome, body);
+                if (pheno != null)
+                {
+                    var body = gR.ProduceBody(pheno);
+                    RegisterBodyGenome(genome, body);
+                }
             }
 
+        }
+        private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
+        {
+            double ratio1 = b1.Parts.Count() + (b1.Parts.Count() / g1.Genes.Count());
+            double ratio2 = b2.Parts.Count() + (b2.Parts.Count() / g2.Genes.Count());
+            return ratio1 <= ratio2;
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
@@ -159,7 +168,7 @@ namespace Aquarium
             bool foundFit = false;
             for (int i = 0; i < BestGenomes.Count(); i++)
             {
-                if (BestBodies[i].Parts.Count() <= numParts)
+                if(AsFit(BestGenomes[i], BestBodies[i], genome, body))
                 {
                     BestBodies[i] = body;
                     BestGenomes[i] = genome;

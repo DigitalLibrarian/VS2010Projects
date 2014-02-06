@@ -28,7 +28,7 @@ namespace Aquarium.GA.Genomes
                     // we are going change it by a porportion of it's own dist from zero
                     double offset = gene.Value * r * 0.01f;
                     offset = (gene.Value / 10f) * (float)random.NextDouble();
-                    gene.Value = gene.Value + offset;
+                    gene.Value = (float)Math.Round(gene.Value + offset, 5);
                 }
             }       
         }
