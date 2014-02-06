@@ -8,14 +8,14 @@ namespace Aquarium.GA.Codons
 {
     class BodyCodonParser : CodonParser
     {
-        public BodyCodonParser(List<CodonDefinition> codonDefs)
+        public BodyCodonParser(List<Codon> codonDefs)
             : base(codonDefs)
         {
         }
 
         protected List<double> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<double> template, int startIndex)
         {
-            return ReadUntilOrEnd(genome, template, Codon.BodyPartEnd, startIndex);
+            return ReadUntilOrEnd(genome, template, new BodyPartEndCodon(), startIndex);
         }
     }
 }

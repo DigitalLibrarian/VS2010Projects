@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Aquarium.GA.Codons
 {
-    public class BodyPartStartCodon : CodonDefinition
+    public class BodyPartStartCodon : Codon
     {
         public override int FrameSize
         {
@@ -26,13 +26,10 @@ namespace Aquarium.GA.Codons
             return new List<double> { 150, 150, 150 };
         }
 
-        public override Codon Codon
-        {
-            get { return Codon.BodyPartStart; }
-        }
+       
     }
 
-    public class BodyPartEndCodon : CodonDefinition
+    public class BodyPartEndCodon : Codon
     {   
         public override int FrameSize
         {
@@ -54,10 +51,6 @@ namespace Aquarium.GA.Codons
         }
 
 
-        public override Codon Codon
-        {
-            get { return Codon.BodyPartEnd; }
-        }
     }
 
 

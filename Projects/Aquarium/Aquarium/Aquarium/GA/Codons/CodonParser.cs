@@ -9,33 +9,31 @@ namespace Aquarium.GA.Codons
 {
     public abstract class CodonParser
     {
-        List<CodonDefinition> Testers { get; set; }
-        public CodonParser(List<CodonDefinition> testers)
+        List<Codon> Testers { get; set; }
+        public CodonParser(List<Codon> testers)
         {
             Testers = testers;
         }
 
-        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon codon, int startIndex)
+        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon tester, int startIndex)
         {
-            return ReadUntilOrEnd( genome, template, new Codon[] { codon },  startIndex);
+            return ReadUntilOrEnd( genome, template, new Codon[] { tester },  startIndex);
         }
-
-        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
+        protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] testers, int startIndex)
+        //protected List<double> ReadUntilOrEnd(BodyGenome genome, GenomeTemplate<double> template, Codon[] codons, int startIndex)
         {
             List<double> dataRead = new List<double>();
             Traversal(genome, template, startIndex, (name) =>
             {
-                var found = RecognizeCodons(genome, template, name);
-                if (found == Codon.None)
+                foreach (var tester in testers)
                 {
-                    var data = genome.ByName(name, template).Value;
-                    dataRead.Add(data);
+                    if (RecognizeCodonDefinition(genome, template, startIndex, tester))
+                    {
+                        return false;
+                    }
                 }
-
-                if (codons.Contains(found))
-                {
-                    return false;
-                }
+                var data = genome.ByName(name, template).Value;
+                dataRead.Add(data);
 
                 return true;
             });
@@ -43,9 +41,8 @@ namespace Aquarium.GA.Codons
             return dataRead;
         }
 
-        protected void Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
+        protected int Traversal(BodyGenome genome, GenomeTemplate<double> template, int startIndex, Predicate<int> nameVisitor)
         {
-
             // we know the entire number of genes in the genome.
             // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
             int index = startIndex;
@@ -54,34 +51,27 @@ namespace Aquarium.GA.Codons
 
             while (traversed < maxTraversal)
             {
-                var found = RecognizeCodons(genome, template, index + traversed);
-                if (found == Codon.None)
+                if (!nameVisitor(index + traversed))
                 {
-                    if (!nameVisitor(index + traversed))
-                    {
-                        return;
-                    }
+                    return traversed;
                 }
 
                 traversed++;
             }
-
+            return traversed;
         }
 
-      
-
-
-        protected Codon RecognizeCodons(BodyGenome genome, GenomeTemplate<double> template, int index)
+        public bool RecognizeCodonDefinition(BodyGenome genome, GenomeTemplate<double> template, int index, Codon defn)
         {
-            foreach (var tester in Testers)
-            {
-                if (tester.Recognize(genome.CondenseSequence(index, tester.FrameSize, template).Select(x => x.Value).ToList()))
-                {
-                    return tester.Codon;
-                }
-            }
-
-            return Codon.None;
+             var sequence = 
+                    genome
+                        .CondenseSequence(index, defn.FrameSize, template)
+                        .Select(x => x.Value)
+                        .ToList();
+             return defn.Recognize(sequence);
         }
+
+        
+         
     }
 }

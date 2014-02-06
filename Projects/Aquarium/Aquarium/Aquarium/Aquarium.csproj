@@ -123,7 +123,7 @@
     <Compile Include="GA\Codons\BodyPartCodon.cs" />
     <Compile Include="GA\GeneParsers\BodyPartGeneParser.cs" />
     <Compile Include="GA\GeneParsers\BodyPartHeader.cs" />
-    <Compile Include="GA\Codons\CodonDefinition.cs" />
+    <Compile Include="GA\Codons\Codon.cs" />
     <Compile Include="GA\Codons\CodonParser.cs" />
     <Compile Include="GA\Genomes\BodyGenome.cs" />
     <Compile Include="GA\Genomes\Gene.cs" />

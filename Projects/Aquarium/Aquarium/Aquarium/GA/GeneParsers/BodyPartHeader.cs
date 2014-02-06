@@ -6,8 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.GeneParsers
 {
-
-
+    //TODO - catch over flows
     public struct BodyPartHeader
     {
         public int GeomIndex;
