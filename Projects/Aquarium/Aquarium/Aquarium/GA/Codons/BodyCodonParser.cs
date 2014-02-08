@@ -15,7 +15,13 @@ namespace Aquarium.GA.Codons
 
         protected List<int> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<int> template, int startIndex)
         {
-            return ReadUntilOrEnd(genome, template, new BodyPartEndCodon(), startIndex);
+            return ReadUntilOrEnd(genome, template, 
+                new Codon<int>[]  {
+                    new BodyPartEndCodon(), 
+                    new BodyPartStartCodon(),
+                    new BodyEndCodon()
+                },
+                startIndex);
         }
 
         

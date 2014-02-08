@@ -41,7 +41,7 @@ namespace Aquarium
         ICamera Camera;
 
         int MaxPop = 1000;
-        int NumBest = 100;
+        int NumBest = 5;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
@@ -69,7 +69,7 @@ namespace Aquarium
         {
             if (goingOff) return;
             goingOff = true;
-            for (int i = 0; i < MaxPop; i++)
+            for (int i = 0; i < NumBest  + MaxPop; i++)
             {
                 SpawnBodyFromGenePool();
             }
@@ -115,8 +115,11 @@ namespace Aquarium
 
             var parent2Gen = Random.NextElement(strangeList);
 
-            //parent2Gen is  some strange from general pop
-            parent2Gen.Mutate(Random);
+            if (strangeList == PopGenomes)
+            {
+                //parent2Gen is  some strange from general pop
+                parent2Gen.Mutate(Random);
+            }
 
             
             int minCount = Math.Min(parent1Gen.Size, parent2Gen.Size);
@@ -130,8 +133,8 @@ namespace Aquarium
             var parent2Suffix = parent2Gen.Genes.Skip(snip);
 
 
-            var offspring1Genes = parent1Prefix.Concat(parent2Suffix).ToList();
-            var offspring2Genes = parent2Prefix.Concat(parent1Suffix).ToList();
+            var offspring1Genes = parent1Prefix.Concat(parent2Suffix).Select(g=> new Gene<int> { Name = g.Name, Value = g.Value} ).ToList();
+            var offspring2Genes = parent2Prefix.Concat(parent1Suffix).Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList();
             
             PhenotypeReader gR = new PhenotypeReader();
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })

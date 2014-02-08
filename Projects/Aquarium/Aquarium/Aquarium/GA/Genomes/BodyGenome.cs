@@ -11,7 +11,7 @@ namespace Aquarium.GA.Genomes
 
         public override void Mutate(Random random)
         {
-            int chance = 50; 
+            int chance = 10; 
             int numAffected = random.Next(1 + Genes.Count() / 3);
 
             for (int i = 0; i < numAffected; i++)
@@ -19,7 +19,7 @@ namespace Aquarium.GA.Genomes
                 var gene = random.NextElement(Genes);
                 if (random.Next(chance) == 0) // one in X
                 {
-                    gene.Name = Genes.Count() + -i / 2 + random.Next(i);
+                    gene.Name = Genes.Count() + (-i / 2) + random.Next(i);
                     
                 }
                 if (random.Next(chance) == 0)
@@ -44,12 +44,12 @@ namespace Aquarium.GA.Genomes
 
                 if (random.Next(chance + chance) == 0)
                 {
-                    int num = Size / 20;
+                    int num = Math.Min(Size / 20, 20);
                     int start = random.Next(Size - num);
                     int target = random.Next(Size - num);
 
                     var section = Genes.GetRange(start, num);
-                    Genes.InsertRange(target, section);
+                    Genes.InsertRange(target, section.Select(g => new Gene<int> { Name = g.Name + target, Value = g.Value}));
 
                 }
             }       

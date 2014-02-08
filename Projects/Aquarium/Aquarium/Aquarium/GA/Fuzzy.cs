@@ -8,11 +8,16 @@ namespace Aquarium.GA
 {
     public static class Fuzzy
     {
-
         public static T CircleIndex<T>(List<T> list, int index)
         {
             var count = list.Count();
             return list[index % count];
+        }
+
+
+        public static int PositiveInteger(int i)
+        {
+            return Math.Abs(i);
         }
 
         public static int RoundToInt(double d)
@@ -36,7 +41,18 @@ namespace Aquarium.GA
             return ToFractionalFloat(d);
         }
 
+
+        public static float ColorValue(int i)
+        {
+            return ToFractionalFloat(i);
+        }
+
         public static Color ToColor(double r, double g, double b)
+        {
+            return new Color(ColorValue(r), ColorValue(g), ColorValue(b));
+        }
+
+        public static Color ToColor(int r, int g, int b)
         {
             return new Color(ColorValue(r), ColorValue(g), ColorValue(b));
         }
@@ -44,6 +60,13 @@ namespace Aquarium.GA
         public static float ToFractionalFloat(double d)
         {
             return (float)(d - Math.Floor(d));
+        }
+
+        public static float ToFractionalFloat(int i)
+        {
+            double d = PositiveInteger(i);
+
+            return ToFractionalFloat(d / 4);
         }
 
         public static Vector3 ToScaleVector(double x, double y, double z)
@@ -54,15 +77,18 @@ namespace Aquarium.GA
                 .75f + ToFractionalFloat(y),
                 .75f + ToFractionalFloat(z)
                 );
+        }
 
-            /*
+
+
+        public static Vector3 ToScaleVector(int x, int y, int z)
+        {
+
             return new Vector3(
                 .5f + ToFractionalFloat(x),
                 .5f + ToFractionalFloat(y),
                 .5f + ToFractionalFloat(z)
                 );
-             * */
         }
-
     }
 }
