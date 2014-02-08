@@ -11,13 +11,13 @@ namespace Aquarium.GA.Genomes
 
         public override void Mutate(Random random)
         {
-            int chance = 50; // one in X
+            int chance = 50; 
             int numAffected = random.Next(1 + Genes.Count() / 3);
 
             for (int i = 0; i < numAffected; i++)
             {
                 var gene = random.NextElement(Genes);
-                if (random.Next(chance) == 0)
+                if (random.Next(chance) == 0) // one in X
                 {
                     gene.Name = Genes.Count() + -i / 2 + random.Next(i);
                     

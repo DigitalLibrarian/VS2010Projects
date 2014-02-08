@@ -5,52 +5,25 @@ using System.Text;
 
 namespace Aquarium.GA.Codons
 {
+    
+
     public class BodyPartStartCodon : BodyCodon
     {
-        public override int FrameSize
-        {
-            get { return 3; }
-        }
+        public BodyPartStartCodon() : this(-2000, 100) { }
+        public BodyPartStartCodon(int band, int range) : base(band, range) { }
 
-        public override bool Recognize(List<double> genes)
-        {
-            var one = genes[0];
-            var two = genes[1];
-            var three = genes[2];
-
-            return one > 100 && two > 100 && three > 100;
-        }
-
-        public override List<double> Example()
-        {
-            return new List<double> { 150, 150, 150 };
-        }
-
-       
     }
 
     public class BodyPartEndCodon : BodyCodon
     {   
-        public override int FrameSize
-        {
-            get { return 3; }
-        }
+        public BodyPartEndCodon() : this(-3000, 100) { }
+        public BodyPartEndCodon(int band, int range) : base(band, range) { }
+    }
 
-        public override bool Recognize(List<double> genes)
-        {
-            var one = genes[0];
-            var two = genes[1];
-            var three = genes[2];
-
-            return one > 100 && two < 100 && three < 100;
-        }
-
-        public override List<double> Example()
-        {
-            return new List<double> { 150, 50, 150 };
-        }
-
-
+    public class BodyEndCodon : BodyCodon
+    {
+        public BodyEndCodon() : this(-1000, 100) { }
+        public BodyEndCodon(int band, int range) : base(band, range) { }
     }
 
 
