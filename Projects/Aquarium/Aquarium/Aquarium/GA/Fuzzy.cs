@@ -21,7 +21,9 @@ namespace Aquarium.GA
         }
         public static int PositiveInteger(double d)
         {
-            return Math.Abs(RoundToInt(d * 1000));
+            var rounded = RoundToInt(d * 1000) / 1000;
+            if (rounded < 0) rounded *= -1;
+            return Math.Abs(rounded);
         }
 
         public static float PositiveFloat(double d)

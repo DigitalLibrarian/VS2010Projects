@@ -8,43 +8,62 @@ using Aquarium.GA.GeneParsers;
 
 namespace Aquarium.GA.Codons
 {
-    public class BodyCodonParser : CodonParser<double>
+
+    public class BodyCodonParser : CodonParser<int>
     {
-        protected List<double> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<double> template, int startIndex)
+
+
+        protected List<int> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<int> template, int startIndex)
         {
             return ReadUntilOrEnd(genome, template, new BodyPartEndCodon(), startIndex);
         }
 
-        public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<double> t)
+        
+
+        public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<int> t)
         {
             BodyPhenotype bodyP = null;
             if (!g.Genes.Any()) return bodyP;
-            try
+            bodyP = new BodyPhenotype();
+
+            var iterator = 0;
+            int maxRead = g.Size * 2;
+            List<int> clump;
+            var bodyPartStart = new BodyPartStartCodon();
+            var bodyPartEnd = new BodyPartEndCodon();
+            var bodyEnd = new BodyEndCodon();
+            bool endRecognized = false;
+            do
             {
-                var p = new BodyPartGeneParser();
-                var headers = p.ReadBodyPartHeaders(g, t);
-
-
-                bodyP = new BodyPhenotype();
-                headers.ForEach(header =>
+                var scan = iterator % maxRead;
+                var seq = g.CondenseSequence(scan, bodyPartStart.FrameSize, t);
+                var data = seq.Select(gene => gene.Value).ToList();
+                if (bodyPartStart.Recognize(data))
                 {
-                    var partOne = new BodyPartPhenotype();
-                    partOne.Color = header.Color;
-                    partOne.BodyPartGeometryIndex = header.GeomIndex;
-                    partOne.AnchorPart = new InstancePointer(header.AnchorInstance);
-                    partOne.PlacementPartSocket = new InstancePointer(header.PlacementSocket);
-                    partOne.Scale = header.Scale;
+                    iterator += bodyPartStart.FrameSize;
+                    scan = iterator % maxRead;
 
-                    bodyP.BodyPartPhenos.Add(partOne);
+                    clump = ParseBodyPartClump(g, t, scan);
 
-                });
-            }
-            catch (OverflowException)
-            {
-                //If the fuzzy math fails, then we treat the parse run as a failure.  Don't do that evolution!
-                //This might mean that it selects for numbers that haven't been combined or mutated too many times
-            }
+                    if (clump.Count() >= BodyPartHeader.Size)
+                    {
+                        var header = BodyPartHeader.FromGenes(clump);
+                        bodyP.BodyPartPhenos.Add(new BodyPartPhenotype(header));
+                    }
 
+                    iterator += clump.Count();
+                    scan = iterator % maxRead;
+                }
+                else if (bodyEnd.Recognize(data))
+                {
+                    endRecognized = true;
+                }
+                else
+                {
+                    iterator++;
+                }
+
+            } while (iterator < maxRead && !endRecognized);
 
             return bodyP;
         }

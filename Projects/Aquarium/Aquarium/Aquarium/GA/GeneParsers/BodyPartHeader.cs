@@ -9,6 +9,8 @@ namespace Aquarium.GA.GeneParsers
     //TODO - catch over flows
     public struct BodyPartHeader
     {
+        public static int Size { get { return 9; } }
+
         public int GeomIndex;
         public Color Color;
 
@@ -17,8 +19,9 @@ namespace Aquarium.GA.GeneParsers
 
         public Vector3 Scale;
 
-        public BodyPartHeader(double geom, double r, double g, double b, double anchor, double placement, double scaleX, double scaleY, double scaleZ)
+        public BodyPartHeader(int geom, int r, int g, int b, int anchor, int placement, int scaleX, int scaleY, int scaleZ)
         {
+            /*
             GeomIndex = Fuzzy.PositiveInteger(geom);
             Color = Fuzzy.ToColor(r, g, b);
             AnchorInstance = Fuzzy.PositiveInteger(anchor);
@@ -26,9 +29,18 @@ namespace Aquarium.GA.GeneParsers
             Scale = Fuzzy.ToScaleVector(scaleX, scaleY, scaleZ);
             Scale = Vector3.Max(Scale, new Vector3(0.01f, 0.01f, 0.01f)); //minimum cap
             Scale = Vector3.Min(Scale, new Vector3(10f, 100f, 10f)); //maximum cap
+             * */
+
+            GeomIndex = geom;
+            Color = new Color(r, b, g);
+            AnchorInstance = anchor;
+            PlacementSocket = placement;
+            Scale = Fuzzy.ToScaleVector(scaleX, scaleY, scaleZ);
+            Scale = Vector3.Max(Scale, new Vector3(0.01f, 0.01f, 0.01f)); //minimum cap
+            Scale = Vector3.Min(Scale, new Vector3(10f, 100f, 10f)); //maximum cap
         }
 
-        public static BodyPartHeader FromGenes(List<double> partGene)
+        public static BodyPartHeader FromGenes(List<int> partGene)
         {
             return new BodyPartHeader(
                     partGene[0], partGene[1], partGene[2],

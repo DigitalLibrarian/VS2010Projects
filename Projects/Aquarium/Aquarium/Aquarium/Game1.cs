@@ -40,8 +40,8 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 100;
-        int NumBest = 10;
+        int MaxPop = 1000;
+        int NumBest = 100;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
@@ -79,36 +79,17 @@ namespace Aquarium
             goingOff = false;
         }
 
-        private Body GenerateNewSpecimen()
-        {
-            var genome = RandomGenome(1 * 9);
-            // this takes the genome  out of the equation
-            // var bodyPheno = CreateHandCraftedGenome();
-
-
-            PhenotypeReader gR = new PhenotypeReader();
-
-            var body = gR.ProduceBody(GenomeToPheno(genome));
-            if (body != null)
-            {
-                RegisterBodyGenome(genome, body);
-            }
-            
-            
-            return body;
-        }
-
 
         #region Population
 
         private void GenerateRandomPopulation(int popSize)
         {
-            int geneSize = 1 * 9;
+            int numParts =  9;
 
             int generated = 0;
             while (generated < popSize)
             {
-                var genome = RandomGenome(geneSize);
+                var genome = RandomGenome(numParts);
 
                 PhenotypeReader gR = new PhenotypeReader();
                 var pheno = GenomeToPheno(genome);
@@ -122,15 +103,13 @@ namespace Aquarium
                     }
                 }
             }
-            var bak = 9;
         }
 
         public void SpawnBodyFromGenePool()
         {
-
             int popSize = PopGenomes.Count();
             var parent1Gen = Random.NextElement(BestGenomes);
-
+            
             var strangeList = PopGenomes;
             if (!strangeList.Any() || Random.Next(4) == 0) strangeList = BestGenomes;
 
@@ -153,9 +132,7 @@ namespace Aquarium
 
             var offspring1Genes = parent1Prefix.Concat(parent2Suffix).ToList();
             var offspring2Genes = parent2Prefix.Concat(parent1Suffix).ToList();
-
             
-
             PhenotypeReader gR = new PhenotypeReader();
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
             {
@@ -170,20 +147,17 @@ namespace Aquarium
                     }
                 }
             }
-
         }
+
         private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
         {
+            //if (g2.Size > 1000) return false;
+
             var c1 = b1.Parts.Count();
             var c2 = b2.Parts.Count();
             if (c2 > c1) return true;
             if (c2 < c1) return false;
-
-            // (genes / part) breaks the tie
-            double ratio1 =  g1.Genes.Count() / c1;
-            double ratio2 = g2.Genes.Count() / c2;
-            return ratio1 >= ratio2;
-
+            return false;
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
@@ -240,148 +214,53 @@ namespace Aquarium
 
         BodyGenome RandomGenome(int length)
         {
-            var gContents = new List<Gene<double>>();
+            var gContents = new List<Gene<int>>();
 
+            List<int> codonContents;
+            int name = 0;
             for (int i = 0; i < length; i++)
             {
-                var v = Random.NextDouble();
-                gContents.Add(
-                        new Gene<double> { Name = i, Value = v }
-                    );
-            };
+                codonContents = new BodyPartStartCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
+
+                for (int j = 0; j < 9; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
+                
+                codonContents = new BodyPartEndCodon().Example();
+
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
+
+            }
+
+
+            codonContents = new BodyEndCodon().Example();
+
+            codonContents.ForEach(v => gContents.Add(
+                        new Gene<int> { Name = name++, Value = v }
+                        ));
             return new BodyGenome(gContents);
             
         }
 
-        private IBodyPhenotype CreateRandomRawGenome(int numObjects  = 20)
-        {
-            var g = RandomGenome(9 * numObjects);
-            return GenomeToPheno(g);
-        }
 
         private IBodyPhenotype GenomeToPheno(BodyGenome g)
         {
-            var t = new RandomDoubleGenomeTemplate(Random);
+            var t = new RandomIntGenomeTemplate(Random);
             var parser = new BodyCodonParser();
 
             return parser.ParseBodyPhenotype(g, t);
         }
 
-        
-        private IBodyPhenotype CreateHandCraftedPhenotype()
-        {
-            var g = new BodyPhenotype();
-
-            var chanSig0 = new ChanneledSignalPhenotype();
-            chanSig0.InstanceId = 0;
-
-
-            var chanSig1 = new ChanneledSignalPhenotype();
-            chanSig1.InstanceId = 1;
-
-
-            var chanSig2 = new ChanneledSignalPhenotype();
-            chanSig2.InstanceId = 2;
-
-
-            var partOne = new BodyPartPhenotype();
-            partOne.ChanneledSignalGenome = chanSig0;
-            partOne.Color = Color.Green;
-
-            g.BodyPartPhenos.Add(partOne);
-
-
-            var nog = new NeuralOrganGenome();
-            nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 4, NumHidden = 1, NumOutputs = 4 };
-            nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
-            nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
-            var tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
-            tNet.RandomizeWeights(Random);
-            nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
-
-            partOne.OrganGenomes.Add(nog);
-            partOne.Scale = new Vector3(3f, 3f,  3f);
-
-            partOne.BodyPartGeometryIndex = 0;
-            for (int i = 0; i < 6; i++)
-            {
-                var partTwo = new BodyPartPhenotype();
-                partTwo.PlacementPartSocket = new InstancePointer(i);
-                partTwo.AnchorPart = new InstancePointer(0);
-                g.BodyPartPhenos.Add(partTwo);
-                partTwo.ChanneledSignalGenome = chanSig0;
-                partTwo.Color = Color.Blue;
-
-                nog = new NeuralOrganGenome();
-                nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig2 };
-                nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
-
-                 tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
-                tNet.RandomizeWeights(Random);
-                nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
-
-                 partTwo.OrganGenomes.Add(nog);
-                partTwo.Scale = new Vector3(0.8f, .2f, 0.8f);
-
-                partTwo.BodyPartGeometryIndex = 1;
-            }
-
-            for (int i = 0; i < 6; i++)
-            {
-                var partTwo = new BodyPartPhenotype();
-                partTwo.PlacementPartSocket = new InstancePointer(1);
-                partTwo.AnchorPart = new InstancePointer(1 + i);
-                g.BodyPartPhenos.Add(partTwo);
-                partTwo.ChanneledSignalGenome = chanSig1;
-                partTwo.Color = Color.Yellow;
-
-                nog = new NeuralOrganGenome();
-                nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig0 };
-                nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
-
-                 tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
-                tNet.RandomizeWeights(Random);
-                nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
-
-                partTwo.OrganGenomes.Add(nog);
-
-                partTwo.BodyPartGeometryIndex = 6;
-            }
-
-
-            for (int i = 0; i < 6; i++)
-            {
-
-                for (int j = 0; j < 7; j++)
-                {
-                    var partTwo = new BodyPartPhenotype();
-                    partTwo.PlacementPartSocket = new InstancePointer(1 + j);
-                    partTwo.AnchorPart = new InstancePointer(1 + 6 + i);
-                    g.BodyPartPhenos.Add(partTwo);
-                    partTwo.ChanneledSignalGenome = chanSig2;
-                    partTwo.Color = Color.WhiteSmoke;
-
-                    nog = new NeuralOrganGenome();
-                    nog.NeuralNetworkGenome = new NeuralNetworkPhenotype { NumInputs = 1, NumHidden = 1, NumOutputs = 1 };
-                    nog.InputGenome = new NeuralInputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig1 };
-                    nog.OutputGenome = new NeuralOutputSocketPhenotype { Channel = 0, ChanneledSignalGenome = chanSig2 };
-                     tNet = new NeuralNetwork(nog.NeuralNetworkGenome.NumInputs, nog.NeuralNetworkGenome.NumHidden, nog.NeuralNetworkGenome.NumOutputs);
-                    tNet.RandomizeWeights(Random);
-                    nog.NeuralNetworkGenome.Weights = tNet.GetWeights();
-
-                    partTwo.OrganGenomes.Add(nog);
-                    partTwo.Scale = new Vector3(0.8f, .2f, 0.8f);
-
-                    partTwo.BodyPartGeometryIndex = 6;
-                }
-            }
-
-
-
-            return g;
-        }
+      
         
 
         /// <summary>
@@ -511,17 +390,22 @@ namespace Aquarium
 
             spriteBatch.Begin();
 
-            string text;
 
-            text = string.Format("Births : {0}", Births);
-            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 0), Color.Yellow);
+            var labels = new string[] {
+                string.Format("Best Hitters: {0}", BestGenomes.Count()),
+                string.Format("Gen.  Pop.: {0}", PopGenomes.Count()),
+                string.Format("Births : {0}", Births),
+                string.Format("GenomeSize : {0}", Genome.Size),
+                string.Format("Parts : {0}", Body.Parts.Count)
+            };
 
-            text = string.Format("GenomeSize : {0}", Genome.Size);
-            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 16), Color.Yellow);
-
-            text = string.Format("Parts : {0}", Body.Parts.Count);
-            spriteBatch.DrawString(spriteFont, text, new Vector2(0, 32), Color.Yellow);
-
+            int y = 0;
+            int change = 16;
+            foreach (var text in labels)
+            {
+                spriteBatch.DrawString(spriteFont, text, new Vector2(0, y), Color.Yellow);
+                y += change;
+            }
 
             spriteBatch.End();
             Terminal.CheckDraw(true);

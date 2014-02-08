@@ -56,7 +56,7 @@ namespace Aquarium.GA.Phenotypes
                 else
                 {
                     var anchorPart = Fuzzy.CircleIndex(body.Parts, partGenome.AnchorPart.InstanceId);
-                    if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part, autoTryOthers: false))
+                    if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part, autoTryOthers: true))
                     {
                         // don't care under GA, means a loss  of the benfit of the limb
                     }

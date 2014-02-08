@@ -40,4 +40,21 @@ namespace Aquarium.GA.Genomes
             return new Gene<double> { Name = name, Value = R.NextDouble() };
         }
     }
+
+
+
+    public class RandomIntGenomeTemplate : GenomeTemplate<int>
+    {
+        Random R;
+        public RandomIntGenomeTemplate(Random r)
+        {
+            R = r;
+        }
+
+
+        public override Gene<int> ByName(int name)
+        {
+            return new Gene<int> { Name = name, Value = R.Next() };
+        }
+    }
 }

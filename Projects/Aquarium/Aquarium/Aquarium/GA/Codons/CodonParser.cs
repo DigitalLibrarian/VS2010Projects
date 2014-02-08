@@ -20,7 +20,7 @@ namespace Aquarium.GA.Codons
             {
                 foreach (var tester in testers)
                 {
-                    if (RecognizeCodonDefinition(genome, template, startIndex, tester))
+                    if (RecognizeCodonDefinition(genome, template, name, tester))
                     {
                         return false;
                     }
@@ -40,7 +40,7 @@ namespace Aquarium.GA.Codons
             // so we will go until we are a couple multiples of that to allow for it to reuse existing genetic material 
             int index = startIndex;
             int traversed = 0;
-            var maxTraversal = genome.Size * 20;
+            var maxTraversal = genome.Size * 1;
 
             while (traversed < maxTraversal)
             {

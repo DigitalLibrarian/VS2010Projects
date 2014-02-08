@@ -6,6 +6,7 @@ using System.Text;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Bodies;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.GeneParsers;
 
 namespace Aquarium.GA.Phenotypes
 {
@@ -132,15 +133,18 @@ namespace Aquarium.GA.Phenotypes
         public IInstancePointer AnchorPart { get; set; }
         public IInstancePointer PlacementPartSocket { get; set; }
 
-        public BodyPartPhenotype()
+        public BodyPartPhenotype(BodyPartHeader header)
         {
             SocketGenomes = new List<IBodyPartSocketPhenotype>();
             OrganGenomes = new List<IOrganPhenotype>();
             Scale = new Vector3(1f, 1f, 1f);
+
+            Color = header.Color;
+            BodyPartGeometryIndex = header.GeomIndex;
+            AnchorPart = new InstancePointer(header.AnchorInstance);
+            PlacementPartSocket = new InstancePointer(header.PlacementSocket);
+            Scale = header.Scale;
         }
-
-
-
 
         public Vector3 Scale
         {

@@ -5,15 +5,13 @@ using System.Text;
 
 namespace Aquarium.GA.Genomes
 {
-    public class BodyGenome : Genome<double>
+    public class BodyGenome : Genome<int>
     {
-        public BodyGenome(List<Gene<double>> genes) : base(genes) { }
+        public BodyGenome(List<Gene<int>> genes) : base(genes) { }
 
         public override void Mutate(Random random)
         {
-            Genes.ForEach(gene => gene.Value = Math.Round(gene.Value, 9));
-
-            int chance = 20; // one in X
+            int chance = 50; // one in X
             int numAffected = random.Next(1 + Genes.Count() / 3);
 
             for (int i = 0; i < numAffected; i++)
@@ -26,20 +24,33 @@ namespace Aquarium.GA.Genomes
                 }
                 if (random.Next(chance) == 0)
                 {
-                    var r = -0.5f + random.NextDouble();//  (-0.5f, 0.5f) is range
-                    gene.Value += r;   
+                    int sign = 1;
+                    if (random.Next(1) == 0) sign = -1;
+                    gene.Value += sign;
                 }
+
 
                 if (random.Next(chance) == 0)
                 {
                     var one = random.NextElement(Genes);
                     var two = random.NextElement(Genes);
 
-                    Genes.Add(new Gene<double>
+                    Genes.Add(new Gene<int>
                     {
-                        Name = one.Name + two.Name,
+                        Name = one.Name,
                         Value = one.Value
                     });
+                }
+
+                if (random.Next(chance + chance) == 0)
+                {
+                    int num = Size / 20;
+                    int start = random.Next(Size - num);
+                    int target = random.Next(Size - num);
+
+                    var section = Genes.GetRange(start, num);
+                    Genes.InsertRange(target, section);
+
                 }
             }       
         }
