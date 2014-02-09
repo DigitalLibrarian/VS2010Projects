@@ -40,8 +40,8 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 1000;
-        int NumBest = 5;
+        int MaxPop = 100;
+        int NumBest = 50;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
@@ -69,7 +69,8 @@ namespace Aquarium
         {
             if (goingOff) return;
             goingOff = true;
-            for (int i = 0; i < NumBest  + MaxPop; i++)
+            
+            for (int i = 0; i < NumBest; i++)
             {
                 SpawnBodyFromGenePool();
             }
@@ -89,20 +90,29 @@ namespace Aquarium
             int generated = 0;
             while (generated < popSize)
             {
-                var genome = RandomGenome(numParts);
-
-                PhenotypeReader gR = new PhenotypeReader();
-                var pheno = GenomeToPheno(genome);
-                if (pheno != null)
+                if (InsertRandom(numParts))
                 {
-                    var body = gR.ProduceBody(pheno);
-                    if (body != null)
-                    {
-                        RegisterBodyGenome(genome, body);
-                        generated++;
-                    }
+                    generated++;
                 }
             }
+        }
+
+        private bool InsertRandom(int numParts)
+        {
+            var genome = RandomGenome(numParts);
+
+            PhenotypeReader gR = new PhenotypeReader();
+            var pheno = GenomeToPheno(genome);
+            if (pheno != null)
+            {
+                var body = gR.ProduceBody(pheno);
+                if (body != null)
+                {
+                    RegisterBodyGenome(genome, body);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void SpawnBodyFromGenePool()
@@ -118,6 +128,8 @@ namespace Aquarium
             if (strangeList == PopGenomes)
             {
                 //parent2Gen is  some strange from general pop
+                parent2Gen = new BodyGenome(parent2Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
+
                 parent2Gen.Mutate(Random);
             }
 
@@ -154,17 +166,17 @@ namespace Aquarium
 
         private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
         {
-            //if (g2.Size > 1000) return false;
-
             var c1 = b1.Parts.Count();
             var c2 = b2.Parts.Count();
             if (c2 > c1) return true;
             if (c2 < c1) return false;
-            return false;
+
+            return true;
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
+            if (genome.Size > 2000) return;
             if (!body.Parts.Any()) return;
             int numParts = body.Parts.Count();
             bool foundFit = false;

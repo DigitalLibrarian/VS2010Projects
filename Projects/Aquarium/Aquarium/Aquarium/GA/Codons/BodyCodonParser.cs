@@ -33,7 +33,7 @@ namespace Aquarium.GA.Codons
             bodyP = new BodyPhenotype();
 
             var iterator = 0;
-            int maxRead = g.Size * 2;
+            int maxRead = g.Size ;
             List<int> clump;
             var bodyPartStart = new BodyPartStartCodon();
             var bodyPartEnd = new BodyPartEndCodon();
