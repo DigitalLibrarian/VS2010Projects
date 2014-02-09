@@ -125,8 +125,6 @@ namespace Aquarium.GA.Phenotypes
     {
         public int BodyPartGeometryIndex { get; set; }
         public Color Color { get; set; }
-        public List<IOrganPhenotype> OrganGenomes { get; set; }
-        public List<IBodyPartSocketPhenotype> SocketGenomes { get; set; }
 
         public IChanneledSignalPhenotype ChanneledSignalGenome { get; set; }
 
@@ -135,8 +133,6 @@ namespace Aquarium.GA.Phenotypes
 
         public BodyPartPhenotype(BodyPartHeader header)
         {
-            SocketGenomes = new List<IBodyPartSocketPhenotype>();
-            OrganGenomes = new List<IOrganPhenotype>();
             Scale = new Vector3(1f, 1f, 1f);
 
             Color = header.Color;

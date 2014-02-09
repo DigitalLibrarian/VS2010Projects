@@ -46,76 +46,149 @@ namespace Aquarium.GA.Codons
 
             return clump;
         }
+
+        public int VisitSequence(BodyGenome genome, GenomeTemplate<int> template, int startIndex, Codon<int> recognizer, Codon<int>[] terminals, Action<List<int>>  visitor)
+        {
+            {
+                var iterator = startIndex;
+                int maxRead = genome.Size;
+                List<int> clump = new List<int>();
+
+                bool endRecognized = false;
+                do
+                {
+                    var scan = iterator % maxRead;
+                    var seq = genome.CondenseSequence(scan, recognizer.FrameSize, template);
+                    var data = seq.Select(gene => gene.Value).ToList();
+                    if (recognizer.Recognize(data))
+                    {
+                        iterator += recognizer.FrameSize;
+                        scan = iterator % maxRead;
+
+                        clump = ReadUntilOrEnd(genome, template, terminals, scan);
+
+                        visitor(clump);
+
+
+                        iterator += clump.Count();
+                    }
+                    else
+                    {
+                        foreach (var term in terminals)
+                        {
+                            if (term.Recognize(data))
+                            {
+                                return scan;
+                            }
+                        }
+                        iterator++;
+                    }
+                } while (iterator < maxRead && !endRecognized);
+                return iterator % maxRead;
+            }
+        }
     }
 
     public class BodyCodonParser : AqParser
     {
-        
 
-        
+        Dictionary<Codon<int>, Func<BodyGenome, GenomeTemplate<int>, int, int>> ClumpProcessors { get; set; }
+   
 
+
+        public IBodyPhenotype Pheno { get; private set; }
+        public bool EndRecognized { get; private set; }
+
+        public BodyCodonParser()
+        {
+            EndRecognized = false;
+            Pheno = new BodyPhenotype();
+            ClumpProcessors =new Dictionary<Codon<int>, Func<BodyGenome, GenomeTemplate<int>, int, int>>();
+            RegisterClumpProcessors();
+
+        }
         public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<int> t)
         {
-            BodyPhenotype bodyP = null;
-            if (!g.Genes.Any()) return bodyP;
-            bodyP = new BodyPhenotype();
 
             var iterator = 0;
-            int maxRead = g.Size ;
-            List<int> clump;
-            var bodyPartStart = new BodyPartStartCodon();
-            var bodyEnd = new BodyEndCodon();
-            bool endRecognized = false;
+            int maxRead = g.Size;
+
+
             do
             {
                 var scan = iterator % maxRead;
-                var seq = g.CondenseSequence(scan, bodyPartStart.FrameSize, t);
-                var data = seq.Select(gene => gene.Value).ToList();
-                if (bodyPartStart.Recognize(data))
+                bool recog = false;
+                foreach (var codon in ClumpProcessors.Keys)
                 {
-                    iterator += bodyPartStart.FrameSize;
-                    scan = iterator % maxRead;
-
-                    clump = ReadUntilOrEnd(
-                        g, t,
-                        new Codon<int>[]  {
-                            new BodyPartEndCodon(),
-                            new BodyPartStartCodon(),
-                            new BodyEndCodon()
-                        },
-                        scan);
-
-
-                    iterator += clump.Count();
-                    scan = iterator % maxRead;
-
-                    if (clump.Count() >= BodyPartHeader.Size)
+                    var seq = g.CondenseSequence(scan, codon.FrameSize, t);
+                    var data = seq.Select(gene => gene.Value).ToList();
+                    if (codon.Recognize(data))
                     {
-                        var header = BodyPartHeader.FromGenes(clump);
-                        bodyP.BodyPartPhenos.Add(new BodyPartPhenotype(header));
+                        iterator += codon.FrameSize;
+                        scan = iterator % maxRead;
 
-                        
-                        var organClump = Extract(g, t, scan, new OrganStartCodon(), new Codon<int>[] { new OrganEndCodon() });
-                        if (organClump.Any())
-                        {
-                            throw new NotImplementedException();
-                        }
-
+                        iterator = ClumpProcessors[codon](g, t, scan);
+                        scan = iterator % maxRead;
+                        recog = true;
+                        break;
                     }
+                }
 
-                }
-                else if (bodyEnd.Recognize(data))
-                {
-                    endRecognized = true;
-                }
-                else
+                if (!recog)
                 {
                     iterator++;
                 }
 
-            } while (iterator < maxRead && !endRecognized);
+            } while (iterator < maxRead && !EndRecognized);
+
+            return Pheno;
+        }
+
+
+        public void RegisterClumpProcessors()
+        {
+            var partStart = new BodyPartStartCodon();
+            ClumpProcessors.Add(partStart, ProcessBodyPartClump);
+            ClumpProcessors.Add(new OrganStartCodon(), ProcessOrganClump);
+            ClumpProcessors.Add(new BodyEndCodon(), ProcessBodyEnd);
+        }
+
+        private int ProcessBodyPartClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
+        {
+            var clump = ReadUntilOrEnd(
+                            g, t,
+                            new Codon<int>[] 
+                            { 
+                                new BodyPartStartCodon(),
+                                new BodyPartEndCodon(),
+                                new BodyEndCodon()
+                            },
+                            iterator);
+
+
+            if (clump.Count() >= BodyPartHeader.Size)
+            {
+                var header = BodyPartHeader.FromGenes(clump);
+                Pheno.BodyPartPhenos.Add(new BodyPartPhenotype(header));
+
+                return iterator + clump.Count();
+            }
             
-            return bodyP;
+            return iterator;
+        }
+
+
+        private int ProcessOrganClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
+        {
+
+            return iterator;
+        }
+
+        private int ProcessBodyEnd(BodyGenome g, GenomeTemplate<int> t, int iterator)
+        {
+            EndRecognized = true;
+            return iterator;
         }
     }
+
 }

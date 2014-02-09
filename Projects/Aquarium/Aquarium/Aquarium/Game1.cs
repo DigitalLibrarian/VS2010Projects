@@ -58,6 +58,7 @@ namespace Aquarium
             GenerateTimer.AutoReset = true;
             GenerateTimer.Elapsed += new ElapsedEventHandler(genTimer_Elapsed);
         }
+
         #region Timer
 
         void genTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -248,8 +249,29 @@ namespace Aquarium
                             new Gene<int> { Name = name++, Value = v }
                         );
                 };
+
                 
                 codonContents = new BodyPartEndCodon().Example();
+
+
+                codonContents = new OrganStartCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
+
+                for (int j = 0; j < 15; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
+
+
+                codonContents = new OrganEndCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
 
                 codonContents.ForEach(v => gContents.Add(
                             new Gene<int> { Name = name++, Value = v }

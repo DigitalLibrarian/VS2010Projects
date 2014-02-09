@@ -19,8 +19,6 @@ namespace Aquarium.GA.Phenotypes
         IInstancePointer AnchorPart { get; set; }
         IInstancePointer PlacementPartSocket { get; set; }
 
-        List<IOrganPhenotype> OrganGenomes { get; set; }
-        List<IBodyPartSocketPhenotype> SocketGenomes { get; set; }
         IChanneledSignalPhenotype ChanneledSignalGenome { get; set; }
 
         Vector3 Scale { get; set; }
