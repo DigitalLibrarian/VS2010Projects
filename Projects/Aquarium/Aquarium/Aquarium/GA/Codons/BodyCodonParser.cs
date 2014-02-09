@@ -11,8 +11,6 @@ namespace Aquarium.GA.Codons
 
     public class BodyCodonParser : CodonParser<int>
     {
-
-
         protected List<int> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<int> template, int startIndex)
         {
             return ReadUntilOrEnd(genome, template, 
@@ -55,6 +53,9 @@ namespace Aquarium.GA.Codons
                     {
                         var header = BodyPartHeader.FromGenes(clump);
                         bodyP.BodyPartPhenos.Add(new BodyPartPhenotype(header));
+
+                        //trigger organ codon parser here
+
                     }
 
                     iterator += clump.Count();

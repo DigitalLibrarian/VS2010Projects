@@ -14,6 +14,21 @@ namespace Aquarium.GA
             return list[index % count];
         }
 
+        /// <summary>
+        /// Returns positive integer in range
+        /// </summary>
+        /// <param name="i"></param>
+        /// <param name="low"></param>
+        /// <param name="high"></param>
+        /// <returns></returns>
+        public static int InRange(int i, int low, int high)
+        {
+            i = PositiveInteger(i);
+                
+            int diff = high - low;
+            var mod = i % diff;
+            return low + mod;
+        }
 
         public static int PositiveInteger(int i)
         {

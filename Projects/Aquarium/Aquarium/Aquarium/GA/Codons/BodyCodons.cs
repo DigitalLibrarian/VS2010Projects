@@ -27,5 +27,18 @@ namespace Aquarium.GA.Codons
     }
 
 
+    public class OrganStartCodon : BodyCodon
+    {
+        public OrganStartCodon() : this(-2200, 100) { }
+        public OrganStartCodon(int band, int range) : base(band, range) { }
+    }
+
+
+    public class OrganEndCodon : BodyCodon
+    {
+        public OrganEndCodon() : this(-2400, 100) { }
+        public OrganEndCodon(int band, int range) : base(band, range) { }
+    }
+
 
 }
