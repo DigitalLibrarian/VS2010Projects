@@ -32,7 +32,9 @@ namespace Aquarium.GA.Codons
 
             for (int i = 0; i < FrameSize; i++)
             {
-                if(Math.Abs(genes[i] - Band) > Range) return false;
+                var diff = genes[i] - Band;
+                if (diff > 0 && diff > Range) return false;
+                if (diff < 0 && diff < Range) return false;
             }
             return true;
         }

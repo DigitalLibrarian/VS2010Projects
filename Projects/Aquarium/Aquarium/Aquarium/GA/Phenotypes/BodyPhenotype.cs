@@ -81,7 +81,7 @@ namespace Aquarium.GA.Phenotypes
         public IChanneledSignalPhenotype ChanneledSignalGenome { get; set; }
     }
 
-    public class NeuralOrganGenome : OrganPhenotype
+    public class NeuralOrganPhenotype : OrganPhenotype
     {
         public NeuralInputSocketPhenotype InputGenome { get; set; }
         public NeuralOutputSocketPhenotype OutputGenome { get; set; }

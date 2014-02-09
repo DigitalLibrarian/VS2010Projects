@@ -59,7 +59,7 @@ namespace Aquarium.GA
 
         public static float ColorValue(int i)
         {
-            return ToFractionalFloat(i);
+            return ToFractionalFloat(i) + 0.05f;
         }
 
         public static Color ToColor(double r, double g, double b)

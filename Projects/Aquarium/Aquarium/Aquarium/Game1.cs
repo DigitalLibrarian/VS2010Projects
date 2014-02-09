@@ -58,6 +58,7 @@ namespace Aquarium
             GenerateTimer.AutoReset = true;
             GenerateTimer.Elapsed += new ElapsedEventHandler(genTimer_Elapsed);
         }
+        #region Timer
 
         void genTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -80,6 +81,7 @@ namespace Aquarium
             goingOff = false;
         }
 
+        #endregion
 
         #region Population
 
@@ -225,7 +227,6 @@ namespace Aquarium
             return BestGenomes.First();
         }
 
-        #endregion
 
         BodyGenome RandomGenome(int length)
         {
@@ -275,8 +276,7 @@ namespace Aquarium
             return parser.ParseBodyPhenotype(g, t);
         }
 
-      
-        
+        #endregion
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.

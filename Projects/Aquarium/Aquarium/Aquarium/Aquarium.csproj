@@ -119,7 +119,7 @@
     <Compile Include="GA\Bodies\NervousSystem.cs" />
     <Compile Include="GA\Codons\BodyCodonParser.cs" />
     <Compile Include="GA\Fuzzy.cs" />
-    <Compile Include="GA\Codons\BodyPartCodon.cs" />
+    <Compile Include="GA\Codons\BodyCodons.cs" />
     <Compile Include="GA\GeneParsers\BodyPartGeneParser.cs" />
     <Compile Include="GA\GeneParsers\BodyPartHeader.cs" />
     <Compile Include="GA\Codons\Codon.cs" />

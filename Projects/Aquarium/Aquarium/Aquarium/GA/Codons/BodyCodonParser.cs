@@ -8,19 +8,49 @@ using Aquarium.GA.GeneParsers;
 
 namespace Aquarium.GA.Codons
 {
-
-    public class BodyCodonParser : CodonParser<int>
+    public abstract class AqParser : CodonParser<int>
     {
-        protected List<int> ParseBodyPartClump(BodyGenome genome, GenomeTemplate<int> template, int startIndex)
+        public List<int> Extract(BodyGenome genome, GenomeTemplate<int> template, int startIndex, Codon<int> recognizer, Codon<int>[] terminals)
         {
-            return ReadUntilOrEnd(genome, template, 
-                new Codon<int>[]  {
-                    new BodyPartEndCodon(), 
-                    new BodyPartStartCodon(),
-                    new BodyEndCodon()
-                },
-                startIndex);
+            var iterator = startIndex;
+            int maxRead = genome.Size;
+            List<int> clump = new List<int>();
+
+            bool endRecognized = false;
+            do
+            {
+                var scan = iterator % maxRead;
+                var seq = genome.CondenseSequence(scan, recognizer.FrameSize, template);
+                var data = seq.Select(gene => gene.Value).ToList();
+                if (recognizer.Recognize(data))
+                {
+                    iterator += recognizer.FrameSize;
+                    scan = iterator % maxRead;
+
+                    clump = ReadUntilOrEnd(genome, template, terminals, scan);
+
+                    return clump;
+                }
+                else
+                {
+                    foreach (var term in terminals)
+                    {
+                        if (term.Recognize(data))
+                        {
+                            return clump;
+                        }
+                    }
+                    iterator++;
+                }
+            } while (iterator < maxRead && !endRecognized);
+
+            return clump;
         }
+    }
+
+    public class BodyCodonParser : AqParser
+    {
+        
 
         
 
@@ -34,7 +64,6 @@ namespace Aquarium.GA.Codons
             int maxRead = g.Size ;
             List<int> clump;
             var bodyPartStart = new BodyPartStartCodon();
-            var bodyPartEnd = new BodyPartEndCodon();
             var bodyEnd = new BodyEndCodon();
             bool endRecognized = false;
             do
@@ -47,19 +76,33 @@ namespace Aquarium.GA.Codons
                     iterator += bodyPartStart.FrameSize;
                     scan = iterator % maxRead;
 
-                    clump = ParseBodyPartClump(g, t, scan);
+                    clump = ReadUntilOrEnd(
+                        g, t,
+                        new Codon<int>[]  {
+                            new BodyPartEndCodon(),
+                            new BodyPartStartCodon(),
+                            new BodyEndCodon()
+                        },
+                        scan);
+
+
+                    iterator += clump.Count();
+                    scan = iterator % maxRead;
 
                     if (clump.Count() >= BodyPartHeader.Size)
                     {
                         var header = BodyPartHeader.FromGenes(clump);
                         bodyP.BodyPartPhenos.Add(new BodyPartPhenotype(header));
 
-                        //trigger organ codon parser here
+                        
+                        var organClump = Extract(g, t, scan, new OrganStartCodon(), new Codon<int>[] { new OrganEndCodon() });
+                        if (organClump.Any())
+                        {
+                            throw new NotImplementedException();
+                        }
 
                     }
 
-                    iterator += clump.Count();
-                    scan = iterator % maxRead;
                 }
                 else if (bodyEnd.Recognize(data))
                 {
@@ -71,7 +114,7 @@ namespace Aquarium.GA.Codons
                 }
 
             } while (iterator < maxRead && !endRecognized);
-
+            
             return bodyP;
         }
     }
