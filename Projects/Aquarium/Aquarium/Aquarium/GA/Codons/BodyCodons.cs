@@ -29,16 +29,29 @@ namespace Aquarium.GA.Codons
 
     public class OrganStartCodon : BodyCodon
     {
-        public OrganStartCodon() : this(-2200, 100) { }
+        public OrganStartCodon() : this(-4200, 100) { }
         public OrganStartCodon(int band, int range) : base(band, range) { }
     }
 
 
     public class OrganEndCodon : BodyCodon
     {
-        public OrganEndCodon() : this(-2400, 100) { }
+        public OrganEndCodon() : this(-4400, 100) { }
         public OrganEndCodon(int band, int range) : base(band, range) { }
     }
 
+
+    public class NeuralNetworkStartCodon : BodyCodon
+    {
+        public NeuralNetworkStartCodon() : this(-8200, 100) { }
+        public NeuralNetworkStartCodon(int band, int range) : base(band, range) { }
+    }
+
+
+    public class NeuralNetworkEndCodon : BodyCodon
+    {
+        public NeuralNetworkEndCodon() : this(-8400, 100) { }
+        public NeuralNetworkEndCodon(int band, int range) : base(band, range) { }
+    }
 
 }

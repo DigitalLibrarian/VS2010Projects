@@ -8,6 +8,23 @@ namespace Aquarium.GA
 {
     public static class Fuzzy
     {
+        public static double TwoComponentDouble(int i1, int i2)
+        {
+            var precision = 1000;
+            double d1 = (double)InRange(i1, 0, precision);
+            double d2 = (double)InRange(i2, 0, precision);
+
+            //i1 has major component
+            //i2 has minor component
+            //both signed
+
+            return (d1 / precision)  + (d2 / (precision * precision));
+
+
+            //return (d1 + (d2 / precision));
+        }
+
+
         public static T CircleIndex<T>(List<T> list, int index)
         {
             var count = list.Count();

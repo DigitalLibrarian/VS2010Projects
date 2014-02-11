@@ -23,6 +23,8 @@ namespace Aquarium.GA.Signals
         Dictionary<int, Tuple<int, int>> inputRegs = new Dictionary<int, Tuple<int, int>>();
         Dictionary<int, Tuple<int, int>> outputRegs = new Dictionary<int, Tuple<int, int>>();
 
+        public int NumRegistrations { get { return inputRegs.Keys.Count + outputRegs.Keys.Count; } }
+
         int _nextInChannel = 0;
         int _nextOutChannel = 0;
         int _totIn = 0;

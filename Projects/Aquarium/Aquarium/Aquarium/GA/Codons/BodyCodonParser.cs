@@ -94,8 +94,6 @@ namespace Aquarium.GA.Codons
 
         Dictionary<Codon<int>, Func<BodyGenome, GenomeTemplate<int>, int, int>> ClumpProcessors { get; set; }
    
-
-
         public IBodyPhenotype Pheno { get; private set; }
         public bool EndRecognized { get; private set; }
 
@@ -106,14 +104,14 @@ namespace Aquarium.GA.Codons
             ClumpProcessors =new Dictionary<Codon<int>, Func<BodyGenome, GenomeTemplate<int>, int, int>>();
             RegisterClumpProcessors();
 
+
         }
+
         public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<int> t)
         {
 
             var iterator = 0;
             int maxRead = g.Size;
-
-
             do
             {
                 var scan = iterator % maxRead;
@@ -141,6 +139,7 @@ namespace Aquarium.GA.Codons
 
             } while (iterator < maxRead && !EndRecognized);
 
+            
             return Pheno;
         }
 
@@ -150,7 +149,8 @@ namespace Aquarium.GA.Codons
             var partStart = new BodyPartStartCodon();
             ClumpProcessors.Add(partStart, ProcessBodyPartClump);
             ClumpProcessors.Add(new OrganStartCodon(), ProcessOrganClump);
-            ClumpProcessors.Add(new BodyEndCodon(), ProcessBodyEnd);
+            ClumpProcessors.Add(new BodyEndCodon(), ProcessBodyEndClump);
+            ClumpProcessors.Add(new NeuralNetworkStartCodon(), ProcessNeuralNetworkClump);
         }
 
         private int ProcessBodyPartClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
@@ -180,11 +180,65 @@ namespace Aquarium.GA.Codons
 
         private int ProcessOrganClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
         {
+            var clump = ReadUntilOrEnd(
+                            g, t,
+                            new Codon<int>[] 
+                            { 
+                                new OrganStartCodon(),
+                                new OrganEndCodon(),
+                                new BodyEndCodon()
+                            },
+                            iterator);
+
+            if (clump.Count() >= OrganHeader.Size)
+            {
+                var header = OrganHeader.FromGenes(clump);
+                var pheno = new OrganPhenotype(header);
+                Pheno.OrganPhenos.Add(pheno);
+
+                return iterator + clump.Count();
+            }
 
             return iterator;
         }
 
-        private int ProcessBodyEnd(BodyGenome g, GenomeTemplate<int> t, int iterator)
+        private int ProcessNeuralNetworkClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
+        {
+
+            var clump = ReadUntilOrEnd(
+                            g, t,
+                            new Codon<int>[] 
+                            { 
+                                new NeuralNetworkStartCodon(),
+                                new NeuralNetworkEndCodon(),
+                                new BodyEndCodon()
+                            },
+                            iterator);
+
+            if (clump.Count() >= NeuralNetworkHeader.Size)
+            {
+                var header = NeuralNetworkHeader.FromGenes(clump);
+                if (header.Weights == null)
+                {
+                    // this happens when the there wasn't enough data to make the weight array,
+                    // we could pad it
+                    // we also need to make this affect the genome score, maybe scaled by the padding required
+
+                }
+                else
+                {
+                    var pheno = new NeuralNetworkPhenotype(header);
+                    Pheno.NeuralNetworkPhenos.Add(pheno);
+
+                }
+
+                return iterator + clump.Count();
+            }
+
+            return iterator;
+        }
+
+        private int ProcessBodyEndClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
         {
             EndRecognized = true;
             return iterator;

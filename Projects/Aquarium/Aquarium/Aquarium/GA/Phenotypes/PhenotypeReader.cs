@@ -21,17 +21,17 @@ namespace Aquarium.GA.Phenotypes
         }
 
 
-        public Body ProduceBody(IBodyPhenotype genome)
+        public Body ProduceBody(IBodyPhenotype bodyPheno)
         {
-            if (!genome.BodyPartPhenos.Any())
+            if (!bodyPheno.BodyPartPhenos.Any())
             {
                 return null;
             }
             var body = new Body();
-            var partsToMake = genome.BodyPartPhenos.ToList();
+            var partsToMake = bodyPheno.BodyPartPhenos.ToList();
 
 
-            var gennedParts = genome.BodyPartPhenos.Select(partGenome => 
+            var gennedParts = bodyPheno.BodyPartPhenos.Select(partGenome => 
             {
                  var part = NewPartFromIndex(partGenome.BodyPartGeometryIndex);
                  part.UCTransform = Matrix.CreateScale(partGenome.Scale) * part.UCTransform;
@@ -59,52 +59,98 @@ namespace Aquarium.GA.Phenotypes
                     if (!ConnectPartFromAnchor(body, anchorPart, partGenome, part, autoTryOthers: true))
                     {
                         // don't care under GA, means a loss  of the benfit of the limb
+                        // todo - this should affect score
                     }
 
                 }
 
-                /*
-                // parts are placed, and anchor sockets have been taken
-                foreach (var socketGenome in partGenome.SocketGenomes)
-                {
-                    var forBodyId = socketGenome.ForeignSocket.BodyPart.InstanceId;
-                    var forBody = Fuzzy.CircleIndex(fittedParts, forBodyId);
-
-                    var fsock = Fuzzy.CircleIndex(forBody.Sockets, socketGenome.ForeignSocket.InstanceId);
-                    var lsock = Fuzzy.CircleIndex(part.Sockets, socketGenome.InstanceId);
-
-                    if (!body.WillFit(lsock, fsock))
-                    {
-                        throw new Exception();
-                    }
-                    lsock.ConnectSocket(fsock);
-
-
-                }
-                 * */
-               // body.Parts.AddRange(fittedParts);
+            
                 first = false;
+            }
+            var organFab = new OrganFab();
 
+            var goodOrganPhenos = new List<IOrganPhenotype>();
+
+            foreach (var organPheno in bodyPheno.OrganPhenos)
+            {
+                var partId = organPheno.BodyPartPointer.InstanceId;
+                var part = Fuzzy.CircleIndex(body.Parts, partId);
+                goodOrganPhenos.Add(organPheno);
+            }
+
+            Dictionary<IOrganPhenotype, INeuralNetworkPhenotype> organNNPhenos = new Dictionary<IOrganPhenotype, INeuralNetworkPhenotype>();
+
+            foreach (var neuPheno in bodyPheno.NeuralNetworkPhenos)
+            {
+                var partId = neuPheno.BodyPartPointer.InstanceId;
+                var part = Fuzzy.CircleIndex(body.Parts, partId);
+                var organId = neuPheno.OrganPointer.InstanceId;
+                if (goodOrganPhenos.Any())
+                {
+                    var organPheno = Fuzzy.CircleIndex(goodOrganPhenos, organId);
+                    if (!organNNPhenos.ContainsKey(organPheno))
+                    {
+                        organNNPhenos.Add(organPheno, neuPheno);
+                    }
+                }
+            }
+
+            var neurals = new Dictionary<IOrganPhenotype, Organ>();
+
+            //now we can add the neural organs
+            foreach (var noPheno in organNNPhenos.Keys)
+            {
+                
+                var partId = noPheno.BodyPartPointer.InstanceId;
+                var part = Fuzzy.CircleIndex(body.Parts, partId);
+                var nnPheno = organNNPhenos[noPheno];
+
+                var network = new NeuralNetwork(nnPheno.NumInputs, nnPheno.NumHidden, nnPheno.NumOutputs);
+                network.SetWeights(nnPheno.Weights);
+
+                var organ = new NeuralOrgan(part, network);
+                part.AddOrgan(organ); //hate this
+
+                neurals.Add(noPheno, organ);
 
             }
 
-            /*
-            for (int i = 0; i < genome.BodyPartGenomes.Count; i++)
+            foreach (var noPheno in neurals.Keys)
             {
-                var part = body.Parts[i];
-                var partGenome = genome.BodyPartGenomes[i];
-                foreach (var oG in partGenome.OrganGenomes)
+                var inputSignalId = noPheno.InputSignal.InstanceId;
+                var outputSignalId = noPheno.OutputSignal.InstanceId;
+
+                var organ = neurals[noPheno] as IOOrgan;
+                var part = organ.Part;
+
+                var max = part.Sockets.Count() + 1;
+                // 0 means me
+
+                inputSignalId = Fuzzy.InRange(inputSignalId, 0, max);
+                outputSignalId = Fuzzy.InRange(outputSignalId, 0, max);
+
+                var connectedSockets = part.Sockets.Where(s => !s.HasAvailable).ToList();
+                if (connectedSockets.Any())
                 {
-                    var organ = ProduceOrgan(oG, part);
-                    part.Organs.Add(organ);
+                    var signal = part.ChanneledSignal;
+                    if (inputSignalId != 0)
+                    {
+                        signal = Fuzzy.CircleIndex(connectedSockets, inputSignalId - 1).ForeignSocket.ForeignSocket.Part.ChanneledSignal;
+                    }
+                    var reader = signal.RegisterOutputChannel(organ.NumInputs);
+                    organ.InputReader = reader;
+
+                    signal = part.ChanneledSignal;
+                    if (outputSignalId != 0)
+                    {
+                        signal = Fuzzy.CircleIndex(connectedSockets, outputSignalId - 1).ForeignSocket.Part.ChanneledSignal;
+                    }
+                    var writer = signal.RegisterInputChannel(organ.NumOutputs);
+                    organ.OutputWriter = writer;
                 }
 
+
             }
-             * */
-
-            // parts are placed and connected with sockets
-            // now we need  to connect all the neural organs
-
 
 
             body.NervousSystem = new NervousSystem(body);
@@ -137,29 +183,6 @@ namespace Aquarium.GA.Phenotypes
             return false;
         }
 
-        
-
-        public BodyPart ProduceBodyPart(IBodyPartPhenotype genome)
-        {
-            var part = NewPartFromIndex(genome.BodyPartGeometryIndex);
-            part.Color = genome.Color;
-            /*
-            foreach (var oG in genome.OrganGenomes)
-            {
-                var organ = ProduceOrgan(oG, part);
-                part.Organs.Add(organ);
-            }
-
-
-            */
-
-            var sockets = part.Sockets;
-
-
-            return part;
-        }
-
-
         private BodyPart NewPartFromIndex(int index)
         {
             var max = PartIndex.Count();
@@ -169,9 +192,7 @@ namespace Aquarium.GA.Phenotypes
 
         private BodyPartSocket FromSocketId(BodyPart  part, int index)
         {
-
             var max = part.Sockets.Count();
-
             return part.Sockets[index % max];
         }
 

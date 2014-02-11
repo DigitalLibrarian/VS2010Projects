@@ -35,7 +35,8 @@ namespace Aquarium.GA.Organs
             if (signal.Band != Network.NumInputs) throw new SignalOutOfBandException();
             base.ReceiveSignal(signal);
 
-            OutputSignal = new Signal(Network.ComputeOutputs(LastInput.Value.ToArray()).ToList());
+            var nextOutput = Network.ComputeOutputs(LastInput.Value.ToArray()).ToList();
+            OutputSignal = new Signal(nextOutput);
 
 
         }

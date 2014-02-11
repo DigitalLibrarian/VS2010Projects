@@ -9,6 +9,8 @@ namespace Aquarium.GA.Phenotypes
     public interface IBodyPhenotype
     {
         List<IBodyPartPhenotype> BodyPartPhenos { get; set; }
+        List<IOrganPhenotype> OrganPhenos { get; set; }
+        List<INeuralNetworkPhenotype> NeuralNetworkPhenos { get; set; }
     }
 
     public interface IBodyPartPhenotype
@@ -27,17 +29,9 @@ namespace Aquarium.GA.Phenotypes
 
     public interface IChanneledSignalPhenotype : IInstancePointer { }
 
-    public interface IBodyPartSocketPhenotype : IInstancePointer
-    {
-        IForeignBodyPartSocketPhenotype ForeignSocket { get; set; }
-    }
-    public interface IForeignBodyPartSocketPhenotype : IInstancePointer
-    {
-        IInstancePointer BodyPart { get; set; }
-    }
 
     /// <summary>
-    /// This is a  "safe" index into some list during fabrication time.
+    /// This is a "safe" index into some list during fabrication time.
     /// 
     /// It's safe in that you can count on it to return something.
     /// </summary>
@@ -49,8 +43,9 @@ namespace Aquarium.GA.Phenotypes
 
     public interface IOrganPhenotype
     {
-        IInstancePointer BodyPointer { get; set; }
-        IOrganAbilityPhenotype OrganAbilityGenome { get;  }
+        IInstancePointer BodyPartPointer { get; set; }
+        IInstancePointer InputSignal { get; set; }
+        IInstancePointer OutputSignal { get; set; }
     }
 
     public interface IOrganAbilityPhenotype
@@ -60,6 +55,10 @@ namespace Aquarium.GA.Phenotypes
 
     public interface INeuralNetworkPhenotype
     {
+
+        IInstancePointer BodyPartPointer { get; set; }
+        IInstancePointer OrganPointer { get; set; }
+
         int NumHidden { get; set; }
 
         int NumInputs { get; set; }

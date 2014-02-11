@@ -132,7 +132,6 @@ namespace Aquarium
             {
                 //parent2Gen is  some strange from general pop
                 parent2Gen = new BodyGenome(parent2Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
-
                 parent2Gen.Mutate(Random);
             }
 
@@ -174,7 +173,46 @@ namespace Aquarium
             if (c2 > c1) return true;
             if (c2 < c1) return false;
 
-            return true;
+            var score1 = AvgOrgans(b1);
+            int numConnected = 0;
+            b1.Parts.ForEach(p =>
+            {
+                if (p.ChanneledSignal.NumRegistrations > 0)
+                {
+                    if (p.ChanneledSignal.Value[0] != 0)
+                    {
+                        numConnected++;
+                    }
+                }
+            });
+            score1 += numConnected;
+            var score2 = AvgOrgans(b2);
+
+            numConnected = 0;
+            b2.Parts.ForEach(p =>
+            {
+                if (p.ChanneledSignal.NumRegistrations > 0)
+                {
+                    if (p.ChanneledSignal.Value[0] != 0)
+                    {
+                        numConnected++;
+                    }
+                }
+            });
+            score2 += numConnected;
+
+            return score2 >= score1;
+        }
+
+        private double AvgOrgans(Body b)
+        {
+            int numParts = b.Parts.Count();
+            int numOrgans = 0;
+            foreach (var p in b.Parts)
+            {
+                numOrgans += p.Organs.Count();
+            }
+            return numOrgans / numParts;
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
@@ -235,14 +273,18 @@ namespace Aquarium
 
             List<int> codonContents;
             int name = 0;
+            int partIndex = 0;
+
             for (int i = 0; i < length; i++)
             {
+                //define a body part
+
                 codonContents = new BodyPartStartCodon().Example();
                 codonContents.ForEach(v => gContents.Add(
                             new Gene<int> { Name = name++, Value = v }
                             ));
 
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < BodyPartHeader.Size; j++)
                 {
                     var v = Random.Next();
                     gContents.Add(
@@ -252,31 +294,75 @@ namespace Aquarium
 
                 
                 codonContents = new BodyPartEndCodon().Example();
-
-
-                codonContents = new OrganStartCodon().Example();
                 codonContents.ForEach(v => gContents.Add(
                             new Gene<int> { Name = name++, Value = v }
                             ));
 
-                for (int j = 0; j < 15; j++)
+                int numOrgans = Random.Next(3);
+
+                for (int organ = 0; organ < numOrgans; organ++)
                 {
-                    var v = Random.Next();
-                    gContents.Add(
-                            new Gene<int> { Name = name++, Value = v }
-                        );
-                };
+
+                    // every body part gets an organ
+
+                    codonContents = new OrganStartCodon().Example();
+                    codonContents.ForEach(v => gContents.Add(
+                                new Gene<int> { Name = name++, Value = v }
+                                ));
+
+                    //tie it the last body part
+                    gContents.Add(new Gene<int> { Name = name++, Value = partIndex });
+                    gContents.Add(new Gene<int> { Name = name++, Value = 1 });
+                    gContents.Add(new Gene<int> { Name = name++, Value = 0 });
 
 
-                codonContents = new OrganEndCodon().Example();
-                codonContents.ForEach(v => gContents.Add(
-                            new Gene<int> { Name = name++, Value = v }
-                            ));
 
-                codonContents.ForEach(v => gContents.Add(
-                            new Gene<int> { Name = name++, Value = v }
-                            ));
+                    codonContents = new OrganEndCodon().Example();
+                    codonContents.ForEach(v => gContents.Add(
+                                new Gene<int> { Name = name++, Value = v }
+                                ));
 
+
+                    // neural network
+
+
+                    codonContents = new NeuralNetworkStartCodon().Example();
+                    codonContents.ForEach(v => gContents.Add(
+                                new Gene<int> { Name = name++, Value = v }
+                                ));
+
+
+
+                    gContents.Add(new Gene<int> { Name = name++, Value = partIndex });
+                    gContents.Add(new Gene<int> { Name = name++, Value = organ }); //organ index
+
+
+                    var numInputs = 3;
+                    var numOutputs = 3;
+                    var numHidden = 3;
+                    var numWeights = NeuralNetworkHeader.ComputeNumWeights(numInputs, numHidden, numOutputs);
+
+                    gContents.Add(new Gene<int> { Name = name++, Value = numInputs });
+                    gContents.Add(new Gene<int> { Name = name++, Value = numHidden });
+                    gContents.Add(new Gene<int> { Name = name++, Value = numOutputs });
+
+                    for (int j = 0; j < numWeights * 2; j++)
+                    {
+                        var v = Random.Next();
+                        gContents.Add(
+                                new Gene<int> { Name = name++, Value = v }
+                            );
+                    };
+
+
+                    codonContents = new NeuralNetworkEndCodon().Example();
+                    codonContents.ForEach(v => gContents.Add(
+                                new Gene<int> { Name = name++, Value = v }
+                                ));
+
+                }
+
+                partIndex++;
             }
 
 
@@ -397,7 +483,8 @@ namespace Aquarium
 
         private void UpdateSimulation(GameTime gameTime)
         {
-            Body.World = Matrix.CreateRotationY(rot += 0.01f)
+            rot += 0.001f;
+            Body.World = Matrix.CreateRotationZ(rot)
                 * Matrix.CreateRotationX(rot);
 
             Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
@@ -427,13 +514,30 @@ namespace Aquarium
 
             spriteBatch.Begin();
 
+            int organCount = 0;
+            Body.Parts.ForEach(p => organCount += p.Organs.Count);
+
+
+            int numConnected = 0;
+            Body.Parts.ForEach(p =>
+            {
+                if (p.ChanneledSignal.NumRegistrations > 0)
+                {
+                    if (p.ChanneledSignal.Value[0] != 0)
+                    {
+                        numConnected++;
+                    }
+                }
+            });
 
             var labels = new string[] {
                 string.Format("Best Hitters: {0}", BestGenomes.Count()),
                 string.Format("Gen.  Pop.: {0}", PopGenomes.Count()),
                 string.Format("Births : {0}", Births),
                 string.Format("GenomeSize : {0}", Genome.Size),
-                string.Format("Parts : {0}", Body.Parts.Count)
+                string.Format("Parts : {0}", Body.Parts.Count),
+                string.Format("Organs : {0}", organCount),
+                string.Format("Connected : {0}", numConnected)
             };
 
             int y = 0;
