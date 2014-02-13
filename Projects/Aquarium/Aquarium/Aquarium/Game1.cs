@@ -132,14 +132,7 @@ namespace Aquarium
 
             var parent2Gen = Random.NextElement(strangeList);
             parent2Gen = new BodyGenome(parent2Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
-            if (strangeList == PopGenomes)
-            {
-                //parent2Gen is  some strange from general pop
-                //parent2Gen.Mutate(Random);
-
-            }
-
-           
+                      
             
             int minCount = Math.Min(parent1Gen.Size, parent2Gen.Size);
             int wiggle = Random.Next(minCount/8);
@@ -190,23 +183,27 @@ namespace Aquarium
                 }
             });
 
-            var organRatio = AvgOrgans(b);
-
             var numParts = b.Parts.Count();
 
-            return (numParts * 3) + (numConnected) + (organRatio * numParts);
+            return (numParts * 3) + (numConnected) + (OrganCount(b));
         }
 
 
         private double AvgOrgans(Body b)
         {
             int numParts = b.Parts.Count();
-            int numOrgans = 0;
+            int numOrgans = OrganCount(b);
+            return numOrgans / numParts;
+        }
+
+        private int OrganCount(Body b)
+        {
+            var numOrgans = 0;
             foreach (var p in b.Parts)
             {
                 numOrgans += p.Organs.Count();
             }
-            return numOrgans / numParts;
+            return numOrgans;
         }
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
@@ -235,19 +232,24 @@ namespace Aquarium
 
             if (!foundFit)
             {
-                if (PopGenomes.Count() < MaxPop)
-                {
-                    PopGenomes.Add(genome);
-                }
-                else
-                {
-                    var index = Random.Next(PopGenomes.Count());
-                    PopGenomes[index] = genome;
-                }
+                AddToPop(genome);
             }
 
             Births++;
+        }
 
+        private void AddToPop(BodyGenome genome)
+        {
+
+            if (PopGenomes.Count() < MaxPop)
+            {
+                PopGenomes.Add(genome);
+            }
+            else
+            {
+                var index = Random.Next(PopGenomes.Count());
+                PopGenomes[index] = genome;
+            }
         }
 
         private Body GetBestHitterBody()
