@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA.Bodies;
-using Aquarium.GA.GeneParsers;
+using Aquarium.GA.Headers;
 using Aquarium.GA.Phenotypes;
 
 namespace Aquarium.GA.Organs

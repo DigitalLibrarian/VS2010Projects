@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aquarium.GA.GeneParsers
+namespace Aquarium.GA.Headers
 {
     public struct OrganHeader
     {   

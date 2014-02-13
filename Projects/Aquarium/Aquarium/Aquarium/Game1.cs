@@ -20,7 +20,7 @@ using Forever.Neural;
 using Aquarium.GA.Signals;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
-using Aquarium.GA.GeneParsers;
+using Aquarium.GA.Headers;
 using Aquarium.GA.Codons;
 
 namespace Aquarium
@@ -41,11 +41,12 @@ namespace Aquarium
         ICamera Camera;
 
         int MaxPop = 100;
-        int NumBest = 50;
+        int NumBest = 10;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
 
+        int BirthsPerGeneration = 50;
         long Births = 0;
 
         float rot = 0;
@@ -55,7 +56,6 @@ namespace Aquarium
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            GenerateTimer.AutoReset = true;
             GenerateTimer.Elapsed += new ElapsedEventHandler(genTimer_Elapsed);
         }
 
@@ -64,22 +64,19 @@ namespace Aquarium
         void genTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             Generate();
+
+            GenerateTimer.Start();
         }
 
-        bool goingOff = false;
         private void Generate()
         {
-            if (goingOff) return;
-            goingOff = true;
-            
-            for (int i = 0; i < NumBest; i++)
+            for (int i = 0; i < BirthsPerGeneration; i++)
             {
                 SpawnBodyFromGenePool();
             }
 
             Body = GetBestHitterBody();
             Genome = GetBestHitterGenome();
-            goingOff = false;
         }
 
         #endregion
@@ -88,10 +85,10 @@ namespace Aquarium
 
         private void GenerateRandomPopulation(int popSize)
         {
-            int numParts =  9;
+            int numParts = 2;
 
             int generated = 0;
-            while (generated < popSize)
+            while (PopGenomes.Count() < popSize)
             {
                 if (InsertRandom(numParts))
                 {
@@ -122,19 +119,21 @@ namespace Aquarium
         {
             int popSize = PopGenomes.Count();
             var parent1Gen = Random.NextElement(BestGenomes);
+            parent1Gen = new BodyGenome(parent1Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
             
             var strangeList = PopGenomes;
             if (!strangeList.Any() || Random.Next(4) == 0) strangeList = BestGenomes;
 
             var parent2Gen = Random.NextElement(strangeList);
-
+            parent2Gen = new BodyGenome(parent2Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
             if (strangeList == PopGenomes)
             {
                 //parent2Gen is  some strange from general pop
-                parent2Gen = new BodyGenome(parent2Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
-                parent2Gen.Mutate(Random);
+                //parent2Gen.Mutate(Random);
+
             }
 
+           
             
             int minCount = Math.Min(parent1Gen.Size, parent2Gen.Size);
             int wiggle = Random.Next(minCount/8);
@@ -154,6 +153,7 @@ namespace Aquarium
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
             {
                 var genome = new BodyGenome(genes);
+                genome.Mutate(Random);
                 var pheno = GenomeToPheno(genome);
                 if (pheno != null)
                 {
@@ -168,41 +168,29 @@ namespace Aquarium
 
         private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
         {
-            var c1 = b1.Parts.Count();
-            var c2 = b2.Parts.Count();
-            if (c2 > c1) return true;
-            if (c2 < c1) return false;
-
-            var score1 = AvgOrgans(b1);
-            int numConnected = 0;
-            b1.Parts.ForEach(p =>
-            {
-                if (p.ChanneledSignal.NumRegistrations > 0)
-                {
-                    if (p.ChanneledSignal.Value[0] != 0)
-                    {
-                        numConnected++;
-                    }
-                }
-            });
-            score1 += numConnected;
-            var score2 = AvgOrgans(b2);
-
-            numConnected = 0;
-            b2.Parts.ForEach(p =>
-            {
-                if (p.ChanneledSignal.NumRegistrations > 0)
-                {
-                    if (p.ChanneledSignal.Value[0] != 0)
-                    {
-                        numConnected++;
-                    }
-                }
-            });
-            score2 += numConnected;
-
-            return score2 >= score1;
+            var score1 = Score(b1, g1);
+            var score2 = Score(b2, g2);
+            return (score2 >= score1);
         }
+
+        private double Score(Body b, BodyGenome g)
+        {
+            var numConnected = 0;
+            b.Parts.ForEach(p =>
+            {
+                if (p.ChanneledSignal.NumRegistrations > 1)
+                {
+                    numConnected++;
+                }
+            });
+
+            var organRatio = AvgOrgans(b);
+
+            var numParts = b.Parts.Count();
+
+            return (numParts * 3) + (numConnected * 3) + (organRatio * numParts);
+        }
+
 
         private double AvgOrgans(Body b)
         {
@@ -217,7 +205,7 @@ namespace Aquarium
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
-            if (genome.Size > 2000) return;
+            if (genome.Size > 20000) return;
             if (!body.Parts.Any()) return;
             int numParts = body.Parts.Count();
             bool foundFit = false;
@@ -267,16 +255,26 @@ namespace Aquarium
         }
 
 
-        BodyGenome RandomGenome(int length)
+        BodyGenome RandomGenome(int numParts)
         {
             var gContents = new List<Gene<int>>();
 
             List<int> codonContents;
             int name = 0;
-            int partIndex = 0;
+            int sizeJunk = 2;
 
-            for (int i = 0; i < length; i++)
+
+
+            for (int i = 0; i < numParts; i++)
             {
+                for (int j = 0; j < sizeJunk; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
+
                 //define a body part
 
                 codonContents = new BodyPartStartCodon().Example();
@@ -298,72 +296,83 @@ namespace Aquarium
                             new Gene<int> { Name = name++, Value = v }
                             ));
 
-                int numOrgans = Random.Next(3);
-
-                for (int organ = 0; organ < numOrgans; organ++)
+                for (int j = 0; j < sizeJunk; j++)
                 {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
 
-                    // every body part gets an organ
+            } // parts
 
-                    codonContents = new OrganStartCodon().Example();
-                    codonContents.ForEach(v => gContents.Add(
-                                new Gene<int> { Name = name++, Value = v }
-                                ));
+            for (int i = 0; i < numParts; i++)
+            {
+                codonContents = new OrganStartCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
 
-                    //tie it the last body part
-                    gContents.Add(new Gene<int> { Name = name++, Value = partIndex });
-                    gContents.Add(new Gene<int> { Name = name++, Value = 1 });
-                    gContents.Add(new Gene<int> { Name = name++, Value = 0 });
-
-
-
-                    codonContents = new OrganEndCodon().Example();
-                    codonContents.ForEach(v => gContents.Add(
-                                new Gene<int> { Name = name++, Value = v }
-                                ));
-
-
-                    // neural network
-
-
-                    codonContents = new NeuralNetworkStartCodon().Example();
-                    codonContents.ForEach(v => gContents.Add(
-                                new Gene<int> { Name = name++, Value = v }
-                                ));
+                for (int j = 0; j < OrganHeader.Size; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
 
 
-
-                    gContents.Add(new Gene<int> { Name = name++, Value = partIndex });
-                    gContents.Add(new Gene<int> { Name = name++, Value = organ }); //organ index
-
-
-                    var numInputs = 3;
-                    var numOutputs = 3;
-                    var numHidden = 3;
-                    var numWeights = NeuralNetworkHeader.ComputeNumWeights(numInputs, numHidden, numOutputs);
-
-                    gContents.Add(new Gene<int> { Name = name++, Value = numInputs });
-                    gContents.Add(new Gene<int> { Name = name++, Value = numHidden });
-                    gContents.Add(new Gene<int> { Name = name++, Value = numOutputs });
-
-                    for (int j = 0; j < numWeights * 2; j++)
-                    {
-                        var v = Random.Next();
-                        gContents.Add(
-                                new Gene<int> { Name = name++, Value = v }
-                            );
-                    };
+                codonContents = new OrganEndCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
 
 
-                    codonContents = new NeuralNetworkEndCodon().Example();
-                    codonContents.ForEach(v => gContents.Add(
-                                new Gene<int> { Name = name++, Value = v }
-                                ));
-
-                }
-
-                partIndex++;
+                for (int j = 0; j < sizeJunk; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
             }
+
+
+            for (int i = 0; i < numParts; i++)
+            {
+
+                // neural network
+
+
+                codonContents = new NeuralNetworkStartCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
+
+                for (int j = 0; j < NeuralNetworkHeader.Size; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
+                
+                codonContents = new NeuralNetworkEndCodon().Example();
+                codonContents.ForEach(v => gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                            ));
+
+
+                for (int j = 0; j < sizeJunk; j++)
+                {
+                    var v = Random.Next();
+                    gContents.Add(
+                            new Gene<int> { Name = name++, Value = v }
+                        );
+                };
+
+            }
+
 
 
             codonContents = new BodyEndCodon().Example();
@@ -378,7 +387,7 @@ namespace Aquarium
 
         private IBodyPhenotype GenomeToPheno(BodyGenome g)
         {
-            var t = new RandomIntGenomeTemplate(Random);
+            var t = new ZeroIntGenomeTemplate();
             var parser = new BodyCodonParser();
 
             return parser.ParseBodyPhenotype(g, t);
@@ -415,7 +424,7 @@ namespace Aquarium
 
             SetupRenderContextAndCamera();
 
-            GenerateRandomPopulation(MaxPop + NumBest);
+            GenerateRandomPopulation(MaxPop);
             Body = GetBestHitterBody();
             Genome = GetBestHitterGenome();
 
@@ -489,7 +498,6 @@ namespace Aquarium
 
             Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
 
-
         }
 
       
@@ -521,12 +529,9 @@ namespace Aquarium
             int numConnected = 0;
             Body.Parts.ForEach(p =>
             {
-                if (p.ChanneledSignal.NumRegistrations > 0)
+                if (p.ChanneledSignal.NumRegistrations > 0 && p.ChanneledSignal.Value[0] != 0)
                 {
-                    if (p.ChanneledSignal.Value[0] != 0)
-                    {
-                        numConnected++;
-                    }
+                    numConnected++;
                 }
             });
 

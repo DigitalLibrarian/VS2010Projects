@@ -6,7 +6,7 @@ using System.Text;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Bodies;
 using Microsoft.Xna.Framework;
-using Aquarium.GA.GeneParsers;
+using Aquarium.GA.Headers;
 
 namespace Aquarium.GA.Phenotypes
 {

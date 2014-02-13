@@ -11,12 +11,23 @@ namespace Aquarium.GA.Genomes
 
         public override void Mutate(Random random)
         {
-            int chance = 10; 
-            var gene = random.NextElement(Genes);
-            if (random.Next(chance) == 0) // one in X
+            int chance = 10;
+            var geneIndex = random.Next(Genes.Count());
+            var gene = Genes[geneIndex];
+
+            if (random.Next(chance) == 0)
             {
-                gene.Name = Genes.Count() + (-2) + random.Next(4);
-                    
+                var newGene = new Gene<int>
+                {
+                    Name = gene.Name + 1,
+                    Value = gene.Value
+                };
+
+                foreach (var g in Genes.Skip(geneIndex + 1))
+                {
+                    g.Name = g.Name + 1;
+                }
+                Genes.Insert(geneIndex + 1, newGene);
             }
             if (random.Next(chance) == 0)
             {
@@ -36,7 +47,7 @@ namespace Aquarium.GA.Genomes
                 {
                     Genes.Add( new Gene<int>
                     {
-                        Name = one.Name + two.Name + k,
+                        Name = Genes.Last().Name + 1,
                         Value = two.Value
                     });
                 }
@@ -45,12 +56,19 @@ namespace Aquarium.GA.Genomes
                 
             if (random.Next(chance) == 0)
             {
-                int num = Math.Min(Size / 10, 20);
-                int start = random.Next(Size - num);
-                int target = random.Next(Size - num);
+                int num = Size / 10;
+                int start = random.Next(Size - (num ));
+                int target = random.Next(Size - (num ));
 
                 var section = Genes.GetRange(start, num);
-                Genes.InsertRange(target, section.Select(g => new Gene<int> { Name = g.Name + target, Value = g.Value}));
+                var newSection = section.Select(g => new Gene<int> { Name = g.Name, Value = g.Value});
+
+                foreach (var g in Genes.Skip(target))
+                {
+                    g.Name = g.Name + num;
+                }
+
+                Genes.InsertRange(target, newSection);
 
             
             }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aquarium.GA.GeneParsers
+namespace Aquarium.GA.Headers
 {
     public struct NeuralNetworkHeader
     {
-        public static int Size { get { return 5; } }
+        public static int Size { get { return 6; } }
 
         public int BodyPartPointer;
         public int OrganPointer;
@@ -49,7 +49,12 @@ namespace Aquarium.GA.GeneParsers
             var numHidden = Fuzzy.InRange(partGene[3], 0, maxHidden);
             var numOutputs = Fuzzy.InRange(partGene[4], 0, maxOutputs);
 
+            numInputs = Math.Max(numInputs, 1);
+            numOutputs = Math.Max(numOutputs, 1);
 
+            var rngSeed = Fuzzy.PositiveInteger(partGene[5]);
+                
+            var random = new Random(rngSeed);
 
             int numWeights = NeuralNetworkHeader.ComputeNumWeights(numInputs, numHidden, numOutputs);
             int numNeeded = numWeights * 2;
@@ -58,15 +63,10 @@ namespace Aquarium.GA.GeneParsers
 
             var index = 5;
 
-            if (partGene.Count() - index < numNeeded)
-            {
-                return new NeuralNetworkHeader(bodyPart, organNum, numInputs, numHidden, numOutputs, null);
-            }
 
-            int w = 0;
             for (int i = 0; i < numWeights; i++)
             {
-                weights[i] = Fuzzy.TwoComponentDouble(partGene[index], partGene[index + 1]);
+                weights[i] = random.NextDouble();
 
                 index+=2;
             }

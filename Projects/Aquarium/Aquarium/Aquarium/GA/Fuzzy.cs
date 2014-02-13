@@ -25,11 +25,20 @@ namespace Aquarium.GA
         }
 
 
+        public static T ScaledCircleIndex<T>(List<T> list, int index, int scale = 100)
+        {
+            return CircleIndex(list, index / scale);
+        }
+
+
+
+     
         public static T CircleIndex<T>(List<T> list, int index)
         {
             var count = list.Count();
             return list[index % count];
         }
+        
 
         /// <summary>
         /// Returns positive integer in range

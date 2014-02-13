@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace Aquarium.GA.GeneParsers
+namespace Aquarium.GA.Headers
 {
     //TODO - catch over flows
     public struct BodyPartHeader

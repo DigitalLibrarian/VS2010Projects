@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
-using Aquarium.GA.GeneParsers;
+using Aquarium.GA.Headers;
 
 namespace Aquarium.GA.Codons
 {
