@@ -40,8 +40,8 @@ namespace Aquarium
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 100;
-        int NumBest = 10;
+        int MaxPop = 10;
+        int NumBest = 100;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
@@ -60,10 +60,16 @@ namespace Aquarium
         }
 
         #region Timer
-
+        bool skipTimer = false;
         void genTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Generate();
+            if (skipTimer) return;
+            skipTimer = true;
+            lock (new object())
+            {
+                Generate();
+                skipTimer = false;
+            }
 
             GenerateTimer.Start();
         }
@@ -188,7 +194,7 @@ namespace Aquarium
 
             var numParts = b.Parts.Count();
 
-            return (numParts * 3) + (numConnected * 3) + (organRatio * numParts);
+            return (numParts * 3) + (numConnected) + (organRatio * numParts);
         }
 
 
@@ -205,7 +211,7 @@ namespace Aquarium
 
         private void RegisterBodyGenome(BodyGenome genome, Body body)
         {
-            if (genome.Size > 20000) return;
+            if (genome.Size > 3000) return;
             if (!body.Parts.Any()) return;
             int numParts = body.Parts.Count();
             bool foundFit = false;

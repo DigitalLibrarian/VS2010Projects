@@ -140,9 +140,9 @@ namespace Forever.Render
     private static BoundingBox UnitBox = new BoundingBox(new Vector3(-1f, -1f, -1f), new Vector3(1f, 1f, 1f));
     #endregion
 
-    public static void RenderUnitCubeTransform(RenderContext renderContext, Matrix unitCubeTransform,  Matrix world, Color color, bool wireFrame = false)
+    public static void RenderUnitCubeTransform(RenderContext renderContext, Matrix unitCubeTransform,  Matrix world, Color color, bool wireFrame = false, float alpha = 1f)
     {
-        RenderUnitCubeTransform(renderContext.GraphicsDevice, unitCubeTransform, world, renderContext.Camera.View, renderContext.Camera.Projection, color, wireFrame);
+        RenderUnitCubeTransform(renderContext.GraphicsDevice, unitCubeTransform, world, renderContext.Camera.View, renderContext.Camera.Projection, color, wireFrame, alpha);
     }
 
     public static void RenderUnitCubeTransform(
@@ -152,13 +152,16 @@ namespace Forever.Render
         Matrix view,
         Matrix projection,
         Color color,
-        bool wireFrame)
+        bool wireFrame,
+        float alpha)
     {
         if (effect == null)
         {
             effect = new BasicEffect(graphicsDevice);
             effect.VertexColorEnabled = true;
             effect.LightingEnabled = false;
+            
+            
 
             vertDecl = VertexPositionColor.VertexDeclaration;
         }
@@ -175,7 +178,7 @@ namespace Forever.Render
         effect.World = world;
         effect.View = view;
         effect.Projection = projection;
-
+        effect.Alpha = alpha;
 
         foreach (EffectPass pass in effect.CurrentTechnique.Passes)
         {
