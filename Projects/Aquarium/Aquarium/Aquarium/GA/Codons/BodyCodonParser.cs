@@ -109,7 +109,6 @@ namespace Aquarium.GA.Codons
 
         public IBodyPhenotype ParseBodyPhenotype(BodyGenome g, GenomeTemplate<int> t)
         {
-
             var iterator = 0;
             int maxRead = g.Size;
             do
@@ -125,10 +124,16 @@ namespace Aquarium.GA.Codons
                         iterator += codon.FrameSize;
                         scan = iterator % maxRead;
 
-                        iterator = ClumpProcessors[codon](g, t, scan);
-                        scan = iterator % maxRead;
-                        recog = true;
-                        break;
+                        var numRead = ClumpProcessors[codon](g, t, scan);
+
+                        if (numRead > 0)
+                        {
+                            iterator += numRead;
+                            scan = iterator % maxRead;
+                            recog = true;
+
+                            break;
+                        }
                     }
                 }
 
@@ -139,7 +144,6 @@ namespace Aquarium.GA.Codons
 
             } while (iterator < maxRead && !EndRecognized);
 
-            
             return Pheno;
         }
 
@@ -171,10 +175,10 @@ namespace Aquarium.GA.Codons
                 var header = BodyPartHeader.FromGenes(clump);
                 Pheno.BodyPartPhenos.Add(new BodyPartPhenotype(header));
 
-                return iterator + clump.Count();
+                return clump.Count();
             }
             
-            return iterator;
+            return 0;
         }
 
 
@@ -196,10 +200,10 @@ namespace Aquarium.GA.Codons
                 var pheno = new OrganPhenotype(header);
                 Pheno.OrganPhenos.Add(pheno);
 
-                return iterator + clump.Count();
+                return  clump.Count();
             }
 
-            return iterator;
+            return 0;
         }
 
         private int ProcessNeuralNetworkClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
@@ -232,16 +236,16 @@ namespace Aquarium.GA.Codons
 
                 }
 
-                return iterator + clump.Count();
+                return  clump.Count();
             }
 
-            return iterator;
+            return 0;
         }
 
         private int ProcessBodyEndClump(BodyGenome g, GenomeTemplate<int> t, int iterator)
         {
             EndRecognized = true;
-            return iterator;
+            return 0;
         }
     }
 

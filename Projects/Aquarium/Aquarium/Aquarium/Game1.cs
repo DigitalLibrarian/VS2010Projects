@@ -22,6 +22,7 @@ using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
 using Aquarium.GA.Headers;
 using Aquarium.GA.Codons;
+using System.Threading;
 
 namespace Aquarium
 {
@@ -32,21 +33,21 @@ namespace Aquarium
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
-        Timer GenerateTimer = new Timer(1000);
+        Thread GenerateThread;
 
         BodyGenerator BodyGen = new BodyGenerator();
         Random Random = new Random();
         RenderContext RenderContext;
         ICamera Camera;
 
-        int MaxPop = 10;
+        int MaxPop = 300;
         int NumBest = 100;
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
 
-        int BirthsPerGeneration = 50;
+        int GenomeSizeCap = 1000;
+        int BirthsPerGeneration = 100;
         long Births = 0;
 
         float rot = 0;
@@ -56,29 +57,35 @@ namespace Aquarium
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            GenerateTimer.Elapsed += new ElapsedEventHandler(genTimer_Elapsed);
+            GenerateThread =  new Thread(new ThreadStart(GenerateThreadFunc));
         }
 
+        
         #region Timer
-        bool skipTimer = false;
-        void genTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (skipTimer) return;
-            skipTimer = true;
-            lock (new object())
-            {
-                Generate();
-                skipTimer = false;
-            }
 
-            GenerateTimer.Start();
+        private void GenerateThreadFunc()
+        {
+            while (true)
+            {
+                Thread.Sleep(100);
+                Generate();
+            }
         }
 
         private void Generate()
         {
+            int numMade = 0;
             for (int i = 0; i < BirthsPerGeneration; i++)
             {
-                SpawnBodyFromGenePool();
+                numMade += SpawnBodyFromGenePool();
+            }
+
+            if (numMade < BirthsPerGeneration/4)
+            {
+                for (int i = 0; i < BirthsPerGeneration/2; i++)
+                {
+                    InsertRandom(Body.Parts.Count());
+                }
             }
 
             Body = GetBestHitterBody();
@@ -121,10 +128,13 @@ namespace Aquarium
             return false;
         }
 
-        public void SpawnBodyFromGenePool()
+        public int SpawnBodyFromGenePool()
         {
             int popSize = PopGenomes.Count();
-            var parent1Gen = Random.NextElement(BestGenomes);
+            var firstList = BestGenomes;
+            if (!firstList.Any() || Random.Next(4) == 0) firstList = PopGenomes;
+
+            var parent1Gen = Random.NextElement(firstList);
             parent1Gen = new BodyGenome(parent1Gen.Genes.Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList());
             
             var strangeList = PopGenomes;
@@ -147,7 +157,8 @@ namespace Aquarium
 
             var offspring1Genes = parent1Prefix.Concat(parent2Suffix).Select(g=> new Gene<int> { Name = g.Name, Value = g.Value} ).ToList();
             var offspring2Genes = parent2Prefix.Concat(parent1Suffix).Select(g => new Gene<int> { Name = g.Name, Value = g.Value }).ToList();
-            
+
+            int numMade = 0;
             PhenotypeReader gR = new PhenotypeReader();
             foreach (var genes in new[] { offspring1Genes, offspring2Genes })
             {
@@ -159,10 +170,14 @@ namespace Aquarium
                     var body = gR.ProduceBody(pheno);
                     if (body != null)
                     {
-                        RegisterBodyGenome(genome, body);
+                        if (RegisterBodyGenome(genome, body))
+                        {
+                            numMade++;
+                        }
                     }
                 }
             }
+            return numMade;
         }
 
         private bool AsFit(BodyGenome g1, Body b1, BodyGenome g2, Body b2)
@@ -174,20 +189,22 @@ namespace Aquarium
 
         private double Score(Body b, BodyGenome g)
         {
+            int numOrgans = 0;
             var numConnected = 0;
             b.Parts.ForEach(p =>
             {
-                if (p.ChanneledSignal.NumRegistrations > 1)
+                if (p.ChanneledSignal.NumRegistrations > 0)
                 {
-                    numConnected++;
+                    numConnected += p.ChanneledSignal.NumRegistrations - 1;
                 }
+                numOrgans += p.Organs.Count();
             });
 
             var numParts = b.Parts.Count();
 
-            return (numParts * 3) + (numConnected) + (OrganCount(b));
+            return (numParts * 2) + (numConnected) + (numOrgans);
         }
-
+        
 
         private double AvgOrgans(Body b)
         {
@@ -206,10 +223,10 @@ namespace Aquarium
             return numOrgans;
         }
 
-        private void RegisterBodyGenome(BodyGenome genome, Body body)
+        private bool RegisterBodyGenome(BodyGenome genome, Body body)
         {
-            if (genome.Size > 3000) return;
-            if (!body.Parts.Any()) return;
+            if (genome.Size > GenomeSizeCap) return false;
+            if (!body.Parts.Any()) return false;
             int numParts = body.Parts.Count();
             bool foundFit = false;
             for (int i = 0; i < BestGenomes.Count(); i++)
@@ -236,6 +253,7 @@ namespace Aquarium
             }
 
             Births++;
+            return true;
         }
 
         private void AddToPop(BodyGenome genome)
@@ -432,11 +450,25 @@ namespace Aquarium
 
             SetupRenderContextAndCamera();
 
+        }
+
+        protected override void BeginRun()
+        {
+            base.BeginRun();
+
             GenerateRandomPopulation(MaxPop);
             Body = GetBestHitterBody();
             Genome = GetBestHitterGenome();
 
-            GenerateTimer.Enabled = true;
+            GenerateThread.IsBackground = true;
+            GenerateThread.Start();
+        }
+
+        protected override void EndRun()
+        {
+            GenerateThread.Abort();
+            
+            base.EndRun();
         }
 
         protected void SetupRenderContextAndCamera()
