@@ -10,18 +10,18 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
 using DebugTerminal;
-using Aquarium.GA.Bodies;
 using Forever.Render.Cameras;
 using Forever.Render;
+using Forever.Screens;
 
-using System.Timers;
-using Aquarium.GA.Organs;
 using Forever.Neural;
+using Aquarium.GA.Organs;
 using Aquarium.GA.Signals;
 using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
 using Aquarium.GA.Headers;
 using Aquarium.GA.Codons;
+using Aquarium.GA.Bodies;
 using System.Threading;
 
 namespace Aquarium
@@ -33,26 +33,27 @@ namespace Aquarium
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Thread GenerateThread;
-
-        BodyGenerator BodyGen = new BodyGenerator();
-        Random Random = new Random();
         RenderContext RenderContext;
         ICamera Camera;
+        ScreenManager ScreenManager { get; set; }
 
-        int MaxPop = 300;
-        int NumBest = 100;
+        Random Random = new Random();
+        Thread GenerateThread;
+
         List<Body> BestBodies = new List<Body>();
         List<BodyGenome> BestGenomes = new List<BodyGenome>();
         List<BodyGenome> PopGenomes = new List<BodyGenome>();
 
+        Body Body { get; set; }
+        BodyGenome Genome { get; set; }
+
+        int MaxPop = 300;
+        int NumBest = 1;
         int GenomeSizeCap = 1000;
         int BirthsPerGeneration = 100;
         long Births = 0;
 
         float rot = 0;
-        Body Body { get; set; }
-        BodyGenome Genome { get; set; }
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -430,8 +431,12 @@ namespace Aquarium
         protected override void Initialize()
         {
             this.Window.AllowUserResizing = true;
+            this.IsMouseVisible = true;
             base.Initialize();
 
+
+            ScreenManager = new ScreenManager(this);
+            ScreenManager.Initialize();
         }
         SpriteFont spriteFont;
         /// <summary>
@@ -449,6 +454,9 @@ namespace Aquarium
             Terminal.SetSkin(skin);
 
             SetupRenderContextAndCamera();
+
+
+            Components.Add(ScreenManager);
 
         }
 

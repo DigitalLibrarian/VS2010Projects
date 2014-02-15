@@ -141,6 +141,8 @@
     <Compile Include="GA\Organs\OrganAbilities\QueryPositionAbility.cs" />
     <Compile Include="GA\Organs\OrganAbility.cs" />
     <Compile Include="GA\Phenotypes\BodyPhenotype.cs" />
+    <Compile Include="GA\Population\Population.cs" />
+    <Compile Include="GA\Population\PopulationMember.cs" />
     <Compile Include="GA\Signals\ChanneledSignal.cs" />
     <Compile Include="GA\Signals\ChannelReader.cs" />
     <Compile Include="GA\Signals\ChannelWriter.cs" />
@@ -164,6 +166,10 @@
     <ProjectReference Include="..\..\..\Forever.Render\Forever.Render\Forever.Render.csproj">
       <Project>{064DEE02-3F23-49B7-BB85-271DE9414A2A}</Project>
       <Name>Forever.Render</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Forever.Screens\Forever.Screens.csproj">
+      <Project>{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}</Project>
+      <Name>Forever.Screens</Name>
     </ProjectReference>
     <ProjectReference Include="..\AquariumContent\AquariumContent.contentproj">
       <Name>AquariumContent</Name>
