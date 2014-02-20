@@ -120,6 +120,7 @@
     <Compile Include="GA\Codons\BodyCodonParser.cs" />
     <Compile Include="GA\Fuzzy.cs" />
     <Compile Include="GA\Codons\BodyCodons.cs" />
+    <Compile Include="GA\Genomes\GenomeSplicer.cs" />
     <Compile Include="GA\Headers\BodyPartHeader.cs" />
     <Compile Include="GA\Codons\Codon.cs" />
     <Compile Include="GA\Codons\CodonParser.cs" />
@@ -143,6 +144,7 @@
     <Compile Include="GA\Phenotypes\BodyPhenotype.cs" />
     <Compile Include="GA\Population\Population.cs" />
     <Compile Include="GA\Population\PopulationMember.cs" />
+    <Compile Include="GA\Population\RandomPopulation.cs" />
     <Compile Include="GA\Signals\ChanneledSignal.cs" />
     <Compile Include="GA\Signals\ChannelReader.cs" />
     <Compile Include="GA\Signals\ChannelWriter.cs" />
@@ -153,6 +155,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="GA\BodyGenerator.cs" />
+    <Compile Include="SimScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

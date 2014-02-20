@@ -92,7 +92,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="ControllerEvents.cs" />
     <Compile Include="GameScreen.cs" />
     <Compile Include="InputState.cs" />
