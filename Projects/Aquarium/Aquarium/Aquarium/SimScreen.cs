@@ -82,10 +82,11 @@ namespace Aquarium
 
             if (!otherScreenHasFocus)
             {
+                float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
                 var members = Pop.LocalMembers(Camera.Position);
                 foreach (var member in members)
                 {
-                    member.Specimen.Body.Update((float)gameTime.ElapsedGameTime.Milliseconds);
+                    member.Specimen.Update(duration);
                 }
 
             }

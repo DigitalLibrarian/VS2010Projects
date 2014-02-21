@@ -30,7 +30,7 @@ namespace Aquarium.GA.Population
                 {
                     if (Register(mem))
                     {
-                        mem.Specimen.Body.Position = Random.NextVector() * popSize;
+                        mem.Specimen.Position = Random.NextVector() * popSize;
                     }
                 }
             }

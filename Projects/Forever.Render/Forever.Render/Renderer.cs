@@ -161,9 +161,8 @@ namespace Forever.Render
             effect.VertexColorEnabled = true;
             effect.LightingEnabled = false;
             
-            
-
             vertDecl = VertexPositionColor.VertexDeclaration;
+            //TODO - supply normals for lighting info
         }
         var box = UnitBox;
         Vector3[] corners = box.GetCorners();

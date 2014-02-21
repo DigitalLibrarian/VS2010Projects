@@ -31,8 +31,6 @@ namespace Aquarium.GA.Bodies
 
         public void Update(float duration)
         {
-
-            World = Matrix.CreateTranslation(Position);
             NervousSystem.Update();
             Parts.ForEach(part => part.Update(this, duration));
         }
