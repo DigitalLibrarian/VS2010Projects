@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Aquarium.GA.Organs;
 using Forever.Neural;
+using Forever.Physics;
 using Aquarium.GA.Signals;
 using Aquarium.GA.Organs.OrganAbilities;
 

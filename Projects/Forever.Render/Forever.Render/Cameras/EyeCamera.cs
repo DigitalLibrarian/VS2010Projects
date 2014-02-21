@@ -12,7 +12,7 @@ namespace Forever.Render.Cameras
     /// </summary>
     public class EyeCamera : ICamera
     {
-        protected float FOV = MathHelper.Pi / 3;
+        protected float FOV = MathHelper.Pi / 4;
         protected float aspectRatio = 1;
         protected float nearClip =  0.01f;
         protected float farClip = 10000000.0f;

@@ -75,7 +75,7 @@ namespace Aquarium.GA.Bodies
             foreach (var socket in Sockets)
             {
                 world = Matrix.CreateTranslation(body.Position + LocalPosition + socket.LocalPosition) * body.World;
-                var ucTransform = Matrix.CreateScale(0.05f) * UCTransform;
+                var ucTransform = Matrix.CreateScale(0.05f) * BodyWorld;
                 Renderer.RenderUnitCubeTransform(renderContext, ucTransform, world, Color.Red, wireFrame: true);
             }
         }

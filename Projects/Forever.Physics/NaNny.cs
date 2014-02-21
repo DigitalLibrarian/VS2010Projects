@@ -4,7 +4,7 @@ using System.Text;
 
 using Microsoft.Xna.Framework;
 
-namespace Aquarium
+namespace Forever.Physics
 {
   public static class NaNny
   {

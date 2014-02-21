@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forever.Render", "..\Foreve
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forever.Screens", "..\Forever.Screens\Forever.Screens.csproj", "{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forever.Physics", "..\Forever.Physics\Forever.Physics.csproj", "{7B227227-3898-4ED6-B968-28543423E947}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,18 @@ Global
 		{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}.Release|x86.ActiveCfg = Release|x86
 		{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}.Release|x86.Build.0 = Release|x86
 		{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}.Release|Xbox 360.ActiveCfg = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|x86.ActiveCfg = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|x86.Build.0 = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Debug|Xbox 360.ActiveCfg = Debug|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|Any CPU.ActiveCfg = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|Mixed Platforms.Build.0 = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|x86.ActiveCfg = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|x86.Build.0 = Release|x86
+		{7B227227-3898-4ED6-B968-28543423E947}.Release|Xbox 360.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,7 +26,13 @@ namespace Aquarium.GA.Population
             {
                 var mem = RandomMember(numPartsEach);
 
-                if (mem != null) Register(mem);
+                if (mem != null)
+                {
+                    if (Register(mem))
+                    {
+                        mem.Specimen.Body.Position = Random.NextVector() * popSize;
+                    }
+                }
             }
         }
 

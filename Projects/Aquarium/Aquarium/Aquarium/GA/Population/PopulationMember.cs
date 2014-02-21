@@ -36,8 +36,7 @@ namespace Aquarium.GA.Population
                 });
 
                 var numParts = b.Parts.Count();
-                var gSize = g.Size;
-                return (numParts * 1000) + (numConnected * 900) + (numOrgans / 10) - (gSize / 1000);
+                return (numParts * 1000) + (numConnected * 900) + (numOrgans / 10) - (g.Size / 1000);
             }
         }
     }

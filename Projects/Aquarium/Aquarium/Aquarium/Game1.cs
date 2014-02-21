@@ -46,6 +46,7 @@ namespace Aquarium
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+
             ScreenManager = new ScreenManager(this);
         }
 
@@ -82,9 +83,10 @@ namespace Aquarium
 
             SetupRenderContextAndCamera();
 
-            Components.Add(ScreenManager);
 
             ScreenManager.AddScreen(new SimScreen(RenderContext));
+            Components.Add(ScreenManager);
+
 
         }
 
@@ -93,14 +95,11 @@ namespace Aquarium
         protected void SetupRenderContextAndCamera()
         {
             Camera = new EyeCamera();
-            Camera.Position = new Vector3(-1f, 0f, 10f);
             RenderContext = new RenderContext(
                 Camera,
                 GraphicsDevice
                 );
         }
-
-      
 
 
         /// <summary>
@@ -117,12 +116,9 @@ namespace Aquarium
 
             Terminal.CheckOpen(Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 
-
             base.Update(gameTime);
 
         }
-
-
       
 
         /// <summary>
@@ -133,11 +129,11 @@ namespace Aquarium
         {
             GraphicsDevice.Clear(Color.Black);
 
+            Set3DRenderStates();
             base.Draw(gameTime);
-            
+
             Set2DRenderStates();
             Terminal.CheckDraw(true);
-            Set3DRenderStates();
         }
 
         void Set2DRenderStates()

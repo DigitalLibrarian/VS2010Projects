@@ -78,6 +78,14 @@ namespace Aquarium
             return list[me.Next(list.Count)];
         }
 
+        public static Vector3 NextVector(this Random me)
+        {
+            Vector3 v = new Vector3((float)me.NextDouble(), (float)me.NextDouble(), (float)me.NextDouble());
+            v -= new Vector3(0.5f, 0.5f, 0.5f);
+            v *= 2f;
+            return v;
+        }
+
 
     }
 }
