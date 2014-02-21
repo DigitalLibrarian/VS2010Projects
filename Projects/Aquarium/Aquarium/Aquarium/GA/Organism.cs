@@ -15,7 +15,9 @@ namespace Aquarium.GA
     public class Organism
     {
         public Body Body { get; private set; }
-        private IRigidBody RigidBody { get; set; }
+        public IRigidBody RigidBody { get; private set; }
+
+        public NervousSystem NervousSystem { get; private set; }
 
         public Vector3 Position
         {
@@ -37,14 +39,16 @@ namespace Aquarium.GA
             RigidBody.AngularDamping = 0.7f;
             RigidBody.Mass = 0.1f;
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
+
+            NervousSystem = new NervousSystem(this);
         }
 
         public void Update(float duration)
         {
+            NervousSystem.Update();
             Body.Update(duration);
 
             UpdatePhysics(duration);
-            
         }
 
         protected void UpdatePhysics(float duration)

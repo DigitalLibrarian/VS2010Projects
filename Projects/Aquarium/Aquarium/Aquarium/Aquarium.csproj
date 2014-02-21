@@ -129,7 +129,8 @@
     <Compile Include="GA\Genomes\BodyGenome.cs" />
     <Compile Include="GA\Genomes\Gene.cs" />
     <Compile Include="GA\Genomes\Genome.cs" />
-    <Compile Include="GA\Organs\OrganFab.cs" />
+    <Compile Include="GA\Organs\OrganAbilities\ThrusterAbility.cs" />
+    <Compile Include="GA\Organs\OrganType.cs" />
     <Compile Include="GA\Phenotypes\BodyPartPhenotype.cs" />
     <Compile Include="GA\Phenotypes\NeuralNetworkPhenome.cs" />
     <Compile Include="GA\Phenotypes\OrganPhenotype.cs" />

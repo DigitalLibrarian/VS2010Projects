@@ -43,13 +43,11 @@ namespace Aquarium.GA.Phenotypes
 
     public interface IOrganPhenotype
     {
+        IInstancePointer OrganType { get; set; }
         IInstancePointer BodyPartPointer { get; set; }
         IInstancePointer InputSignal { get; set; }
         IInstancePointer OutputSignal { get; set; }
-    }
-
-    public interface IOrganAbilityPhenotype
-    {
+        IInstancePointer AbilityId { get; set; }
 
     }
 

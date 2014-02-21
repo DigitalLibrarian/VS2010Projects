@@ -8,8 +8,6 @@ using Aquarium.GA.Bodies;
 
 namespace Aquarium.GA.Organs
 {
-    public enum OrganType { NA, Neural, Ability };
-
     abstract public class Organ : SignalNode 
     {
         #region madness
@@ -85,6 +83,26 @@ Each sensory organ must  have a processor in front of it's input, and also behin
 
         public abstract void Update(NervousSystem nervousSystem);
 
+        public Signal LastInput { get; private set; }
+        public Signal OutputSignal { get; protected set; }
+
+        public int Band { get { return LastInput.Value.Count(); } }
+
+        public event Action OnReceive;
+
+        public virtual void ReceiveSignal(NervousSystem nervousSystem, Signal signal)
+        {
+            if (signal == null)
+            {
+                throw new Exception();
+            }
+            LastInput = signal;
+            if (OnReceive != null)
+            {
+                OnReceive();
+            }
+        }
+
     }
     public abstract class IOOrgan : Organ
     {
@@ -103,7 +121,7 @@ Each sensory organ must  have a processor in front of it's input, and also behin
             var readSignal = InputReader.Read();
             if (readSignal.Band > 0)
             {
-                ReceiveSignal(readSignal);
+                ReceiveSignal(nervousSystem, readSignal);
                 OutputWriter.Write(OutputSignal);
 
             }
@@ -124,14 +142,14 @@ Each sensory organ must  have a processor in front of it's input, and also behin
 
         public AbilityOrgan(BodyPart bodyPart, OrganAbility ability) : base(bodyPart) { Ability = ability; }
 
-        public override void ReceiveSignal(Signal signal)
+        public override void ReceiveSignal(NervousSystem nervousSystem, Signal signal)
         {
             if (HasAbility)
             {
-                OutputSignal = Ability.Fire(this, signal);
+                OutputSignal = Ability.Fire(nervousSystem, this, signal);
             }
 
-            base.ReceiveSignal(signal);
+            base.ReceiveSignal(nervousSystem, signal);
         }
 
 

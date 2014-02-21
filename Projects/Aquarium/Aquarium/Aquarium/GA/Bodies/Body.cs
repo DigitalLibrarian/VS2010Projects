@@ -21,17 +21,13 @@ namespace Aquarium.GA.Bodies
         public Vector3 Position { get; set; }
         public Matrix World { get; set; }
 
-        public NervousSystem NervousSystem { get; set; }
-
         public Body()
         {
             Parts = new List<BodyPart>();
-            NervousSystem = new NervousSystem(this);
         }
 
         public void Update(float duration)
         {
-            NervousSystem.Update();
             Parts.ForEach(part => part.Update(this, duration));
         }
 

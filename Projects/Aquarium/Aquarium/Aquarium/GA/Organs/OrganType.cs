@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aquarium.GA.Signals
+namespace Aquarium.GA.Organs
 {
-    abstract public class SignalNode 
+    public enum OrganType
     {
-       
+        Neural,
+        Ability
     }
-
-    
-
-    
-
 }

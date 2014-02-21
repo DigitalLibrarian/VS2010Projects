@@ -30,10 +30,10 @@ namespace Aquarium.GA.Organs
             get { return Network.NumOutputs; }
         }
 
-        public override void ReceiveSignal(Signal signal)
+        public override void ReceiveSignal(NervousSystem nervousSystem, Signal signal)
         {
             if (signal.Band != Network.NumInputs) throw new SignalOutOfBandException();
-            base.ReceiveSignal(signal);
+            base.ReceiveSignal(nervousSystem, signal);
 
             var nextOutput = Network.ComputeOutputs(LastInput.Value.ToArray()).ToList();
             OutputSignal = new Signal(nextOutput);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA.Signals;
+using Aquarium.GA.Bodies;
 
 namespace Aquarium.GA.Organs
 {
@@ -10,7 +11,6 @@ namespace Aquarium.GA.Organs
     {
         public abstract int NumInputs { get; }
         public abstract int NumOutputs { get; }
-        public abstract Signal Fire(Organ parent, Signal signal);
+        public abstract Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal);
     }
-
 }

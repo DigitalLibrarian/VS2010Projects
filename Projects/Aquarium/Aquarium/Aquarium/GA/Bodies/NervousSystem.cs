@@ -12,19 +12,17 @@ namespace Aquarium.GA.Bodies
     public class NervousSystem
     {
         List<Organ> _organs = new List<Organ>();
-        public Body Body { get; private set; }
+        public Organism Organism { get; private set; }
 
-
-
-        public NervousSystem(Body body)
+        public NervousSystem(Organism body)
         {
-            Body = body;
+            Organism = body;
         }
 
 
         public void Update()
         {
-            foreach (var part in Body.Parts)
+            foreach (var part in Organism.Body.Parts)
             {
                 foreach (var organ in part.Organs)
                 {

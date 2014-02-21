@@ -8,6 +8,7 @@ using Aquarium.GA.Organs;
 using Aquarium.GA.Signals;
 using Microsoft.Xna.Framework;
 using Aquarium.GA.Phenotypes;
+using Aquarium.GA.Organs.OrganAbilities;
 
 namespace Aquarium.GA.Phenotypes
 {
@@ -66,8 +67,6 @@ namespace Aquarium.GA.Phenotypes
             
                 first = false;
             }
-            var organFab = new OrganFab();
-
             var goodOrganPhenos = new List<IOrganPhenotype>();
 
             foreach (var organPheno in bodyPheno.OrganPhenos)
@@ -77,50 +76,80 @@ namespace Aquarium.GA.Phenotypes
                 goodOrganPhenos.Add(organPheno);
             }
 
-            var organNNPhenos = new Dictionary<IOrganPhenotype, INeuralNetworkPhenotype>();
+            var ioOrgans = new Dictionary<IOrganPhenotype, Organ>();
+            var typedOrganPhenos = ClassifyOrgans(goodOrganPhenos);
 
-            foreach (var neuPheno in bodyPheno.NeuralNetworkPhenos)
+
+            if (typedOrganPhenos.ContainsKey(OrganType.Neural))
             {
-                var partId = neuPheno.BodyPartPointer.InstanceId;
-                var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
-                var organId = neuPheno.OrganPointer.InstanceId;
-                if (goodOrganPhenos.Any())
+                goodOrganPhenos = typedOrganPhenos[OrganType.Neural];
+                var organNNPhenos = new Dictionary<IOrganPhenotype, INeuralNetworkPhenotype>();
+
+                //create dict of all organs that have networks pointing at them
+                foreach (var neuPheno in bodyPheno.NeuralNetworkPhenos)
                 {
-                    var organPheno = Fuzzy.ScaledCircleIndex(goodOrganPhenos, organId);
-                    if (!organNNPhenos.ContainsKey(organPheno))
+                    var partId = neuPheno.BodyPartPointer.InstanceId;
+                    var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+                    var organId = neuPheno.OrganPointer.InstanceId;
+                    if (goodOrganPhenos.Any())
                     {
-                        organNNPhenos.Add(organPheno, neuPheno);
-                        goodOrganPhenos.Remove(organPheno);
+                        var organPheno = Fuzzy.ScaledCircleIndex(goodOrganPhenos, organId);
+                        if (!organNNPhenos.ContainsKey(organPheno))
+                        {
+                            organNNPhenos.Add(organPheno, neuPheno);
+                            goodOrganPhenos.Remove(organPheno);
+                        }
                     }
+                }
+
+
+                //now we can add the neural organs
+                foreach (var noPheno in organNNPhenos.Keys)
+                {
+                    var partId = noPheno.BodyPartPointer.InstanceId;
+                    var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+                    var nnPheno = organNNPhenos[noPheno];
+
+                    var network = new NeuralNetwork(nnPheno.NumInputs, nnPheno.NumHidden, nnPheno.NumOutputs);
+                    network.SetWeights(nnPheno.Weights);
+
+                    var organ = new NeuralOrgan(part, network);
+                    part.AddOrgan(organ);
+
+                    ioOrgans.Add(noPheno, organ);
+
+                }
+
+
+            } // do all neurals
+
+            if (typedOrganPhenos.ContainsKey(OrganType.Ability))
+            {
+                goodOrganPhenos = typedOrganPhenos[OrganType.Ability];
+
+                foreach (var organPheno in goodOrganPhenos)
+                {
+                    var rawAbilityId = organPheno.AbilityId.InstanceId;
+                    var partId = organPheno.BodyPartPointer.InstanceId;
+                    var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+
+                    var organAbility = GetOrganAbility(rawAbilityId);
+                    var organ = new AbilityOrgan(part, organAbility);
+
+                    part.AddOrgan(organ);
+                    ioOrgans.Add(organPheno, organ);
+
                 }
             }
 
-            var neurals = new Dictionary<IOrganPhenotype, Organ>();
 
-            //now we can add the neural organs
-            foreach (var noPheno in organNNPhenos.Keys)
-            {
-                
-                var partId = noPheno.BodyPartPointer.InstanceId;
-                var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
-                var nnPheno = organNNPhenos[noPheno];
-
-                var network = new NeuralNetwork(nnPheno.NumInputs, nnPheno.NumHidden, nnPheno.NumOutputs);
-                network.SetWeights(nnPheno.Weights);
-
-                var organ = new NeuralOrgan(part, network);
-                part.AddOrgan(organ); 
-
-                neurals.Add(noPheno, organ);
-
-            }
-
-            foreach (var noPheno in neurals.Keys)
+            // each one of the io organs must be connected to the neural grid
+            foreach (var noPheno in ioOrgans.Keys)
             {
                 var inputSignalId = noPheno.InputSignal.InstanceId;
                 var outputSignalId = noPheno.OutputSignal.InstanceId;
 
-                var organ = neurals[noPheno] as IOOrgan;
+                var organ = ioOrgans[noPheno] as IOOrgan;
                 var part = organ.Part;
 
 
@@ -131,7 +160,7 @@ namespace Aquarium.GA.Phenotypes
                 inputSignalId = Fuzzy.InRange(inputSignalId, 0, max);
                 outputSignalId = Fuzzy.InRange(outputSignalId, 0, max);
 
-                
+
                 var signal = part.ChanneledSignal;
                 if (connectedSockets.Any() && inputSignalId != 0)
                 {
@@ -147,15 +176,44 @@ namespace Aquarium.GA.Phenotypes
                 }
                 var writer = signal.RegisterInputChannel(organ.NumOutputs);
                 organ.OutputWriter = writer;
+            }
 
+ 
+            return body;
+        }
+
+        public Dictionary<OrganType, List<IOrganPhenotype>> ClassifyOrgans(List<IOrganPhenotype> phenos)
+        {
+            var dict = new Dictionary<OrganType, List<IOrganPhenotype>>();
+            foreach (var pheno in phenos)
+            {
+                int rawTypeId = pheno.OrganType.InstanceId;
+
+                var array = Enum.GetValues(typeof(OrganType));
+                var list = new List<OrganType>();
+                foreach(var ele in array) list.Add((OrganType)ele);
+                var organType = Fuzzy.CircleIndex(list, rawTypeId);
+                if (!dict.ContainsKey(organType)) dict.Add(organType, new List<IOrganPhenotype>());
+
+                dict[organType].Add(pheno);
 
             }
 
-
-            body.NervousSystem = new NervousSystem(body);
-            
-            return body;
+            return dict;
         }
+
+
+        public OrganAbility GetOrganAbility(int rawAbilityId)
+        {
+            var list = new List<Func<OrganAbility>>
+            {
+                () => new ThrusterAbility(),
+                () => new QueryPositionAbility()
+            };
+
+            return Fuzzy.CircleIndex(list, rawAbilityId)();
+        }
+        
 
         private bool ConnectPartFromAnchor(Body body, BodyPart anchorPart, IBodyPartPhenotype partGenome, BodyPart part, bool autoTryOthers=true)
         {
