@@ -19,13 +19,8 @@ namespace Aquarium.GA
             Body = b;
         }
 
-        float rot = 0f;
         public void Update(float duration)
         {
-
-            Body.World = Matrix.CreateRotationY(rot += 0.01f)
-                * Matrix.CreateRotationX(rot);
-
             Body.Update(duration);
         }
     }
