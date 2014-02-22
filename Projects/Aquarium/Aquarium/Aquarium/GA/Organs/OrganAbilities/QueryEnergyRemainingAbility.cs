@@ -9,6 +9,10 @@ namespace Aquarium.GA.Organs.OrganAbilities
 {
     public class QueryEnergyRemainingAbility : OrganAbility
     {
+        public QueryEnergyRemainingAbility(int param0)
+            : base(param0)
+        { }
+
         public override int NumInputs
         {
             get { return 1; }

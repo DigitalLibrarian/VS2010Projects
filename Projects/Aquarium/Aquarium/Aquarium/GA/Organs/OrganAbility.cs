@@ -12,5 +12,10 @@ namespace Aquarium.GA.Organs
         public abstract int NumInputs { get; }
         public abstract int NumOutputs { get; }
         public abstract Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal);
+
+
+        public OrganAbility(int abilityParam0)
+        {
+        }
     }
 }

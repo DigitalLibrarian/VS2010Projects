@@ -9,6 +9,10 @@ namespace Aquarium.GA.Organs.OrganAbilities
 {
     public class QueryPositionAbility : OrganAbility
     {
+        public QueryPositionAbility(int param0)
+            : base(param0)
+        { }
+
         public override int NumInputs { get { return 1; }}
         public override int NumOutputs { get { return 3; } }
         

@@ -15,6 +15,8 @@ namespace Aquarium.GA.Phenotypes
         public IInstancePointer OutputSignal { get; set; }
         public IInstancePointer AbilityId { get; set; }
 
+        public IInstancePointer AbilityParam0 { get; set; }
+
         public OrganPhenotype(OrganHeader header)
         {
             OrganType = new InstancePointer(header.OrganType);
@@ -22,6 +24,8 @@ namespace Aquarium.GA.Phenotypes
             InputSignal = new InstancePointer(header.InputSignal);
             OutputSignal = new InstancePointer(header.OutputSignal);
             AbilityId = new InstancePointer(header.AbilityId);
+            AbilityParam0 = new InstancePointer(header.AbilityParam0);
         }
+
     }
 }

@@ -49,6 +49,8 @@ namespace Aquarium.GA.Phenotypes
         IInstancePointer OutputSignal { get; set; }
         IInstancePointer AbilityId { get; set; }
 
+        IInstancePointer AbilityParam0 { get; set; }
+
     }
 
     public interface INeuralNetworkPhenotype

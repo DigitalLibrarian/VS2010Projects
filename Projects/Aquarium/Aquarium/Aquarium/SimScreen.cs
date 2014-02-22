@@ -37,7 +37,7 @@ namespace Aquarium
             Coarse = new Space<PopulationMember>(500);
             Fine = new Space<PopulationMember>(250);
 
-            int popSize = 200;
+            int popSize = 400;
             int spawnRange = 1000;
 
             var rPop = new RandomPopulation(popSize, spawnRange, 500);

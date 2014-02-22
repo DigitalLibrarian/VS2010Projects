@@ -10,6 +10,13 @@ namespace Aquarium.GA.Organs.OrganAbilities
 {
     public class ThrusterAbility : OrganAbility
     {
+        public ThrusterAbility(int param0)
+            : base(param0)
+        {
+            SocketId = param0;
+        }
+
+        int SocketId { get; set; }
 
         public override int NumInputs
         {
@@ -28,26 +35,23 @@ namespace Aquarium.GA.Organs.OrganAbilities
             if (num > 0.5)
             {
                 var rigidBody = nervousSystem.Organism.RigidBody;
+                var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);
 
+
+                var body = nervousSystem.Organism.Body;
                 var part = parent.Part;
-                var dir = part.LocalPosition;
 
-                if (dir.LengthSquared() == 0)
-                {
-                    dir = Vector3.Zero;
-                    result = 0;
-                }
-                else
-                {
-                    dir.Normalize();
-                    var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
-                    var veloCap = 0.001f;
+                var pos = socket.LocalPosition;
+                var dir = socket.Normal;
 
-                    if (rigidBody.Velocity.Length() < veloCap)
-                    {
-                        rigidBody.addForce(dir * mag);
-                        result = 1;
-                    }
+
+                var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
+                var veloCap = 0.001f;
+
+                if (rigidBody.Velocity.Length() < veloCap)
+                {
+                    rigidBody.addForce(dir * mag, pos);
+                    result = 1;
                 }
 
             }

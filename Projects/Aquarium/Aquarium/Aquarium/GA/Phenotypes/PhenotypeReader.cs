@@ -132,8 +132,9 @@ namespace Aquarium.GA.Phenotypes
                     var rawAbilityId = organPheno.AbilityId.InstanceId;
                     var partId = organPheno.BodyPartPointer.InstanceId;
                     var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+                    var abilityParam0 = organPheno.AbilityParam0.InstanceId;
 
-                    var organAbility = GetOrganAbility(rawAbilityId);
+                    var organAbility = GetOrganAbility(rawAbilityId, abilityParam0);
                     var organ = new AbilityOrgan(part, organAbility);
 
                     part.AddOrgan(organ);
@@ -203,14 +204,14 @@ namespace Aquarium.GA.Phenotypes
         }
 
 
-        public OrganAbility GetOrganAbility(int rawAbilityId)
+        public OrganAbility GetOrganAbility(int rawAbilityId, int abilityParam0)
         {
             var list = new List<Func<OrganAbility>>
             {
-                () => new ThrusterAbility(),
-                //() => new QueryPositionAbility(),
-                //() => new QueryVelocityAbility(),
-                //() => new QueryEnergyRemainingAbility()
+                () => new ThrusterAbility(abilityParam0),
+                () => new QueryPositionAbility(abilityParam0),
+                () => new QueryVelocityAbility(abilityParam0),
+                () => new QueryEnergyRemainingAbility(abilityParam0)
             };
 
             return Fuzzy.CircleIndex(list, rawAbilityId)();

@@ -9,6 +9,12 @@ namespace Aquarium.GA.Organs.OrganAbilities
 {
     public class QueryVelocityAbility : OrganAbility
     {
+        public QueryVelocityAbility(int param0)
+            : base(param0)
+        {
+
+        }
+
         public override int NumInputs
         {
             get { return 1; }
