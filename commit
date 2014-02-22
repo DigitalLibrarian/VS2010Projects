@@ -1,9 +1,4 @@
-Cell Space Partitioning
+Cell Space Partitioning Improvement
 
-* Automatic discovery of 3d bounding box partitions
-* Added new query abilities
-* Extensions.cs
-* Added Renderer method for bounding box
-* Fixed rendering bug for body parts
-* Added Organism properties for tracking energy ratio and added query ability
-* Query velocity query ability
+* Formalized and fixed transformations from game world to cell space
+* Consistent bounding box calc solution, needs more work

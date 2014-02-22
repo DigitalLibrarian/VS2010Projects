@@ -27,7 +27,7 @@ namespace Aquarium
         {
             RenderContext = renderContext;
 
-            Pop = new RandomPopulation(200, 1000);
+            Pop = new RandomPopulation(50, 1000);
         }
 
 
@@ -53,7 +53,8 @@ namespace Aquarium
             var context = RenderContext;
             foreach (var part in Pop.Space.Partitions)
             {
-                Renderer.Render(context, part.Box, Color.Red);
+                if(part.Objects.Any())
+                    Renderer.Render(context, part.Box, Color.Red);
             }
         }
 
@@ -69,11 +70,12 @@ namespace Aquarium
             if (!otherScreenHasFocus)
             {
                 float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-                var members = Pop.LocalMembers(Camera.Position, radius: 100f);
+                var members = Pop.LocalMembers(Camera.Position, radius: 1000000f);
                 foreach (var member in members)
                 {
                     member.Specimen.Update(duration);
-                    Pop.Space.Update(member, member.Position);
+                    if (member.Specimen.RigidBody.Velocity.LengthSquared() > 0)
+                        Pop.Space.Update(member, member.Position);
                 }
 
             }

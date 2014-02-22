@@ -41,12 +41,12 @@ namespace Aquarium.GA.Population
             return true;
         }
 
-        protected GenomeTemplate<int> TemplateFor(BodyGenome g)
+        public static GenomeTemplate<int> TemplateFor(BodyGenome g)
         {
             return new ZeroIntGenomeTemplate();
         }
 
-        protected Organism SpawnFromGenome(BodyGenome g)
+        public static Organism SpawnFromGenome(BodyGenome g)
         {
             PhenotypeReader gR = new PhenotypeReader();
 

@@ -41,7 +41,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
                     dir.Normalize();
                 }
 
-                var mag = 0.00001f;
+                var mag = 0.0001f;
                 var veloCap = 0.001f;
 
                 if (rigidBody.Velocity.Length() < veloCap)

@@ -36,7 +36,7 @@ namespace Aquarium.GA.Population
             }
         }
 
-        private PopulationMember RandomMember(int numParts)
+        public  PopulationMember RandomMember(int numParts)
         {
             var gContents = new List<Gene<int>>();
             

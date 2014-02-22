@@ -19,7 +19,7 @@ namespace Aquarium.GA.SpacePartitions
         public IEnumerable<SpaceCoord> Coords { get { return TheMatrix.Keys; } }
         public IEnumerable<Partition<T>> Partitions { get { return TheMatrix.Values; } }
 
-        int GridSize = 10;
+        int GridSize = 100;
 
         public int Count { get; private set; }
 
@@ -36,7 +36,7 @@ namespace Aquarium.GA.SpacePartitions
             par.Objects.Add(obj);
             if (par.Box.Contains(position) == ContainmentType.Disjoint)
             {
-                throw new Exception();
+               // throw new Exception();
             }
             Count++;
         }
@@ -68,11 +68,36 @@ namespace Aquarium.GA.SpacePartitions
         #region Conversions
         private BoundingBox CoordinateBoundingBox(SpaceCoord coord, float boxHalfSize)
         {
-            Vector3 center = CoordToVector(coord, boxHalfSize);
-            var min = new Vector3(center.X - boxHalfSize, center.Y - boxHalfSize, center.Z - boxHalfSize);
-            var max = new Vector3(center.X + boxHalfSize, center.Y + boxHalfSize, center.Z + boxHalfSize);
+            
+                Vector3 center = CoordToVector(coord, boxHalfSize);
+                var min = new Vector3(
+                    coord.X == 0 ? -boxHalfSize * 2 : center.X - boxHalfSize,
+                    coord.Y == 0 ? -boxHalfSize * 2 : center.Y - boxHalfSize,
+                    coord.Z == 0 ? -boxHalfSize * 2 : center.Z - boxHalfSize);
 
-            return new BoundingBox(min, max);
+                var max = new Vector3(
+                    coord.X == 0 ? +boxHalfSize * 2 : center.X + boxHalfSize,
+                    coord.Y == 0 ? +boxHalfSize * 2 : center.Y + boxHalfSize,
+                    coord.Z == 0 ? +boxHalfSize * 2 : center.Z + boxHalfSize);
+
+                return new BoundingBox(min, max);
+            /*
+            if (!(coord.X == 0 && coord.Y == 0 && coord.Z == 0))
+            {
+                Vector3 center = CoordToVector(coord, boxHalfSize);
+                var min = new Vector3(center.X - boxHalfSize, center.Y - boxHalfSize, center.Z - boxHalfSize);
+                var max = new Vector3(center.X + boxHalfSize, center.Y + boxHalfSize, center.Z + boxHalfSize);
+
+                return new BoundingBox(min, max);
+            }
+            else
+            {
+                
+                var min = new Vector3(0- boxHalfSize*2, 0 - boxHalfSize*2, 0 - boxHalfSize*2);
+                var max = new Vector3(0 + boxHalfSize*2, 0 + boxHalfSize*2, 0 + boxHalfSize*2);
+                return new BoundingBox(min, max);
+            }
+             * */
         }
 
 
@@ -96,6 +121,10 @@ namespace Aquarium.GA.SpacePartitions
                             TheMatrix[coord] = p;
                             return TheMatrix[coord];
                             break;
+                        }
+                        else
+                        {
+                            throw new Exception();
                         }
                     }
                 }
@@ -128,7 +157,8 @@ namespace Aquarium.GA.SpacePartitions
             var x = coord.X;
             var y = coord.Y;
             var z = coord.Z;
-            return  new Vector3(x, y, z) * (boxHalfSize);
+            var corner =  new Vector3(x, y, z) * (boxHalfSize*2);
+            return corner +(new Vector3(1, 1, 1) * boxHalfSize);
 
         }
 
@@ -137,11 +167,16 @@ namespace Aquarium.GA.SpacePartitions
             var x = vect.X;
             var y = vect.Y;
             var z = vect.Z;
+
+            if (x < 0) x -= boxHalfSize*2;
+            if (y < 0) y -= boxHalfSize*2;
+            if (z < 0) z -= boxHalfSize*2;
+
             var c = new SpaceCoord
             {
-                X = (int)(x / (boxHalfSize)),
-                Y = (int)(y / (boxHalfSize)),
-                Z = (int)(z / (boxHalfSize)) 
+                X = (int)(x / (boxHalfSize*2)),
+                Y = (int)(y / (boxHalfSize*2)),
+                Z = (int)(z / (boxHalfSize*2)) 
             };
             
             

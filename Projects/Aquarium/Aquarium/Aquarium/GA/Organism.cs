@@ -44,6 +44,7 @@ namespace Aquarium.GA
             RigidBody = new RigidBody(b.Position);
 
             RigidBody.Awake = true;
+            RigidBody.CanSleep = false;
             RigidBody.LinearDamping = 0.9f;
             RigidBody.AngularDamping = 0.7f;
             RigidBody.Mass = 0.1f;
