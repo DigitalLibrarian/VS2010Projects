@@ -1,0 +1,9 @@
+Cell Space Partitioning
+
+* Automatic discovery of 3d bounding box partitions
+* Added new query abilities
+* Extensions.cs
+* Added Renderer method for bounding box
+* Fixed rendering bug for body parts
+* Added Organism properties for tracking energy ratio and added query ability
+* Query velocity query ability
