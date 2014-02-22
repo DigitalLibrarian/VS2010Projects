@@ -15,9 +15,11 @@ namespace Aquarium.GA.SpacePartitions
         /// 3D matrix of cell spaces
         /// </summary>
         Dictionary<SpaceCoord, Partition<T>> TheMatrix { get; set; }
+        Dictionary<T, Partition<T>> PartitionAssignment { get; set; }
 
         public IEnumerable<SpaceCoord> Coords { get { return TheMatrix.Keys; } }
         public IEnumerable<Partition<T>> Partitions { get { return TheMatrix.Values; } }
+
 
         int GridSize = 100;
 
@@ -26,6 +28,7 @@ namespace Aquarium.GA.SpacePartitions
         public Space()
         {
             TheMatrix = new Dictionary<SpaceCoord, Partition<T>>();
+            PartitionAssignment = new Dictionary<T, Partition<T>>();
             Count = 0;
         }
 
@@ -33,28 +36,19 @@ namespace Aquarium.GA.SpacePartitions
         {
             var coord = PositionToCoord(position, GridSize);
             var par = GetOrCreate(coord, GridSize);
-            par.Objects.Add(obj);
-            if (par.Box.Contains(position) == ContainmentType.Disjoint)
-            {
-               // throw new Exception();
-            }
+            AssignPartition(obj, par);
             Count++;
+        }
+
+        public void AssignPartition(T obj, Partition<T> par)
+        {
+            par.Objects.Add(obj);
+            PartitionAssignment[obj] = par;
         }
 
         public void UnRegister(T obj)
         {
-            Partition<T> p = null;
-            foreach (var coord in TheMatrix.Keys)
-            {
-                foreach (var o in TheMatrix[coord].Objects)
-                {
-                    if (o == obj)
-                    {
-                        p = TheMatrix[coord];
-                    }
-                }
-            }
-
+            Partition<T> p = PartitionAssignment[obj];
             p.Objects.Remove(obj);
         }
 
@@ -62,6 +56,8 @@ namespace Aquarium.GA.SpacePartitions
         {
             UnRegister(obj);
             Register(obj, position);
+
+
         }
 
 
@@ -81,23 +77,7 @@ namespace Aquarium.GA.SpacePartitions
                     coord.Z == 0 ? +boxHalfSize * 2 : center.Z + boxHalfSize);
 
                 return new BoundingBox(min, max);
-            /*
-            if (!(coord.X == 0 && coord.Y == 0 && coord.Z == 0))
-            {
-                Vector3 center = CoordToVector(coord, boxHalfSize);
-                var min = new Vector3(center.X - boxHalfSize, center.Y - boxHalfSize, center.Z - boxHalfSize);
-                var max = new Vector3(center.X + boxHalfSize, center.Y + boxHalfSize, center.Z + boxHalfSize);
-
-                return new BoundingBox(min, max);
-            }
-            else
-            {
-                
-                var min = new Vector3(0- boxHalfSize*2, 0 - boxHalfSize*2, 0 - boxHalfSize*2);
-                var max = new Vector3(0 + boxHalfSize*2, 0 + boxHalfSize*2, 0 + boxHalfSize*2);
-                return new BoundingBox(min, max);
-            }
-             * */
+            
         }
 
 
