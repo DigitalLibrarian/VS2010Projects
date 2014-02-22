@@ -22,12 +22,37 @@ namespace Aquarium
         public IRigidBody CamBody { get; private set; }
         public UserControls CamControls { get; private set; }
 
+        private int DrawRadius { get; set; }
+        private int UpdateRadius { get; set; }
+
+
+        public Space<PopulationMember> Coarse { get; private set; }
+        public Space<PopulationMember> Fine { get; private set; }
+
 
         public SimScreen(RenderContext renderContext)
         {
             RenderContext = renderContext;
 
-            Pop = new RandomPopulation(100, 1000);
+            Coarse = new Space<PopulationMember>(1000);
+            Fine = new Space<PopulationMember>(500);
+
+            int popSize = 1000;
+            int spawnRange = 5000;
+
+            var rPop = new RandomPopulation(popSize, spawnRange, 500);
+            rPop.OnAdd += new Population.OnAddEventHandler((mem) =>
+            {
+                Coarse.Register(mem, mem.Position);
+                Fine.Register(mem, mem.Position);
+            });
+
+            rPop.GenerateUntilSize(rPop.MaxPop / 2, rPop.SpawnRange, 10);
+            rPop.GenerateUntilSize(rPop.MaxPop, rPop.SpawnRange * 2, 10);
+
+            Pop = rPop;
+            DrawRadius = 1;
+            UpdateRadius = 2;
         }
 
 
@@ -39,23 +64,45 @@ namespace Aquarium
 
         }
 
+        Partition<PopulationMember> CurrentDrawingPartition { get; set; }
+        IEnumerable<Partition<PopulationMember>> CurrentDrawingPartitions { get; set; }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            var members = Pop.LocalMembers(RenderContext.Camera.Position, 1000f);
-
-            foreach (var member in members)
-            {
-                member.Specimen.Body.Render(RenderContext);
-            }
 
             var context = RenderContext;
-            foreach (var part in Pop.Space.Partitions)
+            var camPos = context.Camera.Position;
+
+            if (CurrentDrawingPartition != null)
             {
-                if(part.Objects.Any())
-                    Renderer.Render(context, part.Box, Color.Red);
+                if (CurrentDrawingPartition.Box.Contains(camPos) != ContainmentType.Contains)
+                {
+
+                    CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
+                    CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
+                }
             }
+            else
+            {
+                CurrentDrawingPartition = Coarse.GetSpacePartitions(camPos, 0).First();
+                CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
+            }
+
+           // CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
+            foreach (var part in CurrentDrawingPartitions)
+            {
+                foreach (var member in part.Objects)
+                {
+                    member.Specimen.Body.Render(RenderContext);
+                }
+
+                if (part.Box.Contains(camPos) != ContainmentType.Disjoint || part.Objects.Any())
+                {
+                    Renderer.Render(context, part.Box, Color.Red);
+                }
+            }
+             
         }
 
        
@@ -70,12 +117,16 @@ namespace Aquarium
             if (!otherScreenHasFocus)
             {
                 float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-                var members = Pop.LocalMembers(Camera.Position, radius: 1000000f);
+                
+                var members = Fine.QueryLocalSpace(Camera.Position,  Fine.GridSize * UpdateRadius, (c, mem) => true);
                 foreach (var member in members)
                 {
                     member.Specimen.Update(duration);
-                    if (member.Specimen.RigidBody.Velocity.LengthSquared() > 0)
-                        Pop.Space.Update(member, member.Position);
+                    var rigidBody = member.Specimen.RigidBody;
+                    if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
+                    {
+                        Fine.Update(member, member.Position);
+                    }
                 }
 
             }

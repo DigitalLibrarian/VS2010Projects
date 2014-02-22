@@ -35,20 +35,21 @@ namespace Aquarium.GA.Organs.OrganAbilities
                 if (dir.LengthSquared() == 0)
                 {
                     dir = Vector3.Zero;
+                    result = 0;
                 }
                 else
                 {
                     dir.Normalize();
+                    var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
+                    var veloCap = 0.001f;
+
+                    if (rigidBody.Velocity.Length() < veloCap)
+                    {
+                        rigidBody.addForce(dir * mag);
+                        result = 1;
+                    }
                 }
 
-                var mag = 0.0001f;
-                var veloCap = 0.001f;
-
-                if (rigidBody.Velocity.Length() < veloCap)
-                {
-                    rigidBody.addForce(dir * mag);
-                    result = 1;
-                }
             }
 
             return new Signal(new List<double> { result });

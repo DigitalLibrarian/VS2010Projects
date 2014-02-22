@@ -16,16 +16,20 @@ namespace Aquarium.GA.Population
         public int GenomeSizeCap { get; private set; }
         protected GenomeSplicer Splicer { get; private set; }
 
-        public Space<PopulationMember> Space { get; private set; }
+        private List<PopulationMember> Members { get; set; }
 
-        public int Size { get { return Space.Count; } }
+        public int Size { get { return Members.Count(); } }
+
+        public delegate void OnAddEventHandler(PopulationMember mem);
+        public event OnAddEventHandler OnAdd;
 
         public Population(int maxPop, int genomeSizeCap)
         {
-            Space = new Space<PopulationMember>();
+            Members = new List<PopulationMember>();
             MaxPop = maxPop;
             GenomeSizeCap = genomeSizeCap;
             Splicer = new GenomeSplicer();
+
 
         }
 
@@ -35,8 +39,10 @@ namespace Aquarium.GA.Population
             var body = mem.Specimen.Body;
             if (genome.Size > GenomeSizeCap) return false;
             if (!body.Parts.Any()) return false;
+            
+            if(OnAdd != null) OnAdd.Invoke(mem);
 
-            Space.Register(mem, mem.Position);
+            Members.Add(mem);
 
             return true;
         }
@@ -68,10 +74,11 @@ namespace Aquarium.GA.Population
         }
 
 
-        public virtual IEnumerable<PopulationMember> LocalMembers(Vector3 query, float radius = 100f)
-        {
-            return Space.Query((coord, mem) => Vector3.Distance(query, mem.Position) < radius);
-        }
 
+
+        public List<PopulationMember> ToList()
+        {
+            return Members;
+        }
     }
 }

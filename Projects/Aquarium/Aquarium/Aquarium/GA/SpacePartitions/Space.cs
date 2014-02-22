@@ -21,12 +21,13 @@ namespace Aquarium.GA.SpacePartitions
         public IEnumerable<Partition<T>> Partitions { get { return TheMatrix.Values; } }
 
 
-        int GridSize = 10;
+        public int GridSize { get; private set; }
 
         public int Count { get; private set; }
 
-        public Space()
+        public Space(int gridSize)
         {
+            GridSize = gridSize;
             TheMatrix = new Dictionary<SpaceCoord, Partition<T>>();
             PartitionAssignment = new Dictionary<T, Partition<T>>();
             Count = 0;
@@ -93,6 +94,26 @@ namespace Aquarium.GA.SpacePartitions
             return list;
         }
 
+        private IEnumerable<Partition<T>> CoordBoxPartitions(SpaceCoord c, int coordBoxHalf=1)
+        {
+            List<Partition<T>> parts = new List<Partition<T>>();
+            var coords = CoordBox(c, coordBoxHalf);
+            foreach (var coord in coords)
+            {
+                if (TheMatrix.ContainsKey(coord))
+                {
+                    parts.Add(TheMatrix[coord]);
+                }
+            }
+
+            return parts;
+        }
+
+
+        public Partition<T> GetOrCreate(Vector3 pos)
+        {
+            return GetOrCreate(VectorToCoord(pos, GridSize), GridSize);
+        }
         private Partition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
         {
             if (!TheMatrix.ContainsKey(coord))
@@ -195,6 +216,40 @@ namespace Aquarium.GA.SpacePartitions
                 }
             }
             return list;
+        }
+
+       
+
+        public IEnumerable<T> QueryLocalSpace(Vector3 pos, float radius, Func<SpaceCoord, T, bool> test)
+        {
+            var list = new List<T>();
+
+            int cellRadius = (int)(radius / GridSize);
+            var c = VectorToCoord(pos, GridSize);
+
+            foreach (var coord in CoordBox(c, cellRadius))
+            {
+                if (TheMatrix.ContainsKey(coord))
+                {
+                    var par = TheMatrix[coord];
+                    foreach (var mem in par.Objects)
+                    {
+                        if (test(coord, mem))
+                        {
+                            list.Add(mem);
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+
+        public IEnumerable<Partition<T>> GetSpacePartitions(Vector3 pos, float radius)
+        {
+
+            int cellRadius = (int)(radius / GridSize);
+            var c = VectorToCoord(pos, GridSize);
+            return CoordBoxPartitions(c, cellRadius);
         }
     }
 }

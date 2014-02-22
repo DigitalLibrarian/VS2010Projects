@@ -174,6 +174,11 @@ namespace Aquarium
                 shift = true;
             }
 
+            if (shift && gamePad.IsButtonDown(Buttons.RightTrigger))
+            {
+                newTrans += newTrans * 10;
+            }
+
             force = newTrans;
             if (force.Length() > 0)
             {

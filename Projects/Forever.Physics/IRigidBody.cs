@@ -51,6 +51,8 @@ namespace Forever.Physics
       void addVelocity(Vector3 velo);
       void addRotation(Vector3 rot);
 
+      void calculateDerivedData();
+
       Vector3 Up { get; }
       Vector3 Right { get; }
       Vector3 Forward { get; }

@@ -204,7 +204,7 @@ namespace Forever.Physics
       this._awake = true;
       this.CanSleep = true;
       
-      this.SmallestPositiveMotion = float.MaxValue;
+      this.SmallestPositiveMotion = float.MinValue* 2;
       this._position = pos;
       this._velocity = Vector3.Zero;
       this._acceleration = Vector3.Zero;

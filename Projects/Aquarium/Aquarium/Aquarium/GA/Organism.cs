@@ -30,6 +30,7 @@ namespace Aquarium.GA
                 var pos = value;
                 Body.Position = pos;
                 RigidBody.Position = pos;
+                RigidBody.calculateDerivedData();
             }
         }
 
@@ -44,10 +45,10 @@ namespace Aquarium.GA
             RigidBody = new RigidBody(b.Position);
 
             RigidBody.Awake = true;
-            RigidBody.CanSleep = false;
+            RigidBody.CanSleep = true;
             RigidBody.LinearDamping = 0.9f;
             RigidBody.AngularDamping = 0.7f;
-            RigidBody.Mass = 0.1f;
+            RigidBody.Mass = 1f;
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 
             NervousSystem = new NervousSystem(this);
