@@ -34,11 +34,11 @@ namespace Aquarium
         {
             RenderContext = renderContext;
 
-            Coarse = new Space<PopulationMember>(1000);
-            Fine = new Space<PopulationMember>(500);
+            Coarse = new Space<PopulationMember>(500);
+            Fine = new Space<PopulationMember>(250);
 
-            int popSize = 1000;
-            int spawnRange = 5000;
+            int popSize = 200;
+            int spawnRange = 1000;
 
             var rPop = new RandomPopulation(popSize, spawnRange, 500);
             rPop.OnAdd += new Population.OnAddEventHandler((mem) =>
@@ -51,8 +51,8 @@ namespace Aquarium
             rPop.GenerateUntilSize(rPop.MaxPop, rPop.SpawnRange * 2, 10);
 
             Pop = rPop;
-            DrawRadius = 1;
-            UpdateRadius = 2;
+            DrawRadius = 5;
+            UpdateRadius = 3;
         }
 
 
@@ -66,6 +66,7 @@ namespace Aquarium
 
         Partition<PopulationMember> CurrentDrawingPartition { get; set; }
         IEnumerable<Partition<PopulationMember>> CurrentDrawingPartitions { get; set; }
+        IEnumerable<Partition<PopulationMember>> CurrentUpdatingPartitions { get; set; }
 
         public override void Draw(GameTime gameTime)
         {
@@ -81,15 +82,16 @@ namespace Aquarium
 
                     CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
                     CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
+                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
                 }
             }
             else
             {
-                CurrentDrawingPartition = Coarse.GetSpacePartitions(camPos, 0).First();
+                CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
                 CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
+                CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
             }
 
-           // CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
             foreach (var part in CurrentDrawingPartitions)
             {
                 foreach (var member in part.Objects)
@@ -102,6 +104,8 @@ namespace Aquarium
                     Renderer.Render(context, part.Box, Color.Red);
                 }
             }
+
+           
              
         }
 
@@ -117,15 +121,24 @@ namespace Aquarium
             if (!otherScreenHasFocus)
             {
                 float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-                
-                var members = Fine.QueryLocalSpace(Camera.Position,  Fine.GridSize * UpdateRadius, (c, mem) => true);
-                foreach (var member in members)
+
+                var camPos = RenderContext.Camera.Position;
+                if (CurrentUpdatingPartitions == null)
                 {
-                    member.Specimen.Update(duration);
-                    var rigidBody = member.Specimen.RigidBody;
-                    if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
+                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
+                }
+
+                foreach (var part in CurrentUpdatingPartitions)
+                {
+                    var members = part.Objects.ToList();
+                    foreach (var member in members)
                     {
-                        Fine.Update(member, member.Position);
+                        member.Specimen.Update(duration);
+                        var rigidBody = member.Specimen.RigidBody;
+                        if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
+                        {
+                            Fine.Update(member, member.Position);
+                        }
                     }
                 }
 
