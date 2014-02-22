@@ -208,7 +208,9 @@ namespace Aquarium.GA.Phenotypes
             var list = new List<Func<OrganAbility>>
             {
                 () => new ThrusterAbility(),
-                () => new QueryPositionAbility()
+                () => new QueryPositionAbility(),
+                () => new QueryVelocityAbility(),
+                () => new QueryEnergyRemainingAbility()
             };
 
             return Fuzzy.CircleIndex(list, rawAbilityId)();

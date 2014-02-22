@@ -14,7 +14,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
         
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
         {
-            if (signal.Value[0] > 0f)
+            if (signal.Value[0] > 0.5f)
             {
                 var p = nervousSystem.Organism.Body.Position;
                 p = p.Round(3);

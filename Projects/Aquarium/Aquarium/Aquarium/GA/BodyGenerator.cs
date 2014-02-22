@@ -89,9 +89,6 @@ namespace Aquarium.GA.Bodies
         }
 
 
-
-       
-
         public static bool AutoConnectPartSockets(Body body, BodyPart part)
         {
             if (!body.Parts.Any())

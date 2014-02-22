@@ -283,17 +283,7 @@ namespace Forever.Physics
         Vector3 angularVelocity = _rotation * duration;
 
         Orientation = TrickyMath.AddVector(Orientation, angularVelocity);
-        /*
-        Quaternion spin = (new Quaternion(angularVelocity.X, angularVelocity.Y, angularVelocity.Z, 0f) * 0.5f);
-
-        if (spin.Length() > 0)
-        {
-            Orientation += Quaternion.Concatenate(Orientation, spin);
-        }
-        
-        Orientation.Normalize();
-        */
-        
+                
         Debug.Sanity(_orientation);
 
         calculateDerivedData();
@@ -304,7 +294,6 @@ namespace Forever.Physics
 
     private void trySleep(float duration)
     {
-        //return;
         if (CanSleep && Awake)
         {
             float currentMotion = TrickyMath.ScalarProduct(Velocity, Velocity) + TrickyMath.ScalarProduct(Rotation, Rotation);

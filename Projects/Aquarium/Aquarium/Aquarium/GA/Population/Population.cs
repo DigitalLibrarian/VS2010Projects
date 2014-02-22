@@ -6,6 +6,7 @@ using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
 using Aquarium.GA.Codons;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.SpacePartitions;
 
 namespace Aquarium.GA.Population
 {
@@ -15,17 +16,17 @@ namespace Aquarium.GA.Population
         public int GenomeSizeCap { get; private set; }
         protected GenomeSplicer Splicer { get; private set; }
 
-        private List<PopulationMember> Registry { get; set; }
+        public Space<PopulationMember> Space { get; private set; }
 
-        public int Size { get { return Registry.Count(); } }
+        public int Size { get { return Space.Count; } }
 
         public Population(int maxPop, int genomeSizeCap)
         {
+            Space = new Space<PopulationMember>();
             MaxPop = maxPop;
             GenomeSizeCap = genomeSizeCap;
             Splicer = new GenomeSplicer();
 
-            Registry = new List<PopulationMember>();
         }
 
         public virtual bool Register(PopulationMember mem)
@@ -35,7 +36,7 @@ namespace Aquarium.GA.Population
             if (genome.Size > GenomeSizeCap) return false;
             if (!body.Parts.Any()) return false;
 
-            Registry.Add(mem);
+            Space.Register(mem, mem.Position);
 
             return true;
         }
@@ -67,11 +68,10 @@ namespace Aquarium.GA.Population
         }
 
 
-        public virtual List<PopulationMember> LocalMembers(Vector3 query, float radius = 1f)
+        public virtual IEnumerable<PopulationMember> LocalMembers(Vector3 query, float radius = 100f)
         {
-            //TODO - only retun subset near query point and radius
-
-            return Registry;
+            return Space.Query((coord, mem) => Vector3.Distance(query, mem.Position) < radius);
         }
+
     }
 }

@@ -212,5 +212,63 @@ namespace Forever.Render
         }
     }
 
+      public static void Render(RenderContext context, BoundingBox box, Color color)
+      {
+          Render(box, context.GraphicsDevice, Matrix.Identity, context.Camera.View, context.Camera.Projection, color);
+      }
+
+    /// <summary>  
+    /// Renders the bounding box for debugging purposes.  
+    /// </summary>  
+    /// <param name="box">The box to render.</param>  
+    /// <param name="graphicsDevice">The graphics device to use when rendering.</param>  
+    /// <param name="view">The current view matrix.</param>  
+    /// <param name="projection">The current projection matrix.</param>  
+    /// <param name="color">The color to use drawing the lines of the box.</param>  
+    public static void Render(
+        BoundingBox box,
+        GraphicsDevice graphicsDevice,
+        Matrix world,
+        Matrix view,
+        Matrix projection,
+        Color color)
+    {
+        if (effect == null)
+        {
+            effect = new BasicEffect(graphicsDevice);
+            effect.VertexColorEnabled = true;
+            effect.LightingEnabled = false;
+
+            vertDecl = VertexPositionColor.VertexDeclaration;
+        }
+
+        Vector3[] corners = box.GetCorners();
+        for (int i = 0; i < 8; i++)
+        {
+            verts[i].Position = corners[i];
+            verts[i].Color = color;
+        }
+
+
+        effect.World = world;
+        effect.View = view;
+        effect.Projection = projection;
+
+        foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+
+            graphicsDevice.DrawUserIndexedPrimitives(
+              PrimitiveType.LineList,
+               verts,
+                0,
+                8,
+                wireframeIndices,
+                0,
+                wireframeIndices.Length / 2);
+
+        }
+    }
   }
+
 }

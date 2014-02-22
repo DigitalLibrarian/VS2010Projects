@@ -34,7 +34,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
                 if (dir.LengthSquared() == 0)
                 {
-                    dir = Vector3.Transform(Vector3.UnitZ, part.BodyWorld);
+                    dir = Vector3.Zero;
                 }
                 else
                 {

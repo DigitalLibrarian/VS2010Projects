@@ -9,12 +9,12 @@ using Forever.Screens;
 using Aquarium.GA.Population;
 using Forever.Render;
 using Forever.Physics;
+using Aquarium.GA.SpacePartitions;
 
 namespace Aquarium
 {
     public class SimScreen : GameScreen
     {
-        Thread GenerateThread;
 
         public Population Pop { get; private set; }
 
@@ -22,15 +22,14 @@ namespace Aquarium
         public IRigidBody CamBody { get; private set; }
         public UserControls CamControls { get; private set; }
 
+
         public SimScreen(RenderContext renderContext)
         {
             RenderContext = renderContext;
-            Pop = new RandomPopulation(100, 1000);
 
-            GenerateThread = new Thread(new ThreadStart(() => { }));
+            Pop = new RandomPopulation(200, 1000);
         }
 
-        protected ICamera Camera { get { return RenderContext.Camera; } }
 
         public override void LoadContent()
         {
@@ -38,42 +37,29 @@ namespace Aquarium
 
             SetupCamera();
 
-
-            GenerateThread.IsBackground = true;
-            GenerateThread.Start();
         }
 
-        public override void UnloadContent()
-        {
 
-            GenerateThread.Abort();
-            System.Threading.SpinWait.SpinUntil(() => 
-                {
-                    System.Threading.Thread.Sleep(100);
-                    return !GenerateThread.IsAlive;
-                }
-                );
-
-            base.UnloadContent();
-
-
-        }
-
-        public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-            var members = Pop.LocalMembers(RenderContext.Camera.Position);
+            var members = Pop.LocalMembers(RenderContext.Camera.Position, 1000f);
 
             foreach (var member in members)
             {
                 member.Specimen.Body.Render(RenderContext);
             }
 
+            var context = RenderContext;
+            foreach (var part in Pop.Space.Partitions)
+            {
+                Renderer.Render(context, part.Box, Color.Red);
+            }
         }
 
        
 
-        public override void Update(Microsoft.Xna.Framework.GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             if (!otherScreenHasFocus && !coveredByOtherScreen)
             {
@@ -83,10 +69,11 @@ namespace Aquarium
             if (!otherScreenHasFocus)
             {
                 float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-                var members = Pop.LocalMembers(Camera.Position);
+                var members = Pop.LocalMembers(Camera.Position, radius: 100f);
                 foreach (var member in members)
                 {
                     member.Specimen.Update(duration);
+                    Pop.Space.Update(member, member.Position);
                 }
 
             }
@@ -96,7 +83,7 @@ namespace Aquarium
 
         #region Camera Controls
 
-
+        protected ICamera Camera { get { return RenderContext.Camera; } }
         private void SetupCamera()
         {
             var cam = Camera;
@@ -109,7 +96,7 @@ namespace Aquarium
             CamControls = new UserControls(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f);
         }
 
-        protected void UpdateCamera(Microsoft.Xna.Framework.GameTime gameTime)
+        protected void UpdateCamera(GameTime gameTime)
         {
             Vector3 actuatorTrans = CamControls.LocalForce;
             Vector3 actuatorRot = CamControls.LocalTorque;
@@ -125,12 +112,10 @@ namespace Aquarium
                 (Camera.Up * upForceMag);
 
 
-
             if (force.Length() != 0)
             {
                 CamBody.addForce(force);
             }
-
 
 
             Vector3 worldTorque = Vector3.Transform(CamControls.LocalTorque, CamBody.Orientation);

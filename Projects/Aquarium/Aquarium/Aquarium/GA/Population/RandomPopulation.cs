@@ -17,10 +17,11 @@ namespace Aquarium.GA.Population
             : base(maxPop, genomeSizeCap)
         {
             Random = new Random();
+            
             GenerateInitial(maxPop);
         }
 
-        protected void GenerateInitial(int popSize, int numPartsEach = 2)
+        protected void GenerateInitial(int popSize, int spawnRange = 100, int numPartsEach = 3)
         {
             while (Size < popSize)
             {
@@ -28,10 +29,9 @@ namespace Aquarium.GA.Population
 
                 if (mem != null)
                 {
-                    if (Register(mem))
-                    {
-                        mem.Specimen.Position = Random.NextVector() * popSize;
-                    }
+
+                    mem.Specimen.Position = Random.NextVector() * spawnRange;
+                    Register(mem);
                 }
             }
         }
@@ -39,7 +39,7 @@ namespace Aquarium.GA.Population
         private PopulationMember RandomMember(int numParts)
         {
             var gContents = new List<Gene<int>>();
-
+            
             List<int> codonContents;
             int name = 0;
             int sizeJunk = 2;
@@ -85,7 +85,7 @@ namespace Aquarium.GA.Population
 
             } // parts
 
-            for (int i = 0; i < numParts; i++)
+            for (int i = 0; i < numParts*2; i++)
             {
                 codonContents = new OrganStartCodon().Example();
                 codonContents.ForEach(v => gContents.Add(
@@ -117,7 +117,7 @@ namespace Aquarium.GA.Population
             }
 
 
-            for (int i = 0; i < numParts; i++)
+            for (int i = 0; i < numParts*2; i++)
             {
 
                 // neural network

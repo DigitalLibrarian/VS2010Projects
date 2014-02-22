@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA.Genomes;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Population
 {
@@ -11,6 +12,8 @@ namespace Aquarium.GA.Population
         public BodyGenome Genome { get; private set; }
 
         public Organism Specimen { get; private set; }
+
+        public Vector3 Position { get { return Specimen.Position; } }
 
         public PopulationMember(BodyGenome genome, Organism specimen)
         {
@@ -39,5 +42,7 @@ namespace Aquarium.GA.Population
                 return (numParts * 1000) + (numConnected * 900) + (numOrgans / 10) - (g.Size / 1000);
             }
         }
+
+
     }
 }

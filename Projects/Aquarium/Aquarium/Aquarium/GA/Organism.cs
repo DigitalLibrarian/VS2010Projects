@@ -21,6 +21,10 @@ namespace Aquarium.GA
 
         public Vector3 Position
         {
+            get
+            {
+                return Body.Position;
+            }
             set
             {
                 var pos = value;
@@ -29,8 +33,13 @@ namespace Aquarium.GA
             }
         }
 
+
+        public float MaxEnergy { get; private set; }
+        public float Energy { get; private set; }
+
         public Organism(Body b)
         {
+            ConfigureSpawnLevels();
             Body = b;
             RigidBody = new RigidBody(b.Position);
 
@@ -41,6 +50,11 @@ namespace Aquarium.GA
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 
             NervousSystem = new NervousSystem(this);
+        }
+        private void ConfigureSpawnLevels()
+        {
+            MaxEnergy = 100;
+            Energy = MaxEnergy;
         }
 
         public void Update(float duration)

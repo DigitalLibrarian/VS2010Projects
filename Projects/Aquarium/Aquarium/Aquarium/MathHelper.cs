@@ -63,28 +63,6 @@ namespace Aquarium
             }
         }
 
-       
-        public static Vector3 Round(this Vector3 source, int decimals=0)
-        {
-            Vector3 rounded = source;
-            rounded.X = (float)Math.Round(rounded.X, decimals);
-            rounded.Y = (float)Math.Round(rounded.Y, decimals);
-            rounded.Z = (float)Math.Round(rounded.Z, decimals);
-            return rounded;
-        }
-
-        public static T NextElement<T>(this Random me, List<T> list)
-        {
-            return list[me.Next(list.Count)];
-        }
-
-        public static Vector3 NextVector(this Random me)
-        {
-            Vector3 v = new Vector3((float)me.NextDouble(), (float)me.NextDouble(), (float)me.NextDouble());
-            v -= new Vector3(0.5f, 0.5f, 0.5f);
-            v *= 2f;
-            return v;
-        }
 
 
     }
