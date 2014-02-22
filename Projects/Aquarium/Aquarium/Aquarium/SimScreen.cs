@@ -27,7 +27,7 @@ namespace Aquarium
         {
             RenderContext = renderContext;
 
-            Pop = new RandomPopulation(50, 1000);
+            Pop = new RandomPopulation(100, 1000);
         }
 
 

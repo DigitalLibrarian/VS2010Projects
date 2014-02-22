@@ -1,4 +1,0 @@
-Cell Space Partitioning Improvement
-
-* Formalized and fixed transformations from game world to cell space
-* Consistent bounding box calc solution, needs more work

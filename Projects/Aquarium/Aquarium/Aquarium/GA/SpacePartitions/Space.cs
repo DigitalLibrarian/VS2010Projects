@@ -21,7 +21,7 @@ namespace Aquarium.GA.SpacePartitions
         public IEnumerable<Partition<T>> Partitions { get { return TheMatrix.Values; } }
 
 
-        int GridSize = 100;
+        int GridSize = 10;
 
         public int Count { get; private set; }
 
@@ -80,6 +80,18 @@ namespace Aquarium.GA.SpacePartitions
             
         }
 
+        private IEnumerable<SpaceCoord> CoordBox(SpaceCoord c, int coordBoxHalf=1)
+        {
+            List<SpaceCoord> list = new List<SpaceCoord>();
+            for (int x = -coordBoxHalf; x < coordBoxHalf+1; x++)
+                for (int y = -coordBoxHalf; y < coordBoxHalf + 1; y++)
+                    for (int z = -coordBoxHalf; z < coordBoxHalf + 1; z++)
+                        list.Add(
+                            new SpaceCoord { X = c.X + x, Y = c.Y + y , Z = c.Z +z}
+                            );
+
+            return list;
+        }
 
         private Partition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
         {
@@ -87,8 +99,9 @@ namespace Aquarium.GA.SpacePartitions
             {
                 var box = CoordinateBoundingBox(coord, boxHalfSize);
 
-                foreach (var cKey in TheMatrix.Keys)
+                foreach (var cKey in CoordBox(coord))
                 {
+                    if (!TheMatrix.ContainsKey(cKey)) continue;
                     var p = TheMatrix[cKey];
                     var ct = p.Box.Contains(box);
                     if (ct == ContainmentType.Contains)
