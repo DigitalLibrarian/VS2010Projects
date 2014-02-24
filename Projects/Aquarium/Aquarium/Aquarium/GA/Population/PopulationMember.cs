@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using Aquarium.GA.Genomes;
 using Microsoft.Xna.Framework;
+using Aquarium.GA.SpacePartitions;
+using Aquarium.GA.Environments;
 
 namespace Aquarium.GA.Population
 {
-    public class PopulationMember
+    public class PopulationMember : IEnvMember
     {
         public BodyGenome Genome { get; private set; }
 
@@ -15,6 +17,7 @@ namespace Aquarium.GA.Population
 
         public Vector3 Position { get { return Specimen.Position; } }
 
+        
         public PopulationMember(BodyGenome genome, Organism specimen)
         {
             Genome = genome;
@@ -44,5 +47,25 @@ namespace Aquarium.GA.Population
         }
 
 
+
+        public PopulationMember Member
+        {
+            get { return this; }
+        }
+
+        EnvPartition EP;
+        public void EnterEnvPartition(EnvPartition p)
+        {
+            EP = p;
+
+            Specimen.Env = p as ISurroundings;
+        }
+
+        public void ExitEnvPartition(EnvPartition p)
+        {
+            EP = null;
+
+            Specimen.Env = null;
+        }
     }
 }

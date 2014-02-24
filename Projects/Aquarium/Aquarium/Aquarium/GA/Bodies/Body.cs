@@ -26,10 +26,6 @@ namespace Aquarium.GA.Bodies
             Parts = new List<BodyPart>();
         }
 
-        public void Update(float duration)
-        {
-            Parts.ForEach(part => part.Update(this, duration));
-        }
 
         public void Render(RenderContext renderContext)
         {

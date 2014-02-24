@@ -43,14 +43,14 @@ namespace Aquarium.GA.SpacePartitions
 
         public void AssignPartition(T obj, Partition<T> par)
         {
-            par.Objects.Add(obj);
+            par.Assign(obj);
             PartitionAssignment[obj] = par;
         }
 
         public void UnRegister(T obj)
         {
             Partition<T> p = PartitionAssignment[obj];
-            p.Objects.Remove(obj);
+            p.UnAssign(obj);    
         }
 
         public void Update(T obj, Vector3 position)
@@ -143,10 +143,16 @@ namespace Aquarium.GA.SpacePartitions
                     }
                 }
 
-                var par = new Partition<T>(box);
+                var par = CreateNewPartition(box);
                 TheMatrix.Add(coord, par);
             }
             return TheMatrix[coord];
+        }
+
+
+        protected virtual Partition<T> CreateNewPartition(BoundingBox box)
+        {
+            return new Partition<T>(box);
         }
 
         private SpaceCoord PositionToCoord(Vector3 pos, float boxHalfSize)
@@ -232,7 +238,8 @@ namespace Aquarium.GA.SpacePartitions
                 if (TheMatrix.ContainsKey(coord))
                 {
                     var par = TheMatrix[coord];
-                    foreach (var mem in par.Objects)
+                    var members = par.Objects.ToList();
+                    foreach (var mem in members)
                     {
                         if (test(coord, mem))
                         {

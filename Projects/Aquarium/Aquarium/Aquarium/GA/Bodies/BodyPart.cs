@@ -60,10 +60,6 @@ namespace Aquarium.GA.Bodies
         }
 
 
-        public void Update(Body body, float duration)
-        {
-
-        }
 
 
         public virtual void Render(Body body, RenderContext renderContext)

@@ -24,7 +24,7 @@ namespace Aquarium.GA.Headers
             InputSignal = Fuzzy.PositiveInteger(inputSignal);
             OutputSignal = Fuzzy.PositiveInteger(outputSignal);
             AbilityId = Fuzzy.PositiveInteger(abilityId);
-            AbilityParam0 = abilityParam0;
+            AbilityParam0 = Fuzzy.PositiveInteger(abilityParam0);
         }
 
         public static OrganHeader FromGenes(List<int> partGene)

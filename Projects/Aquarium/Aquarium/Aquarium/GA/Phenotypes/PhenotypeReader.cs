@@ -209,6 +209,8 @@ namespace Aquarium.GA.Phenotypes
             var list = new List<Func<OrganAbility>>
             {
                 () => new ThrusterAbility(abilityParam0),
+                () => new FoodBitterAbility(abilityParam0),
+                () => new QueryClosestFoodAbility(abilityParam0),
                 () => new QueryPositionAbility(abilityParam0),
                 () => new QueryVelocityAbility(abilityParam0),
                 () => new QueryEnergyRemainingAbility(abilityParam0)

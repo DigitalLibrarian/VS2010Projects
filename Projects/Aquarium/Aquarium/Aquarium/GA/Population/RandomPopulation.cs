@@ -15,8 +15,8 @@ namespace Aquarium.GA.Population
         Random Random { get; set; }
         public float SpawnRange { get; set; }
 
-        public RandomPopulation(int maxPop, float spawnRange, int genomeSizeCap)
-            : base(maxPop, genomeSizeCap)
+        public RandomPopulation(int minPop, int maxPop, float spawnRange, int genomeSizeCap)
+            : base(minPop, maxPop, genomeSizeCap)
         {
             Random = new Random();
             SpawnRange = spawnRange;
@@ -38,7 +38,7 @@ namespace Aquarium.GA.Population
             }
         }
 
-        public  PopulationMember RandomMember(int numParts)
+        public PopulationMember RandomMember(int numParts)
         {
             var g = BodyGenome.Random(Random, numParts, 2, 5);
             var spawn = SpawnFromGenome(g);
@@ -46,6 +46,9 @@ namespace Aquarium.GA.Population
             if (spawn == null) return null;
             return new PopulationMember(g, spawn);
         }
+
+
+
 
       
     }

@@ -12,20 +12,29 @@ namespace Aquarium.GA.Population
 {
     public class Population
     {
+        public int MinPop { get; private set; }
         public int MaxPop { get; private set; }
         public int GenomeSizeCap { get; private set; }
-        protected GenomeSplicer Splicer { get; private set; }
+        public  GenomeSplicer Splicer { get; private set; }
 
         private List<PopulationMember> Members { get; set; }
 
         public int Size { get { return Members.Count(); } }
 
+        public bool NeedsSpawn
+        {
+            get { return Size < MinPop; }
+        }
+
         public delegate void OnAddEventHandler(PopulationMember mem);
         public event OnAddEventHandler OnAdd;
+        public delegate void OnRemoveEventHandler(PopulationMember mem);
+        public event OnRemoveEventHandler OnRemove;
 
-        public Population(int maxPop, int genomeSizeCap)
+        public Population(int minPop,  int maxPop, int genomeSizeCap)
         {
             Members = new List<PopulationMember>();
+            MinPop = minPop;
             MaxPop = maxPop;
             GenomeSizeCap = genomeSizeCap;
             Splicer = new GenomeSplicer();
@@ -46,6 +55,14 @@ namespace Aquarium.GA.Population
 
             return true;
         }
+
+        public virtual void UnRegister(PopulationMember mem)
+        {
+
+            if (OnRemove != null) OnRemove.Invoke(mem);
+            Members.Remove(mem);
+        }
+
 
         public static GenomeTemplate<int> TemplateFor(BodyGenome g)
         {

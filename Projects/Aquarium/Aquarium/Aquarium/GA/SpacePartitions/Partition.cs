@@ -9,13 +9,23 @@ namespace Aquarium.GA.SpacePartitions
     public class Partition<T>
     {
         public BoundingBox Box { get;  set; }
-        public List<T> Objects { get; private set; }
+        List<T> contents;
+        public IEnumerable<T> Objects { get { return contents; } }
 
         public Partition(BoundingBox box)
         {
-            Objects = new List<T>();
+            contents = new List<T>();
             Box = box;
         }
 
+        public virtual void Assign(T obj) 
+        {
+            contents.Add(obj);
+        }
+
+        public virtual void UnAssign(T obj)
+        {
+            contents.Remove(obj);
+        }
     }
 }
