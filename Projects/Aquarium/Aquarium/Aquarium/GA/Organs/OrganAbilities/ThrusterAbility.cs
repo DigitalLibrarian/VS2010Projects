@@ -39,33 +39,18 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
 
                 var body = nervousSystem.Organism.Body;
-                var part = parent.Part;
+                var socketWorldPos = body.Position + socket.Part.LocalPosition + socket.LocalPosition;
 
-                var dir = part.LocalPosition;
-                if (dir.LengthSquared() == 0)
+                var dir = body.Position - socketWorldPos;
+                dir = socket.Normal;
+
+                var mag = 0.001f * nervousSystem.Organism.RigidBody.Mass;
+                var veloCap = 0.005f;
+
+                if (rigidBody.Velocity.Length() < veloCap)
                 {
-                    dir = socket.Normal; 
-                    
-
-                    var mag = 0.0001f * nervousSystem.Organism.RigidBody.Mass;
-                    var veloCap = 0.01f;
-
-                    if (rigidBody.Velocity.Length() < veloCap)
-                    {
-                        rigidBody.addForce(dir * mag, body.Position + Vector3.Forward);
-                        result = 1;
-                    }
-                }
-                else
-                {
-                 
-                    var mag = 0.001f * nervousSystem.Organism.RigidBody.Mass;
-                    var veloCap = 0.01f;
-
-                    if (rigidBody.Velocity.Length() < veloCap)
-                    {
-                        rigidBody.addForce(dir * mag);
-                    }
+                    rigidBody.addForce(dir * mag, socketWorldPos);
+                    result = 1;
                 }
             }
 

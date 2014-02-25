@@ -11,6 +11,8 @@ using Forever.Render;
 using Forever.Physics;
 using Aquarium.GA.SpacePartitions;
 using Aquarium.GA.Environments;
+using Aquarium.GA.Genomes;
+using System.Collections.Concurrent;
 
 namespace Aquarium
 {
@@ -42,8 +44,8 @@ namespace Aquarium
             Coarse = new Space<PopulationMember>(500);
             Fine = new EnvironmentSpace(250, 250);
 
-            int minPopSize = 150;
-            int maxPopSize = 500;
+            int minPopSize = 100;
+            int maxPopSize = 200;
             int spawnRange = 100;
             int geneCap = 2000;
 
@@ -58,15 +60,15 @@ namespace Aquarium
             {
 
                 Coarse.UnRegister(mem);
-                Fine.UnRegister(mem as  IEnvMember);
+                Fine.UnRegister(mem as IEnvMember);
             });
 
-            rPop.GenerateUntilSize(minPopSize / 2, rPop.SpawnRange, 3);
-            rPop.GenerateUntilSize(maxPopSize, rPop.SpawnRange * 2, 10);
+            rPop.GenerateUntilSize(minPopSize / 2, rPop.SpawnRange, 10);
+            rPop.GenerateUntilSize(maxPopSize, rPop.SpawnRange, 10);
 
             Pop = rPop;
-            DrawRadius = 5;
-            UpdateRadius = 50;
+            DrawRadius = 50;
+            UpdateRadius = 25;
 
 
             GenerateThread = new Thread(new ThreadStart(
@@ -74,7 +76,7 @@ namespace Aquarium
                     while (true)
                     {
                         UpdatePopMonitoring();
-                        System.Threading.Thread.Sleep(500);
+                        System.Threading.Thread.Sleep(10);
                     }
                     
                 }
@@ -109,7 +111,6 @@ namespace Aquarium
 
         Partition<PopulationMember> CurrentDrawingPartition { get; set; }
         IEnumerable<Partition<PopulationMember>> CurrentDrawingPartitions { get; set; }
-        IEnumerable<Partition<IEnvMember>> CurrentUpdatingPartitions { get; set; }
 
         public override void Draw(GameTime gameTime)
         {
@@ -125,14 +126,12 @@ namespace Aquarium
 
                     CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
                     CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
-                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
                 }
             }
             else
             {
                 CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
                 CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
-                CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
             }
 
             foreach (var part in CurrentDrawingPartitions)
@@ -159,57 +158,78 @@ namespace Aquarium
             }
         }
 
-       
 
+
+
+        Partition<IEnvMember> CurrentUpdatingPartition { get; set; }
+        IEnumerable<Partition<IEnvMember>> CurrentUpdatingPartitions { get; set; }
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-           // if (!otherScreenHasFocus && !coveredByOtherScreen)
+            UpdateCamera(gameTime);
+          
+            float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
+
+            var camPos = RenderContext.Camera.Position;
+
+            if (CurrentUpdatingPartition != null)
             {
-                UpdateCamera(gameTime);
+                if (CurrentUpdatingPartition.Box.Contains(camPos) != ContainmentType.Contains)
+                {
+                    CurrentUpdatingPartition = Fine.GetOrCreate(camPos);
+                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
+
+                }
+            }
+            else
+            {
+                CurrentUpdatingPartition = Fine.GetOrCreate(camPos);
+                CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
             }
 
-           // if (!otherScreenHasFocus)
+            var dead = new List<PopulationMember>();
+
+            foreach (var part in CurrentUpdatingPartitions)
             {
-                float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
+                var members = part.Objects.ToList();
 
-                var camPos = RenderContext.Camera.Position;
-                if (CurrentUpdatingPartitions == null)
+                foreach (var envMember in members)
                 {
-                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
-                }
-
-                var dead = new List<PopulationMember>();
-
-                foreach (var part in CurrentUpdatingPartitions)
-                {
-                    var members = part.Objects.ToList();
-                    foreach (var envMember in members)
+                    var member = envMember.Member;
+                    member.Specimen.Update(duration);
+                    if (member.Specimen.IsDead)
                     {
-                        var member = envMember.Member;
-                        member.Specimen.Update(duration);
-                        if (member.Specimen.IsDead)
+                        dead.Add(member);
+                    }
+                    else
+                    {
+                        var rigidBody = member.Specimen.RigidBody;
+                        if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
                         {
-                            dead.Add(member);
-                        }
-                        else
-                        {
-                            var rigidBody = member.Specimen.RigidBody;
-                            if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
-                            {
-                                Fine.Update(member, member.Position);
-                            }
+                            Coarse.Update(member, member.Position);
+                            Fine.Update(member, member.Position);
                         }
                     }
                 }
-
-
-                Death(dead); //death to the dead
-
-                
             }
+
+
+            Death(dead); //death to the dead
+
+            var births = Births.ToList();
+            foreach(var newBirth in births){
+                // new life to the living
+                if (newBirth != null)
+                {
+                    Pop.Register(newBirth);
+                    PopulationMember localValue;
+                    Births.TryDequeue(out localValue);
+                }
+            }            
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
+
+        ConcurrentQueue<PopulationMember> Births = new ConcurrentQueue<PopulationMember>();
 
         #region Camera Controls
 
@@ -273,54 +293,62 @@ namespace Aquarium
         #region Population Monitoring
         protected void UpdatePopMonitoring()
         {
-            if (!Pop.NeedsSpawn) return;
-
             var random = new Random();
             var members = Pop.ToList();
 
-            var spawnRange = 1000;
+            var spawnRange = 100;
 
-            if (members.Count < Pop.MinPop)
+            if (!Pop.NeedsSpawn) return;
+
+
+            
+            Action<BodyGenome, Vector3> birther = (BodyGenome off, Vector3 pos) =>
             {
-                Pop.GenerateUntilSize(Pop.MinPop, spawnRange, numPartsEach: 2);
-            }
-            while (Pop.Size < Pop.MaxPop)
+
+                Pop.Splicer.Mutate(off);
+
+                var spawn = Population.SpawnFromGenome(off);
+                if (spawn != null)
+                {
+                    var r = random.NextVector();
+
+                    r *= spawnRange;
+                   
+                    spawn.Position = r;
+
+                    var mem = new PopulationMember(off, spawn);
+                    Births.Enqueue(mem);
+                }
+            };
+
+
+
+            var p1 = random.NextElement(members);
+            var p2 = random.NextElement(members);
+
+            var a1 = p1.Specimen.Age;
+            var a2 = p2.Specimen.Age;
+
+
+            var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
+
+            birther(offspring1[0], p1.Position);
+            birther(offspring1[1], p2.Position);
+
+            if (a1 > a2)
             {
-                var p1 = random.NextElement(members);
-                var p2 = random.NextElement(members);
-
-                var a1 = p1.Specimen.Age;
-                var a2 = p2.Specimen.Age;
-
-
-                var offspring = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-
-                if (a1 > a2)
-                {
-                    p2 = random.NextElement(members);
-                }
-                else if (a1 < a2) ;
-                {
-                    p1 = random.NextElement(members);
-                }
-                offspring.Concat(Pop.Splicer.Meiosis(p1.Genome, p2.Genome));
-
-
-                foreach (var off in offspring)
-                {
-                    Pop.Splicer.Mutate(off);
-
-                    var spawn = Population.SpawnFromGenome(off);
-                    if (spawn != null)
-                    {
-
-                        spawn.Position = random.NextVector() * spawnRange;
-
-                        var mem = new PopulationMember(off, spawn);
-                        Pop.Register(mem);
-                    }
-                }
+                p2 = random.NextElement(members);
             }
+            else if (a1 < a2) ;
+            {
+                p1 = random.NextElement(members);
+            }
+            var offspring2 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
+
+            birther(offspring2[0], p1.Position);
+            birther(offspring2[1], p2.Position);
+
+
         }
         #endregion
     }

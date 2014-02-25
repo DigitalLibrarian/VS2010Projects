@@ -49,21 +49,23 @@ namespace Aquarium.GA.SpacePartitions
 
         public void UnRegister(T obj)
         {
-            Partition<T> p = PartitionAssignment[obj];
-            p.UnAssign(obj);    
+            if (PartitionAssignment.ContainsKey(obj))
+            {
+                Partition<T> p = PartitionAssignment[obj];
+                p.UnAssign(obj);
+                PartitionAssignment.Remove(obj);
+            }
         }
 
         public void Update(T obj, Vector3 position)
         {
             UnRegister(obj);
             Register(obj, position);
-
-
         }
 
 
         #region Conversions
-        private BoundingBox CoordinateBoundingBox(SpaceCoord coord, float boxHalfSize)
+        private BoundingBox CoordToBoundingBox(SpaceCoord coord, float boxHalfSize)
         {
             
                 Vector3 center = CoordToVector(coord, boxHalfSize);
@@ -87,9 +89,12 @@ namespace Aquarium.GA.SpacePartitions
             for (int x = -coordBoxHalf; x < coordBoxHalf+1; x++)
                 for (int y = -coordBoxHalf; y < coordBoxHalf + 1; y++)
                     for (int z = -coordBoxHalf; z < coordBoxHalf + 1; z++)
+                    {
+
                         list.Add(
-                            new SpaceCoord { X = c.X + x, Y = c.Y + y , Z = c.Z +z}
+                            new SpaceCoord { X = c.X + x, Y = c.Y + y, Z = c.Z + z }
                             );
+                    }
 
             return list;
         }
@@ -118,31 +123,7 @@ namespace Aquarium.GA.SpacePartitions
         {
             if (!TheMatrix.ContainsKey(coord))
             {
-                var box = CoordinateBoundingBox(coord, boxHalfSize);
-
-                foreach (var cKey in CoordBox(coord))
-                {
-                    if (!TheMatrix.ContainsKey(cKey)) continue;
-                    var p = TheMatrix[cKey];
-                    var ct = p.Box.Contains(box);
-                    if (ct == ContainmentType.Contains)
-                    {
-                        if (coord.X == 0 || coord.Y == 0 || coord.Z == 0
-                            || (cKey.X == 0 || cKey.Y == 0 || cKey.Z == 0))
-                        {
-                            var biggerBox = p.Box.ExtendToContain(box);
-                            p.Box = biggerBox;
-                            TheMatrix[coord] = p;
-                            return TheMatrix[coord];
-                            break;
-                        }
-                        else
-                        {
-                            throw new Exception();
-                        }
-                    }
-                }
-
+                var box = CoordToBoundingBox(coord, boxHalfSize);
                 var par = CreateNewPartition(box);
                 TheMatrix.Add(coord, par);
             }
@@ -192,16 +173,19 @@ namespace Aquarium.GA.SpacePartitions
             if (y < 0) y -= boxHalfSize*2;
             if (z < 0) z -= boxHalfSize*2;
 
-            var c = new SpaceCoord
+            return RawSpaceCoord(x, y, z, boxHalfSize);
+
+        }
+
+
+        private SpaceCoord RawSpaceCoord(float x, float y, float z, float boxHalfSize)
+        {
+            return new SpaceCoord
             {
                 X = (int)(x / (boxHalfSize*2)),
                 Y = (int)(y / (boxHalfSize*2)),
                 Z = (int)(z / (boxHalfSize*2)) 
             };
-            
-            
-            return c;
-
         }
         #endregion
 
@@ -235,6 +219,7 @@ namespace Aquarium.GA.SpacePartitions
 
             foreach (var coord in CoordBox(c, cellRadius))
             {
+                var cleanVect = CoordToVector(coord, GridSize);
                 if (TheMatrix.ContainsKey(coord))
                 {
                     var par = TheMatrix[coord];

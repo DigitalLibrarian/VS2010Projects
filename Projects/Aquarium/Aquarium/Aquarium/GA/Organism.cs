@@ -21,7 +21,8 @@ namespace Aquarium.GA
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Env { get; set; }
 
-        private const float EnergyBleed = 0.997f;
+        private const float EnergyBleed = 0.99f;
+        private const float EnergyFlatline = 1f;
         /// <summary>
         /// Gets or sets the position of the organism.
         /// 
@@ -52,7 +53,7 @@ namespace Aquarium.GA
         {
             get
             {
-                return Energy <= 1;
+                return Energy <= EnergyFlatline;
             }
         }
 
@@ -65,8 +66,8 @@ namespace Aquarium.GA
 
             RigidBody.Awake = true;
             RigidBody.CanSleep = true;
-            RigidBody.LinearDamping = 0.9f;
-            RigidBody.AngularDamping = 0.7f;
+            RigidBody.LinearDamping = 0.999f;
+            RigidBody.AngularDamping = 0.99f;
             RigidBody.Mass = 1f;
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 
@@ -83,10 +84,8 @@ namespace Aquarium.GA
         long Tick = 0;
         public void Update(float duration)
         {
-            if (!IsDead && Tick++ % 10 == 0)
+            if (!IsDead && Tick++ % 2 == 0)
             {
-                // TODO - life processes like this should be on a slower frame of reference
-                //        we don't have to pump the body at 60 fps
                 UpdateMetabolism(duration);
                 NervousSystem.Update();
             }
