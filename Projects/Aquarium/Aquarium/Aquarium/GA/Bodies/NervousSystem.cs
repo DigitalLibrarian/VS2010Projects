@@ -31,8 +31,21 @@ namespace Aquarium.GA.Bodies
             }
         }
 
-        
-        
-        
+        Dictionary<IRewardable, IMoment> CurrentMoments = new Dictionary<IRewardable, IMoment>();
+        public void RegisterMoment(IRewardable rewardable, IMoment moment)
+        {
+            CurrentMoments[rewardable] = moment;
+        }
+
+        public IMoment GetCurrentMoment(IRewardable rewardable)
+        {
+            if (CurrentMoments.ContainsKey(rewardable))
+            {
+                return CurrentMoments[rewardable];
+            }
+            return null;
+        }
+
+
     }
 }

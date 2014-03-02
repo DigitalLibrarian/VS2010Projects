@@ -40,7 +40,7 @@ namespace Aquarium.GA.Population
 
         public PopulationMember RandomMember(int numParts)
         {
-            var g = BodyGenome.Random(Random, numParts, 2, 5);
+            var g = BodyGenome.Random(Random, numParts, 20, 10, 3);
             var spawn = SpawnFromGenome(g);
 
             if (spawn == null) return null;

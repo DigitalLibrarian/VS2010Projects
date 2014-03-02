@@ -56,8 +56,8 @@ namespace Aquarium.GA.Population
         EnvPartition EP;
         public void EnterEnvPartition(EnvPartition p)
         {
+            if (EP != null || Specimen.Env != null) throw new Exception();
             EP = p;
-
             Specimen.Env = p as ISurroundings;
         }
 

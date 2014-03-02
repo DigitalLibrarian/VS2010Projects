@@ -35,7 +35,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
             if (env != null)
             {
 
-                var searchRadius = 100f;
+                var searchRadius = 50f;
                 //find food
                 var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
                 if (foods.Any())

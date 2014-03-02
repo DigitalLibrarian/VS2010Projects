@@ -23,6 +23,12 @@ namespace Aquarium.GA.Genomes
         {
             var mutators = new List<Action<BodyGenome>>
             {
+                
+                (g) => {
+                    var geneIndex = Random.Next(g.Genes.Count());
+                    var gene = g.Genes[geneIndex];
+                    gene.Value++;
+                },
                 (g) => {
                     var geneIndex = Random.Next(g.Genes.Count());
                     var sourceGene = g.Genes[geneIndex];

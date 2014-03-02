@@ -21,7 +21,7 @@ namespace Aquarium.GA
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Env { get; set; }
 
-        private const float EnergyBleed = 0.99f;
+        private const float EnergyBleed = 0.97f;
         private const float EnergyFlatline = 1f;
         /// <summary>
         /// Gets or sets the position of the organism.
@@ -65,9 +65,9 @@ namespace Aquarium.GA
             RigidBody = new RigidBody(b.Position);
 
             RigidBody.Awake = true;
-            RigidBody.CanSleep = true;
+            RigidBody.CanSleep = false;
             RigidBody.LinearDamping = 0.999f;
-            RigidBody.AngularDamping = 0.99f;
+            RigidBody.AngularDamping = 0.995f;
             RigidBody.Mass = 1f;
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 
@@ -84,7 +84,7 @@ namespace Aquarium.GA
         long Tick = 0;
         public void Update(float duration)
         {
-            if (!IsDead && Tick++ % 2 == 0)
+            if (!IsDead && Tick++ % 4 == 0)
             {
                 UpdateMetabolism(duration);
                 NervousSystem.Update();
@@ -103,7 +103,7 @@ namespace Aquarium.GA
 
         public void Consume(IFood food)
         {
-            var BiteSize = 100f;
+            var BiteSize = 10f;
             Energy += food.BeConsumed(BiteSize);
         }
 

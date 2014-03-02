@@ -131,5 +131,17 @@ namespace Aquarium.GA
                 .5f + ToFractionalFloat(z)
                 );
         }
+
+        public static Vector3 SphereWrap(Vector3 v, BoundingSphere s)
+        {
+            if (Vector3.Distance(s.Center, v) < s.Radius) return v;
+            
+            var c = s.Center;
+            var r = s.Radius;
+
+            var toV = v - c;
+            var n =  c + -toV;
+            return n;
+        }
     }
 }

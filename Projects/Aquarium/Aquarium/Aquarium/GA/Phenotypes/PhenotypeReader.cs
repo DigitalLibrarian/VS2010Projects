@@ -80,8 +80,8 @@ namespace Aquarium.GA.Phenotypes
             var typedOrganPhenos = ClassifyOrgans(goodOrganPhenos);
 
 
-            if (typedOrganPhenos.ContainsKey(OrganType.Neural))
-            {
+          
+            { 
                 goodOrganPhenos = typedOrganPhenos[OrganType.Neural];
                 var organNNPhenos = new Dictionary<IOrganPhenotype, INeuralNetworkPhenotype>();
 
@@ -123,23 +123,47 @@ namespace Aquarium.GA.Phenotypes
 
             } // do all neurals
 
-            if (typedOrganPhenos.ContainsKey(OrganType.Ability))
-            {
-                goodOrganPhenos = typedOrganPhenos[OrganType.Ability];
+          
+            goodOrganPhenos = typedOrganPhenos[OrganType.Ability];
 
-                foreach (var organPheno in goodOrganPhenos)
+            foreach (var organPheno in goodOrganPhenos)
+            {
+                var rawAbilityId = organPheno.AbilityId.InstanceId;
+                var partId = organPheno.BodyPartPointer.InstanceId;
+                var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+                var abilityParam0 = organPheno.AbilityParam0.InstanceId;
+
+                var organAbility = GetOrganAbility(rawAbilityId, abilityParam0);
+                var organ = new AbilityOrgan(part, organAbility);
+
+                part.AddOrgan(organ);
+                ioOrgans.Add(organPheno, organ);
+
+            }
+
+
+            if (typedOrganPhenos[OrganType.Reward].Any() && typedOrganPhenos[OrganType.Neural].Any())
+            {
+                var rewardPhenos = typedOrganPhenos[OrganType.Reward];
+
+                foreach (var organPheno in rewardPhenos)
                 {
-                    var rawAbilityId = organPheno.AbilityId.InstanceId;
                     var partId = organPheno.BodyPartPointer.InstanceId;
                     var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
                     var abilityParam0 = organPheno.AbilityParam0.InstanceId;
 
-                    var organAbility = GetOrganAbility(rawAbilityId, abilityParam0);
-                    var organ = new AbilityOrgan(part, organAbility);
+                    //here we are going to use ability param 0 as the nueral organ selector
 
-                    part.AddOrgan(organ);
-                    ioOrgans.Add(organPheno, organ);
+                    var neuralOrgans = part.Organs.OfType<NeuralOrgan>();
+                    if (neuralOrgans.Any())
+                    {
+                        var neural = Fuzzy.CircleIndex(neuralOrgans.ToList(), abilityParam0) as NeuralOrgan;
 
+                        var organ = new RewardOrgan(part, neural);
+
+                        part.AddOrgan(organ);
+                        ioOrgans.Add(organPheno, organ);
+                    }
                 }
             }
 
@@ -179,22 +203,31 @@ namespace Aquarium.GA.Phenotypes
                 organ.OutputWriter = writer;
             }
 
+
+            
+          
  
             return body;
         }
 
         public Dictionary<OrganType, List<IOrganPhenotype>> ClassifyOrgans(List<IOrganPhenotype> phenos)
         {
+
             var dict = new Dictionary<OrganType, List<IOrganPhenotype>>();
+            var types = new List<OrganType>();
+            var array = Enum.GetValues(typeof(OrganType));
+            foreach (var ele in array)
+            {
+                var organType = (OrganType)ele;
+                types.Add(organType);
+                dict.Add(organType, new List<IOrganPhenotype>());
+            }
+
             foreach (var pheno in phenos)
             {
                 int rawTypeId = pheno.OrganType.InstanceId;
 
-                var array = Enum.GetValues(typeof(OrganType));
-                var list = new List<OrganType>();
-                foreach(var ele in array) list.Add((OrganType)ele);
-                var organType = Fuzzy.CircleIndex(list, rawTypeId);
-                if (!dict.ContainsKey(organType)) dict.Add(organType, new List<IOrganPhenotype>());
+                var organType = Fuzzy.CircleIndex(types, rawTypeId);
 
                 dict[organType].Add(pheno);
 
@@ -209,6 +242,7 @@ namespace Aquarium.GA.Phenotypes
             var list = new List<Func<OrganAbility>>
             {
                 () => new ThrusterAbility(abilityParam0),
+                () => new SpinnerAbility(abilityParam0),
                 () => new FoodBitterAbility(abilityParam0),
                 () => new QueryClosestFoodAbility(abilityParam0),
                 () => new QueryPositionAbility(abilityParam0),

@@ -8,15 +8,16 @@ using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Organs.OrganAbilities
 {
-    public class ThrusterAbility : SimpleFireAbility
+    public class SpinnerAbility : SimpleFireAbility
     {
-        public ThrusterAbility(int param0)
+          public SpinnerAbility(int param0)
             : base(param0)
         {
             SocketId = param0;
         }
 
         int SocketId { get; set; }
+
 
 
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
@@ -27,14 +28,19 @@ namespace Aquarium.GA.Organs.OrganAbilities
             {
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);
+
+                var body = nervousSystem.Organism.Body;
                 var dir = socket.Normal;
 
-                var mag = 0.0001f * nervousSystem.Organism.RigidBody.Mass;
-                var veloCap = 0.005f;
+                var mag = 0.0009f * nervousSystem.Organism.RigidBody.Mass;
+                var veloCap = 0.001f;
 
-                if (rigidBody.Velocity.Length() < veloCap)
+                var torque = dir * mag;
+                
+
+                if (rigidBody.Rotation.Length() < veloCap)
                 {
-                    rigidBody.addForce(dir * mag);
+                    rigidBody.addTorque(torque);
                     result = 1;
                 }
             }

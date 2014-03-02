@@ -57,6 +57,12 @@ namespace Aquarium.GA.SpacePartitions
             }
         }
 
+        /// <summary>
+        /// Update this object's registration
+        /// </summary>
+        /// <param name="obj">The object being tracked (presumed to be already registered)</param>
+        /// <param name="position">The position to associate this object with now</param>
+        /// <returns>True if new keys were added (clients should require cached locations)</returns>
         public void Update(T obj, Vector3 position)
         {
             UnRegister(obj);
@@ -232,6 +238,7 @@ namespace Aquarium.GA.SpacePartitions
                         }
                     }
                 }
+                
             }
             return list;
         }

@@ -9,7 +9,7 @@ using Aquarium.GA.Bodies;
 namespace Aquarium.GA.Organs
 {
 
-    public class NeuralOrgan : IOOrgan
+    public class NeuralOrgan : IOOrgan, IRewardable
     {
         override public OrganType OrganType { get { return OrganType.Neural; } }
         public NeuralNetwork Network { get; private set; }
@@ -37,11 +37,25 @@ namespace Aquarium.GA.Organs
 
             var nextOutput = Network.ComputeOutputs(LastInput.Value.ToArray()).ToList();
             OutputSignal = new Signal(nextOutput);
-
-
+            var moment = new NOMoment { Input = LastInput, Output = OutputSignal };
+            nervousSystem.RegisterMoment(this, moment);
         }
 
-        
+
+        class NOMoment : IMoment
+        {
+            public Signal Input
+            {
+                get;
+                set;
+            }
+
+            public Signal Output
+            {
+                get;
+                set;
+            }
+        }
 
     }
 

@@ -7,7 +7,8 @@ namespace Aquarium.GA.Organs
 {
     public enum OrganType
     {
+        Ability,
         Neural,
-        Ability
+        Reward
     }
 }
