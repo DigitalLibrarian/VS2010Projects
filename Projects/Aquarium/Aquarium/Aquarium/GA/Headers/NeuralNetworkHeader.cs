@@ -7,7 +7,12 @@ namespace Aquarium.GA.Headers
 {
     public struct NeuralNetworkHeader
     {
-        public static int Size { get { return 6; } }
+
+        public const int MaxInputs = 4;
+        public const int MaxHidden = 4;
+        public const int MaxOutputs = 4;
+
+        public static int Size { get { return 6 + (ComputeNumWeights(MaxInputs, MaxHidden, MaxOutputs) * 2); } }
 
         public int BodyPartPointer;
         public int OrganPointer;
@@ -37,43 +42,42 @@ namespace Aquarium.GA.Headers
         }
 
 
-        public static NeuralNetworkHeader FromGenes(List<int> partGene)
+        public static NeuralNetworkHeader FromGenes(List<int> genes)
         {
-            const int maxInputs = 12;
-            const int maxHidden = 10;
-            const int maxOutputs = 12;
 
 
-            var bodyPart = Fuzzy.PositiveInteger(partGene[0]);
-            var organNum = Fuzzy.PositiveInteger(partGene[1]);
+            var bodyPart = Fuzzy.PositiveInteger(genes[0]);
+            var organNum = Fuzzy.PositiveInteger(genes[1]);
 
-            var numInputs = Fuzzy.InRange(partGene[2], 0, maxInputs);
-            var numHidden = Fuzzy.InRange(partGene[3], 0, maxHidden);
-            var numOutputs = Fuzzy.InRange(partGene[4], 0, maxOutputs);
+            var numInputs = Fuzzy.InRange(genes[2], 0, MaxInputs);
+            var numHidden = Fuzzy.InRange(genes[3], 0, MaxHidden);
+            var numOutputs = Fuzzy.InRange(genes[4], 0, MaxOutputs);
 
             numInputs = Math.Max(numInputs, 1);
             numOutputs = Math.Max(numOutputs, 1);
 
-            var rngSeed = Fuzzy.PositiveInteger(partGene[5]);
-                
-            var random = new Random(rngSeed);
-
+            var rngSeed = Fuzzy.PositiveInteger(genes[5]);
+            
             int numWeights = NeuralNetworkHeader.ComputeNumWeights(numInputs, numHidden, numOutputs);
             int numNeeded = numWeights * 2;
 
             var weights = new double[numWeights];
 
-            var index = 5;
+            var index = 6;
 
 
             for (int i = 0; i < numWeights; i++)
             {
-                weights[i] = random.NextDouble();
+                var one = genes[index];
+                var two = genes[index + 1];
+                weights[i] = Fuzzy.TwoComponentDouble(one, two);
 
                 index+=2;
             }
 
             return new NeuralNetworkHeader(bodyPart, organNum, numInputs, numHidden, numOutputs, weights);
         }
+
+
     }
 }

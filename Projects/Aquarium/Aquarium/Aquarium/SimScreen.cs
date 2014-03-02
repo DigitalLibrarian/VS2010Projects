@@ -44,10 +44,10 @@ namespace Aquarium
             Coarse = new Space<PopulationMember>(500);
             Fine = new EnvironmentSpace(250, 250);
 
-            int minPopSize = 100;
-            int maxPopSize = 200;
-            int spawnRange = 100;
-            int geneCap = 2000;
+            int minPopSize = 200;
+            int maxPopSize = 300;
+            int spawnRange = 50;
+            int geneCap = 10000;
 
             var rPop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
             rPop.OnAdd += new Population.OnAddEventHandler((mem) =>
@@ -63,8 +63,7 @@ namespace Aquarium
                 Fine.UnRegister(mem as IEnvMember);
             });
 
-            rPop.GenerateUntilSize(minPopSize / 2, rPop.SpawnRange, 10);
-            rPop.GenerateUntilSize(maxPopSize, rPop.SpawnRange, 10);
+            rPop.GenerateUntilSize(minPopSize, rPop.SpawnRange, 10);
 
             Pop = rPop;
             DrawRadius = 50;
