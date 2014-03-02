@@ -20,9 +20,7 @@ namespace Aquarium.GA.Headers
         public int NumInputs;
         public int NumHidden;
         public int NumOutputs;
-
-        //TODO - add rng seed from read method as property like others
-
+        
         public double[] Weights;
 
         public NeuralNetworkHeader(int bpp, int op, int numInputs, int numHidden, int numOutputs, double[] weights)

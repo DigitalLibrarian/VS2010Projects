@@ -67,7 +67,7 @@ namespace Aquarium.GA
             RigidBody.Awake = true;
             RigidBody.CanSleep = true;
             RigidBody.LinearDamping = 0.999f;
-            RigidBody.AngularDamping = 0.99f;
+            RigidBody.AngularDamping = 0.999f;
             RigidBody.Mass = 1f;
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 

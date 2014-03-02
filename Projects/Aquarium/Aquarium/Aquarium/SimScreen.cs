@@ -44,9 +44,9 @@ namespace Aquarium
             Coarse = new Space<PopulationMember>(500);
             Fine = new EnvironmentSpace(250, 250);
 
-            int minPopSize = 200;
-            int maxPopSize = 300;
-            int spawnRange = 50;
+            int minPopSize = 150;
+            int maxPopSize = 250;
+            int spawnRange = 25;
             int geneCap = 10000;
 
             var rPop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
@@ -63,7 +63,7 @@ namespace Aquarium
                 Fine.UnRegister(mem as IEnvMember);
             });
 
-            rPop.GenerateUntilSize(minPopSize, rPop.SpawnRange, 10);
+            rPop.GenerateUntilSize(maxPopSize, rPop.SpawnRange, 10);
 
             Pop = rPop;
             DrawRadius = 50;
@@ -295,13 +295,13 @@ namespace Aquarium
             var random = new Random();
             var members = Pop.ToList();
 
-            var spawnRange = 100;
+            var spawnRange = Pop.SpawnRange;
 
-            if (!Pop.NeedsSpawn) return;
+            var projectedSize = Pop.Size + Births.Count();
 
-
+            if (projectedSize > Pop.MaxPop) return;
             
-            Action<BodyGenome, Vector3> birther = (BodyGenome off, Vector3 pos) =>
+            Action<BodyGenome> birther = (BodyGenome off) =>
             {
 
                 Pop.Splicer.Mutate(off);
@@ -321,34 +321,50 @@ namespace Aquarium
             };
 
 
-
-            var p1 = random.NextElement(members);
-            var p2 = random.NextElement(members);
-
-            var a1 = p1.Specimen.Age;
-            var a2 = p2.Specimen.Age;
-
-
-            var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-
-            birther(offspring1[0], p1.Position);
-            birther(offspring1[1], p2.Position);
-
-            if (a1 > a2)
+            var numMinLeft =  projectedSize - Pop.Size;
+            while (numMinLeft > 0)
             {
-                p2 = random.NextElement(members);
+                var mem = Pop.RandomMember(6);
+                if (mem != null)
+                {
+                    mem.Specimen.Position = random.NextVector() * spawnRange;
+                    Births.Enqueue(mem);
+                    numMinLeft--;
+                }
             }
-            else if (a1 < a2) ;
+
+
+            
+            while(Pop.Size + Births.Count < Pop.MaxPop)
             {
-                p1 = random.NextElement(members);
+                var p1 = random.NextElement(members);
+                var p2 = random.NextElement(members);
+
+                var a1 = p1.Specimen.Age;
+                var a2 = p2.Specimen.Age;
+
+
+                var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
+
+                birther(offspring1[0]);
+                birther(offspring1[1]);
+
+                if (a1 > a2)
+                {
+                    p2 = random.NextElement(members);
+                }
+                else if (a1 < a2) ;
+                {
+                    p1 = random.NextElement(members);
+                }
+                var offspring2 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
+
+                birther(offspring2[0]);
+                birther(offspring2[1]);
             }
-            var offspring2 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-
-            birther(offspring2[0], p1.Position);
-            birther(offspring2[1], p2.Position);
-
 
         }
+
         #endregion
     }
 }

@@ -137,6 +137,7 @@
     <Compile Include="GA\Organs\OrganAbilities\QueryClosestFoodAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryEnergyRemainingAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryVelocityAbility.cs" />
+    <Compile Include="GA\Organs\OrganAbilities\SpinnerAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\ThrusterAbility.cs" />
     <Compile Include="GA\Organs\OrganType.cs" />
     <Compile Include="GA\Phenotypes\BodyPartPhenotype.cs" />

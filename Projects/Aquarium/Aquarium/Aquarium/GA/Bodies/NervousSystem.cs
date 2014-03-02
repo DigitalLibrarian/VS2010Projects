@@ -14,6 +14,8 @@ namespace Aquarium.GA.Bodies
         List<Organ> _organs = new List<Organ>();
         public Organism Organism { get; private set; }
 
+        public bool IsDead { get { return Organism.IsDead; } }
+
         public NervousSystem(Organism body)
         {
             Organism = body;

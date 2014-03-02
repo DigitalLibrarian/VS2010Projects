@@ -8,26 +8,16 @@ using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Organs.OrganAbilities
 {
-    public class ThrusterAbility : OrganAbility
+    public class SpinnerAbility : OrganAbility
     {
-
-        public override int NumInputs
-        {
-            get { return 1; }
-        }
-
-        public override int NumOutputs
-        {
-            get { return 1; }
-        }
-
-        public ThrusterAbility(int param0)
+          public SpinnerAbility(int param0)
             : base(param0)
         {
             SocketId = param0;
         }
 
         int SocketId { get; set; }
+
 
 
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
@@ -39,22 +29,33 @@ namespace Aquarium.GA.Organs.OrganAbilities
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);
 
+                var body = nervousSystem.Organism.Body;
                 var dir = socket.Normal;
-                dir = Vector3.Transform(dir, rigidBody.Orientation);
 
-                var mag = 0.0001f * nervousSystem.Organism.RigidBody.Mass;
+                var mag = 0.00005f * nervousSystem.Organism.RigidBody.Mass;
                 var veloCap = 0.005f;
-                var bodyPressurePoint = Vector3.Transform(parent.Part.LocalPosition + socket.LocalPosition, rigidBody.World);
 
+                var torque = dir * mag;
+                
 
-                if (rigidBody.Velocity.Length() < veloCap)
+                if (rigidBody.Rotation.Length() < veloCap)
                 {
-                    rigidBody.addForce(dir * mag, bodyPressurePoint);
+                    rigidBody.addTorque(torque);
                     result = 1;
                 }
             }
 
             return new Signal(new List<double> { result });
+        }
+
+        public override int NumInputs
+        {
+            get { return 1; }
+        }
+
+        public override int NumOutputs
+        {
+            get { return 1; }
         }
     }
 }
