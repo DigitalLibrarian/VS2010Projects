@@ -129,26 +129,12 @@ namespace Aquarium
         {
             GraphicsDevice.Clear(Color.Black);
 
-            Set3DRenderStates();
+            RenderContext.Set3DRenderStates();
             base.Draw(gameTime);
 
-            Set2DRenderStates();
+            RenderContext.Set2DRenderStates();
             Terminal.CheckDraw(true);
         }
 
-        void Set2DRenderStates()
-        {
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-            GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-        }
-        void Set3DRenderStates()
-        {
-            // Set suitable renderstates for drawing a 3D model
-            GraphicsDevice.BlendState = BlendState.Opaque;
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-            GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
-        }
     }
 }

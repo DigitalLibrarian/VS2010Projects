@@ -11,6 +11,7 @@ namespace Forever.Physics
     {
         bool Awake { get; }
         void addForce(Vector3 force);
+        void addTorque(Vector3 torque);
         void addForce(Vector3 force, Vector3 point);
         void integrate(float duration);
 

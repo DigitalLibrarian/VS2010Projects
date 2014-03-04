@@ -20,8 +20,8 @@ namespace Aquarium.GA
 
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Env { get; set; }
-
-        private const float EnergyBleed = 0.99f;
+        
+        private const float EnergyBleed = 0.99999f;
         private const float EnergyFlatline = 1f;
         /// <summary>
         /// Gets or sets the position of the organism.
@@ -127,6 +127,7 @@ namespace Aquarium.GA
             if (energy > 0)
             {
                 Energy = energy;
+                EdibleEnergy = Energy;
                 return biteSize;
             }
             else

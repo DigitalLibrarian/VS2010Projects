@@ -18,9 +18,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
         int SocketId { get; set; }
 
-
-
-        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
+        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
             var num = signal.Value[0];
             var result = 0;
@@ -32,7 +30,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
                 var body = nervousSystem.Organism.Body;
                 var dir = socket.Normal;
 
-                var mag = 0.00005f * nervousSystem.Organism.RigidBody.Mass;
+                var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
                 var veloCap = 0.005f;
 
                 var torque = dir * mag;
@@ -40,9 +38,14 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
                 if (rigidBody.Rotation.Length() < veloCap)
                 {
-                    rigidBody.addTorque(torque);
+                    fg.Torque = torque;
                     result = 1;
                 }
+            }
+
+            if (result != 1)
+            {
+                fg.Torque = Vector3.Zero;
             }
 
             return new Signal(new List<double> { result });

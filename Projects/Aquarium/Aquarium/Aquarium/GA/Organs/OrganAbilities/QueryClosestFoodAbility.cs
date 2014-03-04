@@ -25,7 +25,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
             get { return 3; }
         }
 
-        public override Signal Fire(Bodies.NervousSystem nervousSystem, Organ parent, Signals.Signal signal)
+        public override Signal Fire(Bodies.NervousSystem nervousSystem, Organ parent, Signals.Signal signal, MutableForceGenerator fg)
         {
             //TODO - change this sometime, for now we always bite
             double r1=0, r2=0, r3=0;
@@ -33,7 +33,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
             if (env != null)
             {
 
-                var searchRadius = 10f;
+                var searchRadius = 25f;
                 //find food
                 var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
                 if (foods.Any())

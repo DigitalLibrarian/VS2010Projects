@@ -15,8 +15,8 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
         public override int NumInputs { get { return 1; }}
         public override int NumOutputs { get { return 3; } }
-        
-        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
+
+        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
             if (signal.Value[0] > 0.5f)
             {

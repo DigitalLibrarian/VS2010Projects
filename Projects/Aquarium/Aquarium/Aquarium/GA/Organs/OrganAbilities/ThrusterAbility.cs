@@ -10,7 +10,6 @@ namespace Aquarium.GA.Organs.OrganAbilities
 {
     public class ThrusterAbility : OrganAbility
     {
-
         public override int NumInputs
         {
             get { return 1; }
@@ -30,7 +29,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
         int SocketId { get; set; }
 
 
-        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal)
+        public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
             var num = signal.Value[0];
             var result = 0;
@@ -42,16 +41,27 @@ namespace Aquarium.GA.Organs.OrganAbilities
                 var dir = socket.Normal;
                 dir = Vector3.Transform(dir, rigidBody.Orientation);
 
-                var mag = 0.0001f * nervousSystem.Organism.RigidBody.Mass;
-                var veloCap = 0.005f;
+                var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
+                var veloCap = 0.0025f;
                 var bodyPressurePoint = Vector3.Transform(parent.Part.LocalPosition + socket.LocalPosition, rigidBody.World);
 
 
                 if (rigidBody.Velocity.Length() < veloCap)
                 {
-                    rigidBody.addForce(dir * mag, bodyPressurePoint);
+                    var force = dir * mag;
+                    var point = bodyPressurePoint;
+
+                    fg.Force = force;
+                    fg.Position = bodyPressurePoint;
+
                     result = 1;
                 }
+            }
+
+            if (result != 1)
+            {
+                fg.Force = Vector3.Zero;
+                fg.Position = null;
             }
 
             return new Signal(new List<double> { result });

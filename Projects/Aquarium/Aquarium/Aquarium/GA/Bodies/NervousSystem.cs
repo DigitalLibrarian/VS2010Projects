@@ -20,7 +20,7 @@ namespace Aquarium.GA.Bodies
         {
             Organism = body;
         }
-
+        
 
         public void Update()
         {
@@ -32,9 +32,5 @@ namespace Aquarium.GA.Bodies
                 }
             }
         }
-
-        
-        
-        
     }
 }

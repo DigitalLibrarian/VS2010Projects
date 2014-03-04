@@ -133,6 +133,8 @@
     <Compile Include="GA\Genomes\BodyGenome.cs" />
     <Compile Include="GA\Genomes\Gene.cs" />
     <Compile Include="GA\Genomes\Genome.cs" />
+    <Compile Include="GA\Organs\AbilityOrgan.cs" />
+    <Compile Include="GA\Organs\OrganAbilities\MutableForceGenerator.cs" />
     <Compile Include="GA\Organs\OrganAbilities\FoodBitterAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryClosestFoodAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryEnergyRemainingAbility.cs" />

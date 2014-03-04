@@ -13,6 +13,7 @@ using Aquarium.GA.SpacePartitions;
 using Aquarium.GA.Environments;
 using Aquarium.GA.Genomes;
 using System.Collections.Concurrent;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Aquarium
 {
@@ -33,19 +34,24 @@ namespace Aquarium
         public Space<PopulationMember> Coarse { get; private set; }
         public EnvironmentSpace Fine { get; private set; }
 
+        public ForceRegistry ForceRegistry { get; private set; }
 
         Thread GenerateThread;
-
+        int SpawnThreadFreq = 500;
+        int MaxPerSpawnPump = 50;
+        int DefaultParts = 10;
+        int BirthsPerUpdate = 1;
+        int MaxBirthQueueSize = 400;
         public SimScreen(RenderContext renderContext)
         {
-
+            ForceRegistry = new Forever.Physics.ForceRegistry();
             RenderContext = renderContext;
 
             Coarse = new Space<PopulationMember>(500);
             Fine = new EnvironmentSpace(250, 250);
 
-            int minPopSize = 150;
-            int maxPopSize = 250;
+            int minPopSize = 50;
+            int maxPopSize = 150;
             int spawnRange = 25;
             int geneCap = 10000;
 
@@ -54,6 +60,7 @@ namespace Aquarium
             {
                 Coarse.Register(mem, mem.Position);
                 Fine.Register(mem as IEnvMember, mem.Position);
+                RegisterForces(mem);
             });
 
             rPop.OnRemove += new Population.OnRemoveEventHandler((mem) =>
@@ -61,25 +68,57 @@ namespace Aquarium
 
                 Coarse.UnRegister(mem);
                 Fine.UnRegister(mem as IEnvMember);
+                UnRegisterForces(mem);
             });
 
-            rPop.GenerateUntilSize(maxPopSize, rPop.SpawnRange, 10);
 
             Pop = rPop;
             DrawRadius = 50;
             UpdateRadius = 25;
-
 
             GenerateThread = new Thread(new ThreadStart(
                 () => {
                     while (true)
                     {
                         UpdatePopMonitoring();
-                        System.Threading.Thread.Sleep(10);
+                        System.Threading.Thread.Sleep(SpawnThreadFreq);
                     }
                     
                 }
                     ));
+
+            while (Births.Count() < Pop.MinPop) UpdatePopMonitoring();
+        }
+
+        private void RegisterForces(PopulationMember mem)
+        {
+
+            foreach (var part in mem.Specimen.Body.Parts)
+            {
+                foreach (var organ in part.Organs)
+                {
+                    var fg = organ.ForceGenerator;
+                    if (fg != null)
+                    {
+                        ForceRegistry.Add(mem.Specimen.RigidBody, fg);
+                    }
+                }
+            }
+        }
+
+        private void UnRegisterForces(PopulationMember mem)
+        {
+            foreach (var part in mem.Specimen.Body.Parts)
+            {
+                foreach (var organ in part.Organs)
+                {
+                    var fg = organ.ForceGenerator;
+                    if (fg != null)
+                    {
+                        ForceRegistry.Remove(mem.Specimen.RigidBody, fg);
+                    }
+                }
+            }
         }
 
 
@@ -89,7 +128,6 @@ namespace Aquarium
 
             SetupCamera();
 
-
             GenerateThread.IsBackground = true;
             GenerateThread.Start();
 
@@ -97,7 +135,7 @@ namespace Aquarium
 
         public override void UnloadContent()
         {
-               GenerateThread.Abort();
+            GenerateThread.Abort();
             System.Threading.SpinWait.SpinUntil(() => 
                 {
                     System.Threading.Thread.Sleep(100);
@@ -146,8 +184,22 @@ namespace Aquarium
                     Renderer.Render(context, part.Box, Color.Red);
                 }
             }
- 
+
+            RenderContext.Set2DRenderStates();
+            var batch = ScreenManager.SpriteBatch;
+            var font = ScreenManager.Font;
+            var text = string.Format("Pop: {0}", Pop.Size);
+            var textPos = new Vector2(0, 16);
+            var color = Color.Yellow;
+            batch.Begin();
+            batch.DrawString(font, text, textPos, color);
+            textPos += new Vector2(0, 16);
+            text = string.Format("Queued for Birth: {0}", Births.Count());
+            batch.DrawString(font, text, textPos, color);
+            batch.End();
+            RenderContext.Set3DRenderStates();
         }
+
 
         public void Death(IEnumerable<PopulationMember> members)
         {
@@ -202,6 +254,7 @@ namespace Aquarium
                     else
                     {
                         var rigidBody = member.Specimen.RigidBody;
+                        ForceRegistry.UpdateForceGenerators(rigidBody, gameTime);
                         if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
                         {
                             Coarse.Update(member, member.Position);
@@ -214,21 +267,32 @@ namespace Aquarium
 
             Death(dead); //death to the dead
 
-            var births = Births.ToList();
-            foreach(var newBirth in births){
-                // new life to the living
-                if (newBirth != null)
-                {
-                    Pop.Register(newBirth);
-                    PopulationMember localValue;
-                    Births.TryDequeue(out localValue);
-                }
-            }            
+            UpdateBirths();   
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
         ConcurrentQueue<PopulationMember> Births = new ConcurrentQueue<PopulationMember>();
+
+        private void UpdateBirths()
+        {
+            if (Pop.Size > Pop.MaxPop) return;
+            int totalBirths = 0;
+
+            PopulationMember localValue;
+            while (totalBirths < BirthsPerUpdate && Births.TryPeek(out localValue))
+            {
+                Births.TryDequeue(out localValue);
+                // new life to the living
+                if (localValue != null)
+                {
+                    if (Pop.Register(localValue))
+                    {
+                        totalBirths++;
+                    }
+                }
+            }
+        }
 
         #region Camera Controls
 
@@ -290,52 +354,53 @@ namespace Aquarium
 
 
         #region Population Monitoring
+
         protected void UpdatePopMonitoring()
         {
+
             var random = new Random();
             var members = Pop.ToList();
 
             var spawnRange = Pop.SpawnRange;
 
-            var projectedSize = Pop.Size + Births.Count();
-
-            if (projectedSize > Pop.MaxPop) return;
+            if (Births.Count() > MaxBirthQueueSize) return;
+            int maxPer = MaxPerSpawnPump;
             
-            Action<BodyGenome> birther = (BodyGenome off) =>
+            Action<BodyGenome, Vector3> birther = (BodyGenome off, Vector3 pos) =>
             {
-
                 Pop.Splicer.Mutate(off);
 
                 var spawn = Population.SpawnFromGenome(off);
                 if (spawn != null)
                 {
-                    var r = random.NextVector();
-
-                    r *= spawnRange;
-                   
-                    spawn.Position = r;
+                    spawn.Position = pos;
 
                     var mem = new PopulationMember(off, spawn);
                     Births.Enqueue(mem);
                 }
             };
 
-
-            var numMinLeft =  projectedSize - Pop.Size;
-            while (numMinLeft > 0)
+            int numQueued = Births.Count();
+            if (numQueued + Pop.Size < Pop.MinPop)
             {
-                var mem = Pop.RandomMember(6);
-                if (mem != null)
+                var numMinLeft = Pop.MinPop - (numQueued);
+                while (numMinLeft > 0)
                 {
-                    mem.Specimen.Position = random.NextVector() * spawnRange;
-                    Births.Enqueue(mem);
-                    numMinLeft--;
+                    var mem = Pop.RandomMember(DefaultParts);
+                    if (mem != null)
+                    {
+                        mem.Specimen.Position = random.NextVector() * spawnRange;
+                        Births.Enqueue(mem);
+                        numMinLeft--;
+                        numQueued++;
+                    }
                 }
             }
 
 
-            
-            while(Pop.Size + Births.Count < Pop.MaxPop)
+
+            int total = 0;
+            while(members.Any() && numQueued < MaxBirthQueueSize && total < maxPer)
             {
                 var p1 = random.NextElement(members);
                 var p2 = random.NextElement(members);
@@ -345,10 +410,12 @@ namespace Aquarium
 
 
                 var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-
-                birther(offspring1[0]);
-                birther(offspring1[1]);
-
+                var center = (p1.Position * 0.5f) + (p2.Position * 0.5f);
+                
+                birther(offspring1[0], center + random.NextVector() * spawnRange);
+                birther(offspring1[1], center + random.NextVector() * spawnRange);
+                numQueued += 2;
+                total += 2;
                 if (a1 > a2)
                 {
                     p2 = random.NextElement(members);
@@ -358,9 +425,11 @@ namespace Aquarium
                     p1 = random.NextElement(members);
                 }
                 var offspring2 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-
-                birther(offspring2[0]);
-                birther(offspring2[1]);
+                center = (p1.Position * 0.5f) + (p2.Position * 0.5f);
+                birther(offspring2[0], center + random.NextVector() * spawnRange);
+                birther(offspring2[1], center + random.NextVector() * spawnRange);
+                numQueued += 2;
+                total += 2;
             }
 
         }

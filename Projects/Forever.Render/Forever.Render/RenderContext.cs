@@ -32,9 +32,24 @@ namespace Forever.Render
     public void Render(IRenderable entity, GameTime gameTime){
 
       entity.Render(this, gameTime);
-
-
-
     }
+
+
+    public void Set2DRenderStates()
+    {
+        GraphicsDevice.BlendState = BlendState.AlphaBlend;
+        GraphicsDevice.DepthStencilState = DepthStencilState.None;
+        GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+        GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+    }
+    public void Set3DRenderStates()
+    {
+        // Set suitable renderstates for drawing a 3D model
+        GraphicsDevice.BlendState = BlendState.Opaque;
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+    }
+
+
   }
 }
