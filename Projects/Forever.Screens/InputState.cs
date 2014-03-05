@@ -33,9 +33,11 @@ namespace Forever.Screens
 
         public readonly KeyboardState[] CurrentKeyboardStates;
         public readonly GamePadState[] CurrentGamePadStates;
+        public MouseState CurrentMouseState;
 
         public readonly KeyboardState[] LastKeyboardStates;
         public readonly GamePadState[] LastGamePadStates;
+        public MouseState LastMouseState;
 
 
         #endregion
@@ -148,18 +150,23 @@ namespace Forever.Screens
         public virtual void Update()
         {
 
-          for (int i = 0; i < MaxInputs; i++)
-          {
-            LastKeyboardStates[i] = CurrentKeyboardStates[i];
-            LastGamePadStates[i] = CurrentGamePadStates[i];
-
-            CurrentKeyboardStates[i] = Keyboard.GetState((PlayerIndex)i);
-            CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i);
-
-          }
-
+            for (int i = 0; i < MaxInputs; i++)
+            {
+                LastKeyboardStates[i] = CurrentKeyboardStates[i];
+                LastGamePadStates[i] = CurrentGamePadStates[i];
+              
+                CurrentKeyboardStates[i] = Keyboard.GetState((PlayerIndex)i);
+                CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i);
+            }
+            LastMouseState = CurrentMouseState;
+            CurrentMouseState = Mouse.GetState();
         }
 
+        public bool IsMouseLeftClick()
+        {
+            return (CurrentMouseState.LeftButton == ButtonState.Released
+                && LastMouseState.LeftButton == ButtonState.Pressed);
+        }
 
 
 

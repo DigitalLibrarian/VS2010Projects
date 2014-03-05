@@ -27,9 +27,10 @@ namespace Aquarium.UI
             }
         }
 
-
         public IActionBarAction Action { get; set; }
         ActionBar ActionBar { get; set; }
+
+        public Rectangle LastRectangle { get; private set; }
 
         public Slot(ActionBar bar, Keys key, int index, int totalCoolDown)
         {
@@ -49,8 +50,6 @@ namespace Aquarium.UI
             RenderContext renderContext)
         {
             var rect = GetRectangle(renderContext.GraphicsDevice.Viewport);
-
-
             batch.DrawRectangle(rect, Color.White, 1);
 
             var label = Key.ToString();
@@ -72,6 +71,8 @@ namespace Aquarium.UI
             if (State == SlotState.CoolDown)
                 color = Color.Yellow;
             batch.DrawString(font, label, labelPoint, color);
+
+            LastRectangle = rect;
         }
 
         private Rectangle GetRectangle(Viewport viewport)
@@ -87,7 +88,7 @@ namespace Aquarium.UI
             var toBegin = -totalBarWidth / 2;
             var x = center + toBegin + offX;
 
-            return new Rectangle(x, y, ActionBar.SlotWidth, ActionBar.SlotHeight);
+            return new Rectangle(x, y-5, ActionBar.SlotWidth, ActionBar.SlotHeight);
         }
 
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)
@@ -142,6 +143,11 @@ namespace Aquarium.UI
 
         bool activation = false;
         public void OnButtonPress()
+        {
+            activation = true;
+        }
+
+        public void OnMouseClick()
         {
             activation = true;
         }

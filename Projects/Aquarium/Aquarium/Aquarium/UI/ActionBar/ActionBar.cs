@@ -98,6 +98,14 @@ namespace Aquarium.UI
                 {
                     slot.OnButtonPress();
                 }
+                else if (input.IsMouseLeftClick())
+                {
+                    var point = new Point(input.CurrentMouseState.X, input.CurrentMouseState.Y);
+                    if (slot.LastRectangle.Contains(point))
+                    {
+                        slot.OnMouseClick();
+                    }
+                }
             }
         }
 

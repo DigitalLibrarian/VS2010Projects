@@ -57,15 +57,15 @@ namespace Aquarium
             int spawnRange = 25;
             int geneCap = 10000;
 
-            var rPop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
-            rPop.OnAdd += new Population.OnAddEventHandler((mem) =>
+            Pop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
+            Pop.OnAdd += new Population.OnAddEventHandler((mem) =>
             {
                 Coarse.Register(mem, mem.Position);
                 Fine.Register(mem as IEnvMember, mem.Position);
                 RegisterForces(mem);
             });
 
-            rPop.OnRemove += new Population.OnRemoveEventHandler((mem) =>
+            Pop.OnRemove += new Population.OnRemoveEventHandler((mem) =>
             {
 
                 Coarse.UnRegister(mem);
@@ -73,8 +73,6 @@ namespace Aquarium
                 UnRegisterForces(mem);
             });
 
-
-            Pop = rPop;
             DrawRadius = 50;
             UpdateRadius = 25;
 
