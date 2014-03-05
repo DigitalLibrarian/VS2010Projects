@@ -22,7 +22,6 @@ using Aquarium.GA.Phenotypes;
 using Aquarium.GA.Headers;
 using Aquarium.GA.Codons;
 using Aquarium.GA.Bodies;
-using System.Threading;
 
 namespace Aquarium
 {
@@ -37,7 +36,6 @@ namespace Aquarium
         RenderContext RenderContext;
         public ICamera Camera { get; set; }
         ScreenManager ScreenManager { get; set; }
-
         Random Random = new Random();
 
         

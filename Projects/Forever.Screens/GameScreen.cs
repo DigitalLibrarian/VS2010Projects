@@ -51,8 +51,16 @@ namespace Forever.Screens
             get { return propagateDraw; }
             protected set { propagateDraw = value; }
         }
-
         bool propagateDraw = false;
+
+        public bool PropagateInput
+        {
+
+            get { return propagateInput; }
+            protected set { propagateInput = value; }
+        }
+        bool propagateInput = false;
+
 
 
         /// <summary>

@@ -171,6 +171,10 @@
     <Compile Include="Game1.cs" />
     <Compile Include="GA\BodyGenerator.cs" />
     <Compile Include="SimScreen.cs" />
+    <Compile Include="UI\ActionBar\ActionBarAction.cs" />
+    <Compile Include="UI\ActionBar\Slot.cs" />
+    <Compile Include="UI\ActionBar\SlotState.cs" />
+    <Compile Include="UI\ActionBar\ActionBar.cs" />
     <Compile Include="UserControls.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -182,8 +182,8 @@ namespace Forever.Screens
                     if (!otherScreenHasFocus)
                     {
                         screen.HandleInput(input);
-
-                        otherScreenHasFocus = true;
+                        if(!screen.PropagateInput)
+                            otherScreenHasFocus = true;
                     }
 
                     // If this is an active non-popup, inform any subsequent

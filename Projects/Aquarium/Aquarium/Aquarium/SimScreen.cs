@@ -14,11 +14,11 @@ using Aquarium.GA.Environments;
 using Aquarium.GA.Genomes;
 using System.Collections.Concurrent;
 using Microsoft.Xna.Framework.Graphics;
+using Aquarium.UI;
+using Microsoft.Xna.Framework.Content;
 
 namespace Aquarium
 {
-
-
     public class SimScreen : GameScreen
     {
         public RandomPopulation Pop { get; private set; }
@@ -35,6 +35,8 @@ namespace Aquarium
         public EnvironmentSpace Fine { get; private set; }
 
         public ForceRegistry ForceRegistry { get; private set; }
+
+        ActionBar ActionBar { get; set; }
 
         Thread GenerateThread;
         int SpawnThreadFreq = 500;
@@ -88,6 +90,7 @@ namespace Aquarium
                     ));
 
             while (Births.Count() < Pop.MinPop) UpdatePopMonitoring();
+
         }
 
         private void RegisterForces(PopulationMember mem)
@@ -127,10 +130,10 @@ namespace Aquarium
             base.LoadContent();
 
             SetupCamera();
+            SetupUI(ScreenManager.Game.Content);
 
             GenerateThread.IsBackground = true;
             GenerateThread.Start();
-
         }
 
         public override void UnloadContent()
@@ -185,19 +188,7 @@ namespace Aquarium
                 }
             }
 
-            RenderContext.Set2DRenderStates();
-            var batch = ScreenManager.SpriteBatch;
-            var font = ScreenManager.Font;
-            var text = string.Format("Pop: {0}", Pop.Size);
-            var textPos = new Vector2(0, 16);
-            var color = Color.Yellow;
-            batch.Begin();
-            batch.DrawString(font, text, textPos, color);
-            textPos += new Vector2(0, 16);
-            text = string.Format("Queued for Birth: {0}", Births.Count());
-            batch.DrawString(font, text, textPos, color);
-            batch.End();
-            RenderContext.Set3DRenderStates();
+            ActionBar.Draw(gameTime);
         }
 
 
@@ -267,7 +258,9 @@ namespace Aquarium
 
             Death(dead); //death to the dead
 
-            UpdateBirths();   
+            UpdateBirths();
+
+            ActionBar.Update(gameTime);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -296,6 +289,7 @@ namespace Aquarium
 
         #region Camera Controls
 
+            //TODO - break out into class
         protected ICamera Camera { get { return RenderContext.Camera; } }
         private void SetupCamera()
         {
@@ -349,6 +343,17 @@ namespace Aquarium
         {
             base.HandleInput(input);
             CamControls.HandleInput(input);
+            ActionBar.HandleInput(input);
+        }
+        #endregion
+
+        #region UI
+        private void SetupUI(ContentManager content)
+        {
+            //TODO - pick better font
+            var spriteBatch = ScreenManager.SpriteBatch;
+            var spriteFont = ScreenManager.Font;
+            ActionBar = new ActionBar(RenderContext, new Vector2(0, 440), 50, 40, spriteBatch, spriteFont);
         }
         #endregion
 
