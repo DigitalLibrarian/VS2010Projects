@@ -12,6 +12,6 @@ namespace Forever.Physics
 
   public interface IForceGenerator
   {
-    void updateForce(IPhysicsObject p, GameTime gameTime);
+    void updateForce(IPhysicsObject p, float duration);
   }
 }

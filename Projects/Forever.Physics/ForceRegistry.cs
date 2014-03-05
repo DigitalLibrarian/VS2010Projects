@@ -67,7 +67,7 @@ namespace Forever.Physics
         }
 
 
-        public void UpdateForceGenerators(IPhysicsObject p, GameTime gameTime)
+        public void UpdateForceGenerators(IPhysicsObject p, float duration)
         {
             if (registry.ContainsKey(p))
             {
@@ -76,7 +76,7 @@ namespace Forever.Physics
                 registry[p].CopyTo(list, 0);
                 for (int i = 0; i < size; i++)
                 {
-                    list[i].updateForce(p, gameTime);
+                    list[i].updateForce(p, duration);
                 }
 
             }

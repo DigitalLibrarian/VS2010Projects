@@ -20,18 +20,18 @@ namespace Aquarium.GA.Organs.OrganAbilities
             Torque = Vector3.Zero;
         }
 
-        public void updateForce(IPhysicsObject p, GameTime gameTime)
+        public void updateForce(IPhysicsObject p, float duration)
         {
             if (Position != null)
             {
-                p.addForce(Force, (Vector3)Position);
+                p.addForce(Force * duration, (Vector3)Position);
             }
             else
             {
-                p.addForce(Force);
+                p.addForce(Force * duration);
             }
 
-            p.addTorque(Torque);
+            p.addTorque(Torque * duration);
         }
     }
 }

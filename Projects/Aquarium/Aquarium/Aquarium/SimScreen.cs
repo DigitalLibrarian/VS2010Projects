@@ -33,8 +33,6 @@ namespace Aquarium
         public Space<PopulationMember> Coarse { get; private set; }
         public EnvironmentSpace Fine { get; private set; }
 
-        public ForceRegistry ForceRegistry { get; private set; }
-
         public UserControls Controls { get; private set; }
         public MouseSteering Steering { get; private set; }
         public ActionBar ActionBar { get; private set; }
@@ -48,7 +46,6 @@ namespace Aquarium
         int MaxBirthQueueSize = 400;
         public SimScreen(RenderContext renderContext)
         {
-            ForceRegistry = new Forever.Physics.ForceRegistry();
             RenderContext = renderContext;
 
             Coarse = new Space<PopulationMember>(500);
@@ -64,14 +61,12 @@ namespace Aquarium
             {
                 Coarse.Register(mem, mem.Position);
                 Fine.Register(mem as IEnvMember, mem.Position);
-                RegisterForces(mem);
             });
 
             Pop.OnRemove += new Population.OnRemoveEventHandler((mem) =>
             {
                 Coarse.UnRegister(mem);
                 Fine.UnRegister(mem as IEnvMember);
-                UnRegisterForces(mem);
             });
 
             DrawRadius = 50;
@@ -90,37 +85,6 @@ namespace Aquarium
 
             while (Births.Count() < Pop.MinPop) UpdatePopMonitoring();
 
-        }
-
-        private void RegisterForces(PopulationMember mem)
-        {
-
-            foreach (var part in mem.Specimen.Body.Parts)
-            {
-                foreach (var organ in part.Organs)
-                {
-                    var fg = organ.ForceGenerator;
-                    if (fg != null)
-                    {
-                        ForceRegistry.Add(mem.Specimen.RigidBody, fg);
-                    }
-                }
-            }
-        }
-
-        private void UnRegisterForces(PopulationMember mem)
-        {
-            foreach (var part in mem.Specimen.Body.Parts)
-            {
-                foreach (var organ in part.Organs)
-                {
-                    var fg = organ.ForceGenerator;
-                    if (fg != null)
-                    {
-                        ForceRegistry.Remove(mem.Specimen.RigidBody, fg);
-                    }
-                }
-            }
         }
 
 
@@ -220,7 +184,6 @@ namespace Aquarium
                 {
                     CurrentUpdatingPartition = Fine.GetOrCreate(camPos);
                     CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
-
                 }
             }
             else
@@ -246,7 +209,7 @@ namespace Aquarium
                     else
                     {
                         var rigidBody = member.Specimen.RigidBody;
-                        ForceRegistry.UpdateForceGenerators(rigidBody, gameTime);
+                       
                         if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
                         {
                             Coarse.Update(member, member.Position);

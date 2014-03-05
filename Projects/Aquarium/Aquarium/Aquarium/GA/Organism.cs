@@ -20,7 +20,7 @@ namespace Aquarium.GA
 
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Env { get; set; }
-        
+
         private const float EnergyBleed = 0.99999f;
         private const float EnergyFlatline = 1f;
         /// <summary>
@@ -72,6 +72,19 @@ namespace Aquarium.GA
             RigidBody.InertiaTensor = InertiaTensorFactory.Sphere(RigidBody.Mass, 1f);
 
             NervousSystem = new NervousSystem(this);
+
+            OrganForces = new List<IForceGenerator>();
+            foreach (var part in Body.Parts)
+            {
+                foreach (var organ in part.Organs)
+                {
+                    var fg = organ.ForceGenerator;
+                    if (fg != null)
+                    {
+                        OrganForces.Add(fg);
+                    }
+                }
+            }
         }
         private void ConfigureSpawnLevels()
         {
@@ -84,13 +97,13 @@ namespace Aquarium.GA
         long Tick = 0;
         public void Update(float duration)
         {
-            if (!IsDead && Tick++ % 2 == 0)
+            if (!IsDead && ((Tick++ % 2) == 0))
             {
                 UpdateMetabolism(duration);
                 NervousSystem.Update();
             }
-            UpdatePhysics(duration);
 
+            UpdatePhysics(duration);
         }
 
         protected void UpdateMetabolism(float duration)
@@ -107,9 +120,13 @@ namespace Aquarium.GA
             Energy += food.BeConsumed(BiteSize);
         }
 
-
+        List<IForceGenerator> OrganForces { get; set; }
         protected void UpdatePhysics(float duration)
         {
+            foreach (var fg in OrganForces)
+            {
+                fg.updateForce(RigidBody, duration);
+            }
             RigidBody.integrate(duration);
             Body.Position = RigidBody.Position;
             Body.World = RigidBody.World;
