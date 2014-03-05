@@ -6,8 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Forever.Screens;
 
-namespace Aquarium
+namespace Aquarium.UI
 {
+    // TODO - i wanna be able to support x3 controls
+
     public enum UserControlKeys
     {
         MoveFoward,
@@ -24,6 +26,7 @@ namespace Aquarium
         RollLeft,
 
         Shifter,
+        DoubleShifter,
 
         PrimaryFire,
         SecondaryFire
@@ -47,6 +50,8 @@ namespace Aquarium
         public bool PrimaryFire { get; set; }
         public bool SecondaryFire { get; set; }
 
+        public bool ControlSchemeToggle { get; set; }
+
         public PlayerIndex playerIndex;
         public Dictionary<Keys, UserControlKeys> KeyMappings = new Dictionary<Keys, UserControlKeys>();
 
@@ -63,9 +68,9 @@ namespace Aquarium
             KeyMappings[Keys.S] = UserControlKeys.MoveBackward;
             KeyMappings[Keys.A] = UserControlKeys.MoveLeft;
             KeyMappings[Keys.D] = UserControlKeys.MoveRight;
-            KeyMappings[Keys.Q] = UserControlKeys.TurnLeft;
+            KeyMappings[Keys.Q] = UserControlKeys.RollLeft;
             KeyMappings[Keys.Left] = UserControlKeys.TurnLeft;
-            KeyMappings[Keys.E] = UserControlKeys.TurnRight;
+            KeyMappings[Keys.E] = UserControlKeys.RollRight;
             KeyMappings[Keys.Right] = UserControlKeys.TurnRight;
             KeyMappings[Keys.X] = UserControlKeys.MoveUp;
             KeyMappings[Keys.Z] = UserControlKeys.MoveDown;
@@ -73,14 +78,15 @@ namespace Aquarium
             KeyMappings[Keys.Down] = UserControlKeys.LookUp;
             KeyMappings[Keys.Up] = UserControlKeys.LookDown;
 
-            KeyMappings[Keys.T] = UserControlKeys.RollRight;
-            KeyMappings[Keys.G] = UserControlKeys.RollLeft;
+            KeyMappings[Keys.T] = UserControlKeys.TurnRight;
+            KeyMappings[Keys.G] = UserControlKeys.TurnLeft;
 
             KeyMappings[Keys.LeftShift] = UserControlKeys.Shifter;
-            KeyMappings[Keys.RightShift] = UserControlKeys.Shifter;
+            KeyMappings[Keys.RightShift] = UserControlKeys.DoubleShifter;
 
             KeyMappings[Keys.LeftAlt] = UserControlKeys.PrimaryFire;
             KeyMappings[Keys.RightAlt] = UserControlKeys.SecondaryFire;
+
         }
 
 
@@ -89,6 +95,7 @@ namespace Aquarium
             Vector3 newTrans = Vector3.Zero;
             Vector3 newRot = Vector3.Zero;
             bool shift = false;
+            bool doubleShift = false;
             bool primaryFire = false;
             bool secondaryFire = false;
             foreach (KeyValuePair<Keys, UserControlKeys> pair in KeyMappings)
@@ -138,6 +145,9 @@ namespace Aquarium
                         case UserControlKeys.Shifter:
                             shift = true;
                             break;
+                        case UserControlKeys.DoubleShifter:
+                            doubleShift = true;
+                            break;
                         case UserControlKeys.PrimaryFire:
                             primaryFire = true;
                             break;
@@ -174,15 +184,20 @@ namespace Aquarium
                 shift = true;
             }
 
-            if (shift && gamePad.IsButtonDown(Buttons.RightTrigger))
+            if (gamePad.IsButtonDown(Buttons.RightTrigger))
             {
-                newTrans += newTrans * 10;
+                doubleShift = true;
             }
 
             force = newTrans;
             if (force.Length() > 0)
             {
                 force *= shift ? ForceShiftMag : ForceMag;
+                if (shift && doubleShift)
+                {
+
+                    force *= 10;
+                }
             }
 
             torque = newRot;
@@ -193,6 +208,7 @@ namespace Aquarium
             PrimaryFire = primaryFire;
             SecondaryFire = secondaryFire;
 
+            ControlSchemeToggle = inputState.IsNewKeyPress(Keys.Space);
         }
 
 

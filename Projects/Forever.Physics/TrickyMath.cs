@@ -89,25 +89,11 @@ namespace Forever.Physics
 
         public static Quaternion AddVector(Quaternion addee, Vector3 vector)
         {
-            /*
-            Vector3 angularVelocity = vector;
-            Quaternion spin = (new Quaternion(angularVelocity.X, angularVelocity.Y, angularVelocity.Z, 0f) * 0.5f);
-
-            if (spin.Length() > 0)
-            {
-                addee += Quaternion.Concatenate(addee, spin);
-            }
-            
-            return addee;
-            */
-
-            Quaternion q = //Quaternion.Concatenate(
-               //addee,
-                new Quaternion(
+            Quaternion q = new Quaternion(
                     vector.X,
                     vector.Y,
                     vector.Z,
-                    0f//)
+                    0f
             );
 
 

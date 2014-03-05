@@ -24,8 +24,7 @@ namespace Aquarium
         public RandomPopulation Pop { get; private set; }
 
         protected RenderContext RenderContext { get; private set; }
-        public IRigidBody CamBody { get; private set; }
-        public UserControls CamControls { get; private set; }
+        public IRigidBody PlayerRigidBody { get; private set; }
 
         private int DrawRadius { get; set; }
         private int UpdateRadius { get; set; }
@@ -36,7 +35,10 @@ namespace Aquarium
 
         public ForceRegistry ForceRegistry { get; private set; }
 
-        ActionBar ActionBar { get; set; }
+        public UserControls Controls { get; private set; }
+        public MouseSteering Steering { get; private set; }
+        public ActionBar ActionBar { get; private set; }
+
 
         Thread GenerateThread;
         int SpawnThreadFreq = 500;
@@ -67,7 +69,6 @@ namespace Aquarium
 
             Pop.OnRemove += new Population.OnRemoveEventHandler((mem) =>
             {
-
                 Coarse.UnRegister(mem);
                 Fine.UnRegister(mem as IEnvMember);
                 UnRegisterForces(mem);
@@ -186,8 +187,9 @@ namespace Aquarium
                 }
             }
 
-            ActionBar.Draw(gameTime);
+            DrawUI(gameTime);
         }
+
 
 
         public void Death(IEnumerable<PopulationMember> members)
@@ -205,6 +207,7 @@ namespace Aquarium
         IEnumerable<Partition<IEnvMember>> CurrentUpdatingPartitions { get; set; }
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+            UpdatePlayerRigidBody(gameTime);
             UpdateCamera(gameTime);
           
             float duration = (float)gameTime.ElapsedGameTime.Milliseconds;
@@ -254,15 +257,16 @@ namespace Aquarium
             }
 
 
-            Death(dead); //death to the dead
+            Death(dead); 
 
             UpdateBirths();
 
-            ActionBar.Update(gameTime);
+            UpdateUI(gameTime);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
+        
         ConcurrentQueue<PopulationMember> Births = new ConcurrentQueue<PopulationMember>();
 
         private void UpdateBirths()
@@ -292,20 +296,36 @@ namespace Aquarium
         private void SetupCamera()
         {
             var cam = Camera;
-            CamBody = new RigidBody(cam.Position);
-            CamBody.Awake = true;
-            CamBody.LinearDamping = 0.9f;
-            CamBody.AngularDamping = 0.7f;
-            CamBody.Mass = 0.1f;
-            CamBody.InertiaTensor = InertiaTensorFactory.Sphere(CamBody.Mass, 1f);
-            CamControls = new UserControls(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f);
+            PlayerRigidBody = new RigidBody(cam.Position);
+            PlayerRigidBody.Awake = true;
+            PlayerRigidBody.LinearDamping = 0.9f;
+            PlayerRigidBody.AngularDamping = 0.7f;
+            PlayerRigidBody.Mass = 0.1f;
+            PlayerRigidBody.InertiaTensor = InertiaTensorFactory.Sphere(PlayerRigidBody.Mass, 1f);
+            Controls = new UserControls(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f);
         }
 
+        /// <summary>
+        /// Update the camera to follow the player
+        /// </summary>
+        /// <param name="gameTime"></param>
         protected void UpdateCamera(GameTime gameTime)
         {
-            Vector3 actuatorTrans = CamControls.LocalForce;
-            Vector3 actuatorRot = CamControls.LocalTorque;
+            //TODO - make this a follow cam
+            Camera.Position = PlayerRigidBody.Position;
+            Camera.Rotation = PlayerRigidBody.Orientation;
+        }
 
+
+
+        #endregion
+
+        #region Player Rigid Body
+
+        protected void UpdatePlayerRigidBody(GameTime gameTime)
+        {
+            Vector3 actuatorTrans = Controls.LocalForce;
+            Vector3 actuatorRot = Controls.LocalTorque;
 
             float forwardForceMag = -actuatorTrans.Z;
             float rightForceMag = actuatorTrans.X;
@@ -316,43 +336,107 @@ namespace Aquarium
                 (Camera.Right * rightForceMag) +
                 (Camera.Up * upForceMag);
 
+            PlayerRigidBody.addForce(force);
 
-            if (force.Length() != 0)
-            {
-                CamBody.addForce(force);
-            }
-
-
-            Vector3 worldTorque = Vector3.Transform(CamControls.LocalTorque, CamBody.Orientation);
+            Vector3 worldTorque = Vector3.Transform(Controls.LocalTorque, PlayerRigidBody.Orientation);
 
             if (worldTorque.Length() != 0)
             {
-                CamBody.addTorque(worldTorque);
+                PlayerRigidBody.addTorque(worldTorque);
             }
+
+            var steeringTorque = GetMouseSteeringTorque(gameTime, PlayerRigidBody);
+            PlayerRigidBody.addTorque(steeringTorque);
+
+            PlayerRigidBody.integrate((float)gameTime.ElapsedGameTime.Milliseconds);
+        }
+
+        #endregion
+
+
+        #region UI
+
+        public Reticule CurrentReticule { get; private set; }
+        public CursorReticule Cursor { get; private set; }
+
+        public Reticule EmptyCircleReticule { get; private set; }
+        public Reticule FilledCircleReticule { get; private set; }
+
+        private void SetupUI(ContentManager content)
+        {
+            //TODO - pick better font
+            var spriteFont = ScreenManager.Font;
+            ActionBar = new ActionBar(RenderContext, new Vector2(0, 440), 50, 40, spriteFont);
+
+            var emptyCircle = content.Load<Texture2D>("Reticules/SimpleCircleReticule");
+            EmptyCircleReticule = new Reticule(emptyCircle, 0, 200, 200, 35, 35);
+
+            var filledCircle = content.Load<Texture2D>("Reticules/SimpleConcentricReticule");
+            FilledCircleReticule = new Reticule(filledCircle, 0, 200, 200, 35, 35);
             
-            CamBody.integrate((float)gameTime.ElapsedGameTime.Milliseconds);
-            Camera.Position = CamBody.Position;
-            Camera.Rotation = CamBody.Orientation;
-            
+            Cursor = new CursorReticule(emptyCircle, 0, 200, 200, 30, 30);
+            Steering = new MouseSteering();
+
+            CurrentReticule = FilledCircleReticule;
         }
 
 
         public override void HandleInput(InputState input)
         {
             base.HandleInput(input);
-            CamControls.HandleInput(input);
+            Controls.HandleInput(input);
             ActionBar.HandleInput(input);
+            Cursor.HandleInput(input);
+            Steering.HandleInput(input);
+            if (Controls.ControlSchemeToggle)
+            {
+                Steering.Engaged = !Steering.Engaged;
+                if (Steering.Engaged)
+                {
+                    CurrentReticule = EmptyCircleReticule;
+                }
+                else
+                {
+                    CurrentReticule = FilledCircleReticule;
+                }
+                this.ScreenManager.Game.IsMouseVisible = !Steering.Engaged;
+            }
         }
-        #endregion
 
-        #region UI
-        private void SetupUI(ContentManager content)
+
+        private Vector3 GetMouseSteeringTorque(GameTime gameTime, IRigidBody body)
         {
-            //TODO - pick better font
-            var spriteBatch = ScreenManager.SpriteBatch;
-            var spriteFont = ScreenManager.Font;
-            ActionBar = new ActionBar(RenderContext, new Vector2(0, 440), 50, 40, spriteBatch, spriteFont);
+            var cp = RenderContext.GraphicsDevice.Viewport.Bounds.Center;
+
+            return Steering.GetTorqueForBodyAndAnchor(gameTime, body, cp);
         }
+
+
+        public void DrawUI(GameTime gameTime)
+        {
+            RenderContext.Set2DRenderStates();
+
+            var batch = ScreenManager.SpriteBatch;
+            var center = RenderContext.GraphicsDevice.Viewport.Bounds.Center;
+            batch.Begin();
+            CurrentReticule.Draw(batch, center);
+
+            if (Steering.Engaged)
+            {
+                Cursor.DrawOnCursor(batch);
+            }
+
+            ActionBar.Draw(gameTime, batch);
+            batch.End();
+
+            RenderContext.Set3DRenderStates();
+        }
+
+        private void UpdateUI(GameTime gameTime)
+        {
+            ActionBar.Update(gameTime);
+        }
+
         #endregion
 
 

@@ -20,11 +20,9 @@ namespace Aquarium.UI
         public List<Slot> Slots { get; private set; }
         public RenderContext RenderContext { get; private set; }
 
-        SpriteBatch SpriteBatch { get; set; }
         SpriteFont SpriteFont { get; set; }
 
-        public ActionBar(RenderContext renderContext, Vector2 position, int cellWidth, int cellHeight,
-                SpriteBatch spriteBatch, SpriteFont spriteFont
+        public ActionBar(RenderContext renderContext, Vector2 position, int cellWidth, int cellHeight, SpriteFont spriteFont
             )
         {
             RenderContext = renderContext;
@@ -32,7 +30,6 @@ namespace Aquarium.UI
             SlotWidth = cellWidth;
             SlotHeight = cellHeight;
 
-            SpriteBatch = spriteBatch;
             SpriteFont = spriteFont;
 
             Slots = new List<Slot>();
@@ -64,21 +61,15 @@ namespace Aquarium.UI
             }
         }
 
-        public void Draw(Microsoft.Xna.Framework.GameTime gameTime)
+        public void Draw(Microsoft.Xna.Framework.GameTime gameTime, SpriteBatch batch)
         {
-            RenderContext.Set2DRenderStates();
-            var batch = this.SpriteBatch;
             var font = this.SpriteFont;
-
-            batch.Begin();
 
             foreach (var slot in Slots)
             {
                 slot.Draw(gameTime, batch, font, RenderContext);
             }
 
-            batch.End();
-            RenderContext.Set3DRenderStates();
         }
 
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)

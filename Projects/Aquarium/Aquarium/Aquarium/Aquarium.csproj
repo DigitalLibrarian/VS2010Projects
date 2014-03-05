@@ -175,7 +175,10 @@
     <Compile Include="UI\ActionBar\Slot.cs" />
     <Compile Include="UI\ActionBar\SlotState.cs" />
     <Compile Include="UI\ActionBar\ActionBar.cs" />
-    <Compile Include="UserControls.cs" />
+    <Compile Include="UI\MouseSteering.cs" />
+    <Compile Include="UI\Reticule\CursorReticule.cs" />
+    <Compile Include="UI\Reticule\Reticule.cs" />
+    <Compile Include="UI\UserControls.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

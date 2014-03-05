@@ -39,6 +39,13 @@ namespace Forever.Screens
         public readonly GamePadState[] LastGamePadStates;
         public MouseState LastMouseState;
 
+        public Point CurrentMousePoint
+        {
+            get
+            {
+                return new Point(CurrentMouseState.X, CurrentMouseState.Y);
+            }
+        }
 
         #endregion
 
