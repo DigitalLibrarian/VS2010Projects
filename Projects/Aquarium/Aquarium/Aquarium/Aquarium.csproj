@@ -134,7 +134,8 @@
     <Compile Include="GA\Genomes\Gene.cs" />
     <Compile Include="GA\Genomes\Genome.cs" />
     <Compile Include="GA\Organs\AbilityOrgan.cs" />
-    <Compile Include="GA\Organs\OrganAbilities\MutableForceGenerator.cs" />
+    <Compile Include="GA\Signals\SignalEncoding.cs" />
+    <Compile Include="MutableForceGenerator.cs" />
     <Compile Include="GA\Organs\OrganAbilities\FoodBitterAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryClosestFoodAbility.cs" />
     <Compile Include="GA\Organs\OrganAbilities\QueryEnergyRemainingAbility.cs" />
@@ -162,9 +163,7 @@
     <Compile Include="GA\Signals\ChannelWriter.cs" />
     <Compile Include="GA\Signals\SignalNode.cs" />
     <Compile Include="GA\SpacePartitions\EnvironmentSpace.cs" />
-    <Compile Include="GA\SpacePartitions\Partition.cs" />
-    <Compile Include="GA\SpacePartitions\Space.cs" />
-    <Compile Include="GA\SpacePartitions\SpaceCoord.cs" />
+    <Compile Include="Hunter.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
@@ -175,10 +174,14 @@
     <Compile Include="UI\ActionBar\Slot.cs" />
     <Compile Include="UI\ActionBar\SlotState.cs" />
     <Compile Include="UI\ActionBar\ActionBar.cs" />
-    <Compile Include="UI\MouseSteering.cs" />
+    <Compile Include="UI\Odometer.cs" />
+    <Compile Include="UI\Steering\ISteering.cs" />
+    <Compile Include="UI\Steering\MouseSteering.cs" />
     <Compile Include="UI\Reticule\CursorReticule.cs" />
     <Compile Include="UI\Reticule\Reticule.cs" />
-    <Compile Include="UI\UserControls.cs" />
+    <Compile Include="UI\Steering\AnalogSteering.cs" />
+    <Compile Include="UI\Steering\SteeringControls.cs" />
+    <Compile Include="ControlledCraft.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
@@ -200,6 +203,10 @@
     <ProjectReference Include="..\..\..\Forever.Screens\Forever.Screens.csproj">
       <Project>{7F88056B-C1D7-4538-8D9E-908BF5DDBB41}</Project>
       <Name>Forever.Screens</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Forever.SpacePartitions\Forever.SpacePartitions.csproj">
+      <Project>{780CD23C-C486-4152-A13C-9BEDCF1AE569}</Project>
+      <Name>Forever.SpacePartitions</Name>
     </ProjectReference>
     <ProjectReference Include="..\AquariumContent\AquariumContent.contentproj">
       <Name>AquariumContent</Name>

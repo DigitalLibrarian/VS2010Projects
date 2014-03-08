@@ -44,7 +44,7 @@ namespace Aquarium.UI
         }
 
         public void Draw(
-            Microsoft.Xna.Framework.GameTime gameTime,
+            GameTime gameTime,
             SpriteBatch batch,
             SpriteFont font,
             RenderContext renderContext)

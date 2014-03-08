@@ -18,6 +18,8 @@ namespace Forever.Physics
         float Mass { get; }
 
         Vector3 CenterOfMass { get; }
+        Vector3 Velocity { get; }
+        Vector3 Rotation { get; }
 
         void Translate(Vector3 translation);
     }

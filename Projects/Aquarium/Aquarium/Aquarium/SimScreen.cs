@@ -16,6 +16,8 @@ using System.Collections.Concurrent;
 using Microsoft.Xna.Framework.Graphics;
 using Aquarium.UI;
 using Microsoft.Xna.Framework.Content;
+using Forever.SpacePartitions;
+using Aquarium.UI.Steering;
 
 namespace Aquarium
 {
@@ -29,21 +31,31 @@ namespace Aquarium
         private int DrawRadius { get; set; }
         private int UpdateRadius { get; set; }
 
-
         public Space<PopulationMember> Coarse { get; private set; }
         public EnvironmentSpace Fine { get; private set; }
 
-        public UserControls Controls { get; private set; }
-        public MouseSteering Steering { get; private set; }
         public ActionBar ActionBar { get; private set; }
 
+        Model HunterModel { get; set; }
+
+        PartitionSphere<Hunter> Hunters { get; set; }
+        PartitionSphere<PopulationMember> DrawSet { get; set; }
+        PartitionSphere<IEnvMember> UpdateSet { get; set; }
+
+        ControlledCraft User { get; set; }
+
+        OdometerDashboard Odometer { get; set; }
 
         Thread GenerateThread;
         int SpawnThreadFreq = 500;
         int MaxPerSpawnPump = 50;
         int DefaultParts = 10;
         int BirthsPerUpdate = 1;
-        int MaxBirthQueueSize = 400;
+        int MaxBirthQueueSize = 200;
+        int minPopSize = 50;
+        int maxPopSize = 100;
+        int spawnRange = 25;
+        int geneCap = 10000;
         public SimScreen(RenderContext renderContext)
         {
             RenderContext = renderContext;
@@ -51,10 +63,12 @@ namespace Aquarium
             Coarse = new Space<PopulationMember>(500);
             Fine = new EnvironmentSpace(250, 250);
 
-            int minPopSize = 50;
-            int maxPopSize = 150;
-            int spawnRange = 25;
-            int geneCap = 10000;
+            DrawRadius = 5000;
+            UpdateRadius = 2500;
+
+            DrawSet = new PartitionSphere<PopulationMember>(Coarse);
+            UpdateSet = new PartitionSphere<IEnvMember>(Fine);
+
 
             Pop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
             Pop.OnAdd += new Population.OnAddEventHandler((mem) =>
@@ -69,8 +83,12 @@ namespace Aquarium
                 Fine.UnRegister(mem as IEnvMember);
             });
 
-            DrawRadius = 50;
-            UpdateRadius = 25;
+
+
+            
+            var huntSpace = new Space<Hunter>(Fine.GridSize);
+            Hunters = new PartitionSphere<Hunter>(huntSpace);
+
 
             GenerateThread = new Thread(new ThreadStart(
                 () => {
@@ -91,9 +109,11 @@ namespace Aquarium
         public override void LoadContent()
         {
             base.LoadContent();
+            var content = ScreenManager.Game.Content;
+            HunterModel = content.Load<Model>(Hunter.ModelAsset);
 
             SetupCamera();
-            SetupUI(ScreenManager.Game.Content);
+            SetupUI(content);
 
             GenerateThread.IsBackground = true;
             GenerateThread.Start();
@@ -112,32 +132,16 @@ namespace Aquarium
 
         }
 
-        Partition<PopulationMember> CurrentDrawingPartition { get; set; }
-        IEnumerable<Partition<PopulationMember>> CurrentDrawingPartitions { get; set; }
-
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
 
             var context = RenderContext;
             var camPos = context.Camera.Position;
-
-            if (CurrentDrawingPartition != null)
-            {
-                if (CurrentDrawingPartition.Box.Contains(camPos) != ContainmentType.Contains)
-                {
-
-                    CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
-                    CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
-                }
-            }
-            else
-            {
-                CurrentDrawingPartition = Coarse.GetOrCreate(camPos);
-                CurrentDrawingPartitions = Coarse.GetSpacePartitions(camPos, Coarse.GridSize * DrawRadius);
-            }
-
-            foreach (var part in CurrentDrawingPartitions)
+            var drawSphere = new BoundingSphere(camPos, DrawRadius);
+            DrawSet.Sphere = drawSphere;
+            Hunters.Sphere = drawSphere;
+            foreach (var part in DrawSet.GetPartitions())
             {
                 var members = part.Objects.ToList();
                 foreach (var member in members)
@@ -150,6 +154,12 @@ namespace Aquarium
                     Renderer.Render(context, part.Box, Color.Red);
                 }
             }
+
+            foreach (var hunter in Hunters)
+            {
+                hunter.Draw(RenderContext);
+            }
+
 
             DrawUI(gameTime);
         }
@@ -166,9 +176,6 @@ namespace Aquarium
 
 
 
-
-        Partition<IEnvMember> CurrentUpdatingPartition { get; set; }
-        IEnumerable<Partition<IEnvMember>> CurrentUpdatingPartitions { get; set; }
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             UpdatePlayerRigidBody(gameTime);
@@ -178,47 +185,34 @@ namespace Aquarium
 
             var camPos = RenderContext.Camera.Position;
 
-            if (CurrentUpdatingPartition != null)
-            {
-                if (CurrentUpdatingPartition.Box.Contains(camPos) != ContainmentType.Contains)
-                {
-                    CurrentUpdatingPartition = Fine.GetOrCreate(camPos);
-                    CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
-                }
-            }
-            else
-            {
-                CurrentUpdatingPartition = Fine.GetOrCreate(camPos);
-                CurrentUpdatingPartitions = Fine.GetSpacePartitions(camPos, Fine.GridSize * UpdateRadius);
-            }
+            UpdateSet.Sphere = new BoundingSphere(camPos, UpdateRadius);
 
             var dead = new List<PopulationMember>();
 
-            foreach (var part in CurrentUpdatingPartitions)
+            foreach (var envMember in UpdateSet)
             {
-                var members = part.Objects.ToList();
-
-                foreach (var envMember in members)
+                var member = envMember.Member;
+                member.Specimen.Update(duration);
+                if (member.Specimen.IsDead)
                 {
-                    var member = envMember.Member;
-                    member.Specimen.Update(duration);
-                    if (member.Specimen.IsDead)
-                    {
-                        dead.Add(member);
-                    }
-                    else
-                    {
-                        var rigidBody = member.Specimen.RigidBody;
+                    dead.Add(member);
+                }
+                else
+                {
+                    var rigidBody = member.Specimen.RigidBody;
                        
-                        if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
-                        {
-                            Coarse.Update(member, member.Position);
-                            Fine.Update(member, member.Position);
-                        }
+                    if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
+                    {
+                        Coarse.Update(member, member.Position);
+                        Fine.Update(member, member.Position);
                     }
                 }
             }
 
+            foreach (var hunter in Hunters)
+            {
+                hunter.Update(duration);
+            }
 
             Death(dead); 
 
@@ -241,7 +235,7 @@ namespace Aquarium
             while (totalBirths < BirthsPerUpdate && Births.TryPeek(out localValue))
             {
                 Births.TryDequeue(out localValue);
-                // new life to the living
+                
                 if (localValue != null)
                 {
                     if (Pop.Register(localValue))
@@ -261,11 +255,11 @@ namespace Aquarium
             var cam = Camera;
             PlayerRigidBody = new RigidBody(cam.Position);
             PlayerRigidBody.Awake = true;
+            PlayerRigidBody.CanSleep = false;
             PlayerRigidBody.LinearDamping = 0.9f;
             PlayerRigidBody.AngularDamping = 0.7f;
             PlayerRigidBody.Mass = 0.1f;
             PlayerRigidBody.InertiaTensor = InertiaTensorFactory.Sphere(PlayerRigidBody.Mass, 1f);
-            Controls = new UserControls(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f);
         }
 
         /// <summary>
@@ -287,31 +281,8 @@ namespace Aquarium
 
         protected void UpdatePlayerRigidBody(GameTime gameTime)
         {
-            Vector3 actuatorTrans = Controls.LocalForce;
-            Vector3 actuatorRot = Controls.LocalTorque;
-
-            float forwardForceMag = -actuatorTrans.Z;
-            float rightForceMag = actuatorTrans.X;
-            float upForceMag = actuatorTrans.Y;
-
-            Vector3 force =
-                (Camera.Forward * forwardForceMag) +
-                (Camera.Right * rightForceMag) +
-                (Camera.Up * upForceMag);
-
-            PlayerRigidBody.addForce(force);
-
-            Vector3 worldTorque = Vector3.Transform(Controls.LocalTorque, PlayerRigidBody.Orientation);
-
-            if (worldTorque.Length() != 0)
-            {
-                PlayerRigidBody.addTorque(worldTorque);
-            }
-
-            var steeringTorque = GetMouseSteeringTorque(gameTime, PlayerRigidBody);
-            PlayerRigidBody.addTorque(steeringTorque);
-
-            PlayerRigidBody.integrate((float)gameTime.ElapsedGameTime.Milliseconds);
+          
+            User.Update(gameTime);
         }
 
         #endregion
@@ -327,9 +298,12 @@ namespace Aquarium
 
         private void SetupUI(ContentManager content)
         {
+            var actionBarSlotHeight = 40;
+
             //TODO - pick better font
             var spriteFont = ScreenManager.Font;
-            ActionBar = new ActionBar(RenderContext, new Vector2(0, 440), 50, 40, spriteFont);
+            ActionBar = new ActionBar(RenderContext, 50, actionBarSlotHeight, spriteFont);
+            ActionBar.Slots[0].Action = new ActionBarAction(SpawnHunterOnCamera);
 
             var emptyCircle = content.Load<Texture2D>("Reticules/SimpleCircleReticule");
             EmptyCircleReticule = new Reticule(emptyCircle, 0, 200, 200, 35, 35);
@@ -338,43 +312,61 @@ namespace Aquarium
             FilledCircleReticule = new Reticule(filledCircle, 0, 200, 200, 35, 35);
             
             Cursor = new CursorReticule(emptyCircle, 0, 200, 200, 30, 30);
-            Steering = new MouseSteering();
+            var mouseSteering = new MouseSteering(RenderContext.GraphicsDevice, PlayerRigidBody, 0.000000001f);
+            
+            var analogSteering = new AnalogSteering(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f, PlayerRigidBody);
+
+            var controlForces = new SteeringControls(mouseSteering, analogSteering);
+            controlForces.MaxAngular = 0.025f;
+            controlForces.MaxLinear = 0.1f;
+            
+
+            User = new ControlledCraft(PlayerRigidBody, controlForces);
+
+            Odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
             CurrentReticule = FilledCircleReticule;
         }
 
+        private void SpawnHunterOnCamera()
+        {
+            var pos = Camera.Position;
+            var body = new RigidBody(pos);
+
+            body.Awake = true;
+            body.CanSleep = true;
+            body.LinearDamping = 0.999f;
+            body.AngularDamping = 0.999f;
+            body.Mass = 1f;
+            body.InertiaTensor = InertiaTensorFactory.Sphere(body.Mass, 1f);
+            body.Orientation = PlayerRigidBody.Orientation;
+
+            var hunter = new Hunter(HunterModel, body);
+            Hunters.Space.Register(hunter, pos);
+            
+        }
 
         public override void HandleInput(InputState input)
         {
             base.HandleInput(input);
-            Controls.HandleInput(input);
+
+            User.HandleInput(input);
+
             ActionBar.HandleInput(input);
             Cursor.HandleInput(input);
-            Steering.HandleInput(input);
-            if (Controls.ControlSchemeToggle)
+            var mouseSteering = User.ControlForces.MouseSteeringEngaged;
+            if (mouseSteering)
             {
-                Steering.Engaged = !Steering.Engaged;
-                if (Steering.Engaged)
-                {
-                    CurrentReticule = EmptyCircleReticule;
-                }
-                else
-                {
-                    CurrentReticule = FilledCircleReticule;
-                }
-                this.ScreenManager.Game.IsMouseVisible = !Steering.Engaged;
+                CurrentReticule = EmptyCircleReticule;
             }
+            else
+            {
+                CurrentReticule = FilledCircleReticule;
+            }
+            this.ScreenManager.Game.IsMouseVisible = !mouseSteering;
         }
 
-
-        private Vector3 GetMouseSteeringTorque(GameTime gameTime, IRigidBody body)
-        {
-            var cp = RenderContext.GraphicsDevice.Viewport.Bounds.Center;
-
-            return Steering.GetTorqueForBodyAndAnchor(gameTime, body, cp);
-        }
-
-
+     
         public void DrawUI(GameTime gameTime)
         {
             RenderContext.Set2DRenderStates();
@@ -384,12 +376,15 @@ namespace Aquarium
             batch.Begin();
             CurrentReticule.Draw(batch, center);
 
-            if (Steering.Engaged)
+            if (User.ControlForces.MouseSteeringEngaged)
             {
                 Cursor.DrawOnCursor(batch);
             }
 
             ActionBar.Draw(gameTime, batch);
+
+            Odometer.Draw(gameTime, batch, ScreenManager.Font);
+
             batch.End();
 
             RenderContext.Set3DRenderStates();
@@ -416,15 +411,15 @@ namespace Aquarium
             if (Births.Count() > MaxBirthQueueSize) return;
             int maxPer = MaxPerSpawnPump;
             
-            Action<BodyGenome, Vector3> birther = (BodyGenome off, Vector3 pos) =>
+            Action<BodyGenome> birther = (BodyGenome off) =>
             {
                 Pop.Splicer.Mutate(off);
 
                 var spawn = Population.SpawnFromGenome(off);
                 if (spawn != null)
                 {
-                    spawn.Position = pos;
-
+                    spawn.Position = random.NextVector() * spawnRange;
+                    spawn.RigidBody.Orientation = Quaternion.CreateFromYawPitchRoll((float)random.NextDouble(), (float)random.NextDouble(), (float)random.NextDouble());
                     var mem = new PopulationMember(off, spawn);
                     Births.Enqueue(mem);
                 }
@@ -460,30 +455,33 @@ namespace Aquarium
 
 
                 var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-                var center = (p1.Position * 0.5f) + (p2.Position * 0.5f);
-                
-                birther(offspring1[0], center + random.NextVector() * spawnRange);
-                birther(offspring1[1], center + random.NextVector() * spawnRange);
+                birther(offspring1[0]);
+                birther(offspring1[1]);
                 numQueued += 2;
                 total += 2;
                 if (a1 > a2)
                 {
                     p2 = random.NextElement(members);
                 }
-                else if (a1 < a2) ;
+                else if (a1 < a2)
                 {
                     p1 = random.NextElement(members);
                 }
                 var offspring2 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);
-                center = (p1.Position * 0.5f) + (p2.Position * 0.5f);
-                birther(offspring2[0], center + random.NextVector() * spawnRange);
-                birther(offspring2[1], center + random.NextVector() * spawnRange);
+                birther(offspring2[0]);
+                birther(offspring2[1]);
                 numQueued += 2;
                 total += 2;
             }
 
         }
 
+        Vector3 Halfway(Vector3 v1, Vector3 v2)
+        {
+            var half = (v1 - v2);
+            half = v2 + (half * 0.5f);
+            return half;
+        }
         #endregion
     }
 }

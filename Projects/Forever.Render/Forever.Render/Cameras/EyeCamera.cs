@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 using Forever.Render;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Forever.Render.Cameras
 {
@@ -13,7 +14,7 @@ namespace Forever.Render.Cameras
     public class EyeCamera : ICamera
     {
         protected float FOV = MathHelper.Pi / 4;
-        protected float aspectRatio = 1;
+        public float AspectRatio { get { return _graphics.Viewport.AspectRatio; } }
         protected float nearClip =  0.01f;
         protected float farClip = 10000000.0f;
      
@@ -28,10 +29,11 @@ namespace Forever.Render.Cameras
         {
             get
             {
-                return Matrix.CreatePerspectiveFieldOfView(this.FOV, this.aspectRatio, this.nearClip, this.farClip);
+                return Matrix.CreatePerspectiveFieldOfView(this.FOV, this.AspectRatio, this.nearClip, this.farClip);
             }
-     
         }
+
+        
      
         public Matrix View
         {
@@ -42,11 +44,12 @@ namespace Forever.Render.Cameras
                 return Matrix.Invert(Matrix.CreateFromQuaternion(this.Rotation) * Matrix.CreateTranslation(this.Position));
             }
         }
-     
-     
-     
-        public EyeCamera()
+
+
+        private GraphicsDevice _graphics;
+        public EyeCamera(GraphicsDevice graphicsDevice)
         {
+            _graphics = graphicsDevice;
            this.cameraPosition = Vector3.Zero;
            this.Rotation = Quaternion.Identity;
         }
@@ -67,7 +70,6 @@ namespace Forever.Render.Cameras
             Quaternion q2 = Quaternion.CreateFromAxisAngle(right, pitch);
             Quaternion q3 = Quaternion.CreateFromAxisAngle(forward, roll);
             Rotation = q1 * q2 * q3 * Rotation;
-            //cameraRotation = Matrix.CreateFromQuaternion(q1 * q2 * q3) * cameraRotation;
         }
         
 

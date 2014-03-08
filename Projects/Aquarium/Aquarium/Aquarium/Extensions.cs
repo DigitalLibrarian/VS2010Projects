@@ -8,7 +8,15 @@ namespace Aquarium
 {
     static class AqExtensions
     {
-
+        /// <summary>
+        /// Returns the number of milliseconds since last update.  This is what I usually use for an update method.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <returns></returns>
+        public static float GetDuration(this GameTime gameTime)
+        {
+            return (float)gameTime.ElapsedGameTime.Milliseconds;
+        }
 
         public static Vector3 Round(this Vector3 source, int decimals = 0)
         {

@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Aquarium.GA.Population;
 using Aquarium.GA.Environments;
+using Forever.SpacePartitions;
 
 namespace Aquarium.GA.SpacePartitions
 {
@@ -19,7 +20,7 @@ namespace Aquarium.GA.SpacePartitions
             FoodGridSize = foodGridSize;
         }
 
-        protected override Partition<IEnvMember> CreateNewPartition(Microsoft.Xna.Framework.BoundingBox box)
+        protected override IPartition<IEnvMember> CreateNewPartition(Microsoft.Xna.Framework.BoundingBox box)
         {
             return new EnvPartition(box, FoodGridSize);
         }

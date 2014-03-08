@@ -21,7 +21,7 @@ namespace Aquarium.GA
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Env { get; set; }
 
-        private const float EnergyBleed = 0.99999f;
+        private const float EnergyBleed = 0.999f;
         private const float EnergyFlatline = 1f;
         /// <summary>
         /// Gets or sets the position of the organism.
@@ -97,7 +97,7 @@ namespace Aquarium.GA
         long Tick = 0;
         public void Update(float duration)
         {
-            if (!IsDead && ((Tick++ % 2) == 0))
+            if (!IsDead && ((Tick++ % 10) == 0))
             {
                 UpdateMetabolism(duration);
                 NervousSystem.Update();
@@ -116,7 +116,7 @@ namespace Aquarium.GA
 
         public void Consume(IFood food)
         {
-            var BiteSize = 100f;
+            var BiteSize = 25;
             Energy += food.BeConsumed(BiteSize);
         }
 

@@ -14,6 +14,7 @@ namespace Aquarium.GA.Signals
         {
             Value = inputs;
         }
+
     }
 
 

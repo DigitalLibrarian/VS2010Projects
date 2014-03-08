@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Aquarium.GA.Bodies;
 using Aquarium.GA.Signals;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Organs.OrganAbilities
 {
@@ -28,14 +29,14 @@ namespace Aquarium.GA.Organs.OrganAbilities
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
             var num = signal.Value[0];
-            var result = new List<double>{ 0, 0, 0 };
+            Vector3 vector = Vector3.Zero;
             if (num > 0.5)
             {
                 var rigidBody = nervousSystem.Organism.RigidBody;
-                result = new List<double> { rigidBody.Velocity.X, rigidBody.Velocity.Y, rigidBody.Velocity.Z };
+                vector = rigidBody.Velocity;
             }
 
-            return new Signal(result);
+            return new Signal(SignalEncoding.Encode(vector));
         }
     }
 }

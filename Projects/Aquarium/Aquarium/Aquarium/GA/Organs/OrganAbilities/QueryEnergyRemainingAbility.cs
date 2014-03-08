@@ -25,15 +25,15 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
+            float ratio = 0f;
             if (signal.Value[0] > 0.5f)
             {
                 var p = nervousSystem.Organism.Body.Position;
                 p = p.Round(3);
-                var ratio = nervousSystem.Organism.Energy / nervousSystem.Organism.MaxEnergy;
-                return new Signal(new List<double> { ratio });
+                ratio = nervousSystem.Organism.Energy / nervousSystem.Organism.MaxEnergy;
             }
 
-            return new Signal(new List<double> { 0 } );
+            return new Signal(SignalEncoding.Encode(ratio));
         }
     }
 }

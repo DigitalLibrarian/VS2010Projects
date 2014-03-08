@@ -15,18 +15,16 @@ namespace Aquarium.UI
     {
         public int SlotWidth { get; private set; }
         public int SlotHeight { get; private set; }
-        public Vector2 Position { get; private set; }
 
         public List<Slot> Slots { get; private set; }
         public RenderContext RenderContext { get; private set; }
 
         SpriteFont SpriteFont { get; set; }
 
-        public ActionBar(RenderContext renderContext, Vector2 position, int cellWidth, int cellHeight, SpriteFont spriteFont
+        public ActionBar(RenderContext renderContext, int cellWidth, int cellHeight, SpriteFont spriteFont
             )
         {
             RenderContext = renderContext;
-            Position = position;
             SlotWidth = cellWidth;
             SlotHeight = cellHeight;
 

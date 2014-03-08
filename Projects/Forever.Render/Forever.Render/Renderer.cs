@@ -14,11 +14,18 @@ namespace Forever.Render
       Matrix world, RenderContext renderContext)
     {
 
-      Renderer.RenderModel(model, 
+      Renderer.RenderModel(model, Matrix.Identity,
         world, renderContext.Camera.View, renderContext.Camera.Projection);
     }
 
-    public static void RenderModel(Model model, 
+    public static void RenderModel(Model model, Matrix modelTransform,
+      Matrix world, RenderContext renderContext)
+    {
+
+        Renderer.RenderModel(model, modelTransform,
+          world, renderContext.Camera.View, renderContext.Camera.Projection);
+    }
+    public static void RenderModel(Model model, Matrix modelTransform,
       Matrix world, Matrix view, Matrix proj)
     {
       Matrix[] transforms = new Matrix[model.Bones.Count];
@@ -32,7 +39,7 @@ namespace Forever.Render
           
           effect.View = view;
           effect.Projection = proj;
-          effect.World = transforms[mesh.ParentBone.Index] * world;
+          effect.World = transforms[mesh.ParentBone.Index]  * modelTransform * world;
         }
         mesh.Draw();
         
@@ -49,7 +56,7 @@ namespace Forever.Render
       BasicEffect effect = render_context.BasicEffect;
       Matrix view = render_context.Camera.View;
       Matrix proj = render_context.Camera.Projection;
-      /* Would the real RenderVertexPositionColorList please stand up? */
+      
       RenderVertexPositionColorList(gd, effect, world, view, proj, vertices, vertexDeclaration, vertex_buffer);
     }
 
@@ -58,10 +65,6 @@ namespace Forever.Render
       VertexPositionColor[] vertices, VertexDeclaration vertexDeclaration, 
       VertexBuffer vertex_buffer  )
     {
-
-     // gd.VertexDeclaration = vertexDeclaration;
-       
-
       effect.World = world;
       effect.View = view;
       effect.Projection = proj;

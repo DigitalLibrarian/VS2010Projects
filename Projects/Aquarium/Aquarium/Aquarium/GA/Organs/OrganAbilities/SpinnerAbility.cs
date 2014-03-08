@@ -21,17 +21,18 @@ namespace Aquarium.GA.Organs.OrganAbilities
         public override Signal Fire(NervousSystem nervousSystem, Organ parent, Signal signal, MutableForceGenerator fg)
         {
             var num = signal.Value[0];
-            var result = 0;
+            float result = 0;
             if (num > 0.5)
             {
+                if (num > 1) num = 1;
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);
 
                 var body = nervousSystem.Organism.Body;
                 var dir = socket.Normal;
 
-                var mag = 0.00001f * nervousSystem.Organism.RigidBody.Mass;
-                var veloCap = 0.005f;
+                var mag = 0.000001f * ((float) num) * nervousSystem.Organism.RigidBody.Mass;
+                var veloCap = 0.001f;
 
                 var torque = dir * mag;
                 
@@ -48,7 +49,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
                 fg.Torque = Vector3.Zero;
             }
 
-            return new Signal(new List<double> { result });
+            return new Signal(SignalEncoding.Encode(result));
         }
 
         public override int NumInputs

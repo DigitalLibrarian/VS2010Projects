@@ -47,6 +47,11 @@ namespace Forever.Screens
             }
         }
 
+        public int ScrollbarWheelChange
+        {
+            get { return CurrentMouseState.ScrollWheelValue - LastMouseState.ScrollWheelValue; }
+        }
+
         #endregion
 
         #region Initialization

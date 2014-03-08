@@ -7,9 +7,13 @@ using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Genomes
 {
+    //TODO - branch and compare results with fixed length genome
+
     public class Genome<T>
     {
+        // Name is index and value is the payload for the gene
         // ((1 1) (2 1) (3 0) (4 0) (5 0) (6 1) (7 1))
+        // This allows for a gene to take the place of a latter one
         public List<Gene<T>> Genes { get; private set; }
 
         public int Size { get { return Genes.Count(); } }

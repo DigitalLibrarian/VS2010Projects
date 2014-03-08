@@ -34,7 +34,7 @@ namespace Aquarium
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
         RenderContext RenderContext;
-        public ICamera Camera { get; set; }
+
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
 
@@ -43,7 +43,6 @@ namespace Aquarium
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
 
             ScreenManager = new ScreenManager(this);
         }
@@ -61,7 +60,6 @@ namespace Aquarium
             this.Window.AllowUserResizing = true;
             this.IsMouseVisible = true;
             base.Initialize();
-
 
             ScreenManager.Initialize();
         }
@@ -92,9 +90,8 @@ namespace Aquarium
 
         protected void SetupRenderContextAndCamera()
         {
-            Camera = new EyeCamera();
             RenderContext = new RenderContext(
-                Camera,
+                new EyeCamera(GraphicsDevice),
                 GraphicsDevice
                 );
         }

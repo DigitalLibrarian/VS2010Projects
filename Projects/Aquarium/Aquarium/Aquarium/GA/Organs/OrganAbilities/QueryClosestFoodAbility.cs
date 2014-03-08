@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA.Signals;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium.GA.Organs.OrganAbilities
 {
@@ -27,8 +28,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
 
         public override Signal Fire(Bodies.NervousSystem nervousSystem, Organ parent, Signals.Signal signal, MutableForceGenerator fg)
         {
-            //TODO - change this sometime, for now we always bite
-            double r1=0, r2=0, r3=0;
+            Vector3 vector = Vector3.Zero;
             var env = nervousSystem.Organism.Env;
             if (env != null)
             {
@@ -41,15 +41,12 @@ namespace Aquarium.GA.Organs.OrganAbilities
                     var food = foods.FirstOrDefault(f => f != nervousSystem.Organism);
                     if (food != null)
                     {
-                        var p = food.Position - nervousSystem.Organism.Position;
-                        r1 = p.X;
-                        r2 = p.Y;
-                        r3 = p.Z;
+                        vector = food.Position - nervousSystem.Organism.Position;
                     }
                 }
             }
 
-            return new Signals.Signal(new List<double> { r1, r2, r3 });
+            return new Signals.Signal(SignalEncoding.Encode(vector));
         }
     }
 }

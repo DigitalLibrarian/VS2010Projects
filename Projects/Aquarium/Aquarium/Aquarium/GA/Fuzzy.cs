@@ -18,7 +18,7 @@ namespace Aquarium.GA
             //i2 has minor component
             //both signed
 
-            return (d1 / precision)  + (d2 / (precision * precision));
+            return (d1 / (precision ))  + (d2 / (precision * precision ));
 
 
             //return (d1 + (d2 / precision));
@@ -41,7 +41,7 @@ namespace Aquarium.GA
         
 
         /// <summary>
-        /// Returns positive integer in range
+        /// Returns positive integer in range (excluding high)
         /// </summary>
         /// <param name="i"></param>
         /// <param name="low"></param>
