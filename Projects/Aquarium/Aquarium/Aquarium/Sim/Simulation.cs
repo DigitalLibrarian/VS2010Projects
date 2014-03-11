@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Forever.SpacePartitions;
+using Microsoft.Xna.Framework;
+using Forever.Render;
+using Aquarium.Sim.Agents;
+
+namespace Aquarium.Sim
+{
+    public class Simulation
+    {
+        public SimSpace Space { get; private set; }
+        public PartitionSphere<IAgent> UpdateSet { get; set; }
+        public PartitionSphere<IAgent> DrawSet { get; set; }
+
+        float UpdateRadius = 2500;
+        float DrawRadius = 5000;
+
+        public Simulation()
+        {
+            Space = new SimSpace(gridSize: 500);
+            UpdateSet = new PartitionSphere<IAgent>(Space, GetUpdateSphere());
+            DrawSet = new PartitionSphere<IAgent>(Space, GetDrawSphere());
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            UpdateSet.Sphere = GetUpdateSphere();
+
+            var duration = gameTime.GetDuration();
+            foreach (var agent in UpdateSet)
+            {
+                agent.Update(duration);
+            }
+        }
+
+        public void Draw(GameTime gameTime, RenderContext renderContext)
+        {
+            DrawSet.Sphere = GetDrawSphere();
+
+            var duration = gameTime.GetDuration();
+            foreach (var agent in DrawSet)
+            {
+                agent.Draw(duration, renderContext);
+            }
+        }
+
+        private BoundingSphere GetUpdateSphere()
+        {
+            return new BoundingSphere(Vector3.Zero, UpdateRadius);
+        }
+
+        private BoundingSphere GetDrawSphere()
+        {
+            return new BoundingSphere(Vector3.Zero, DrawRadius);
+        }
+    }
+
+
+}

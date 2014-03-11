@@ -8,6 +8,13 @@ namespace Aquarium
 {
     static class AqExtensions
     {
+        public static Vector3 HalfwayTo(this Vector3 v1, Vector3 v2)
+        {
+            var half = (v1 - v2);
+            half = v2 + (half * 0.5f);
+            return half;
+        }
+
         /// <summary>
         /// Returns the number of milliseconds since last update.  This is what I usually use for an update method.
         /// </summary>

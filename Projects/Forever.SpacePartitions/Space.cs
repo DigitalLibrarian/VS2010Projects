@@ -68,8 +68,14 @@ namespace Forever.SpacePartitions
 
         public void Update(T obj, Vector3 position)
         {
-            UnRegister(obj);
-            Register(obj, position);
+            //TODO - this hasn't been tested
+
+            var p = PartitionAssignment[obj];
+            if (p.Box.Contains(position) == ContainmentType.Disjoint)
+            {
+                UnRegister(obj);
+                Register(obj, position);
+            }
         }
 
 

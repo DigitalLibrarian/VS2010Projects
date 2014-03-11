@@ -154,6 +154,7 @@ namespace Aquarium.GA
                 return Math.Min(ConsumableEnergy, biteSize);
             }
         }
+
     }
 
 

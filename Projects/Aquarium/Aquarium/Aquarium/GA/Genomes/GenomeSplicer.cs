@@ -79,7 +79,7 @@ namespace Aquarium.GA.Genomes
             Mutators.AddRange(mutators);
         }
 
-        public BodyGenome[] Meiosis(BodyGenome parent1Gen, BodyGenome parent2Gen, int wiggleSize = 8)
+            public BodyGenome[] Meiosis(BodyGenome parent1Gen, BodyGenome parent2Gen, int wiggleSize = 8)
         { 
             int minCount = Math.Min(parent1Gen.Size, parent2Gen.Size);
             int wiggle = Random.Next(minCount/wiggleSize);

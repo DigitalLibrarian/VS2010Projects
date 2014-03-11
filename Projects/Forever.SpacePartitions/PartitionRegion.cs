@@ -22,22 +22,20 @@ namespace Forever.SpacePartitions
     {
         public Space<T> Space { get; private set; }
         IEnumerable<IPartition<T>> Partitions;
-        BoundingSphere _sphere;
+        
         BoundingSphere _fetchedSphere;
-        IPartition<T> Principle;
+        public IPartition<T> Principle { get; private set; }
 
         public BoundingSphere Sphere
         {
-            get { return _sphere; }
-            set
-            {
-                _sphere = value;
-            }
+            get;
+            set;
         }
-       
-        public PartitionSphere(Space<T> space)
+
+        public PartitionSphere(Space<T> space, BoundingSphere sphere)
         {
             Space = space;
+            Sphere = sphere;
             Partitions = new IPartition<T>[0];
         }
 

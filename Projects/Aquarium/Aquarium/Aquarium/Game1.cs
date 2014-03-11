@@ -80,7 +80,7 @@ namespace Aquarium
             SetupRenderContextAndCamera();
 
 
-            ScreenManager.AddScreen(new SimScreen(RenderContext));
+            ScreenManager.AddScreen(new SimulationScreen(RenderContext));
             Components.Add(ScreenManager);
 
 

@@ -21,7 +21,7 @@ using Aquarium.UI.Steering;
 
 namespace Aquarium
 {
-    public class SimScreen : GameScreen
+    public class Sim_V1_Screen : GameScreen
     {
         public RandomPopulation Pop { get; private set; }
 
@@ -56,7 +56,7 @@ namespace Aquarium
         int maxPopSize = 100;
         int spawnRange = 25;
         int geneCap = 10000;
-        public SimScreen(RenderContext renderContext)
+        public Sim_V1_Screen(RenderContext renderContext)
         {
             RenderContext = renderContext;
 
@@ -66,8 +66,8 @@ namespace Aquarium
             DrawRadius = 5000;
             UpdateRadius = 2500;
 
-            DrawSet = new PartitionSphere<PopulationMember>(Coarse);
-            UpdateSet = new PartitionSphere<IEnvMember>(Fine);
+            //DrawSet = new PartitionSphere<PopulationMember>(Coarse);
+            //UpdateSet = new PartitionSphere<IEnvMember>(Fine);
 
 
             Pop = new RandomPopulation(minPopSize, maxPopSize, spawnRange, geneCap);
@@ -85,7 +85,7 @@ namespace Aquarium
 
             
             var huntSpace = new Space<Hunter>(Fine.GridSize);
-            Hunters = new PartitionSphere<Hunter>(huntSpace);
+            //Hunters = new PartitionSphere<Hunter>(huntSpace);
 
             GenerateThread = new Thread(new ThreadStart(
                 () => {
@@ -99,7 +99,7 @@ namespace Aquarium
                     ));
 
             while (Births.Count() < Pop.MinPop) UpdatePopMonitoring();
-
+            
         }
 
 
@@ -483,9 +483,7 @@ namespace Aquarium
 
         Vector3 Halfway(Vector3 v1, Vector3 v2)
         {
-            var half = (v1 - v2);
-            half = v2 + (half * 0.5f);
-            return half;
+            return v1.HalfwayTo(v2);
         }
         #endregion
     }
