@@ -83,12 +83,9 @@ namespace Aquarium
                 Fine.UnRegister(mem as IEnvMember);
             });
 
-
-
             
             var huntSpace = new Space<Hunter>(Fine.GridSize);
             Hunters = new PartitionSphere<Hunter>(huntSpace);
-
 
             GenerateThread = new Thread(new ThreadStart(
                 () => {
@@ -174,10 +171,18 @@ namespace Aquarium
             }
         }
 
-
-
+        const int RefetchFrequency = 10000;
+        int timeLeft = 0;
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+            timeLeft -= gameTime.ElapsedGameTime.Milliseconds;
+            if (timeLeft <= 0)
+            {
+                DrawSet.Refetch();
+                UpdateSet.Refetch();
+                timeLeft = RefetchFrequency;
+            }
+
             UpdatePlayerRigidBody(gameTime);
             UpdateCamera(gameTime);
           

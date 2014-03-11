@@ -38,7 +38,7 @@ namespace Aquarium.GA.Population
             }
         }
 
-        public PopulationMember RandomMember(int numParts,  int numOrgans = 10, int numNN = 9, int sizeJunk = 1)
+        public PopulationMember RandomMember(int numParts,  int numOrgans = 40, int numNN = 20, int sizeJunk = 1)
         {
             var g = BodyGenome.Random(Random, numParts, numOrgans, numNN, sizeJunk);
             var spawn = SpawnFromGenome(g);

@@ -10,6 +10,8 @@ namespace Forever.SpacePartitions
     {
         Space<T> Space { get; }
         IEnumerable<IPartition<T>> GetPartitions();
+
+        void Refetch();
     }
 
     /// <summary>
@@ -67,12 +69,16 @@ namespace Forever.SpacePartitions
                 geomFail
                 )
             {
-                Principle = Space.GetOrCreate(Sphere.Center);
-                Partitions = Space.GetSpacePartitions(Sphere.Center, Sphere.Radius);
-                _fetchedSphere = Sphere;
+                Refetch();
             }
         }
 
+        public void Refetch()
+        {
+            Principle = Space.GetOrCreate(Sphere.Center);
+            Partitions = Space.GetSpacePartitions(Sphere.Center, Sphere.Radius);
+            _fetchedSphere = Sphere;
+        }
 
         public List<T> ToList()
         {

@@ -9,8 +9,6 @@ using Forever.SpacePartitions;
 
 namespace Aquarium.GA.SpacePartitions
 {
-
-
     public class EnvironmentSpace : Space<IEnvMember> 
     {
 

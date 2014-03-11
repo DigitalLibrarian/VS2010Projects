@@ -54,7 +54,7 @@ namespace Aquarium.UI.Steering
 
         public float MinThruster = -0.0001f;
         public float MaxThruster = 0.001f;
-        public float ThrustIncrement = 0.000001f;
+        public float ThrustIncrement = 0.0000005f;
         public float CurrentThrust = 0f;
 
         private Vector3 GetForce()
