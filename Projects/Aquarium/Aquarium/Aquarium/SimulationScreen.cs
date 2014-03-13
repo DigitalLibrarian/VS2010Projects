@@ -11,6 +11,7 @@ using Aquarium.Sim.Agents;
 using System.Threading;
 using Forever.Physics;
 using Aquarium.UI.Steering;
+using Aquarium.UI.Targets;
 
 
 namespace Aquarium
@@ -136,21 +137,48 @@ namespace Aquarium
             var actionBar = new ActionBar(RenderContext, 50, actionBarSlotHeight, spriteFont);
             actionBar.Slots[0].Action = new ActionBarAction(AddNewSpawnerAgent);
 
+
             var hud = new ControlledCraftHUD(User, RenderContext);
             hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
 
-
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
+
+            var targetWindow = new TargetWindow(
+                new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
+                RenderContext, 
+                new Vector2(0, 0), 
+                ScreenManager.Font);
 
             return new List<IUIElement>
             {
                 actionBar,
                 hud, 
-                odometer
+                odometer, 
+                targetWindow
             };
         }
 
+        bool Engaged = true;
+        ITarget LastTarget = null;
+        public ITarget GetNextTarget(Microsoft.Xna.Framework.Ray ray)
+        {
+            if (Engaged)
+            {
+                var space = Sim.UpdateSet.Principle as SimSpacePartition;
+                var list = space.FindAll(ray);
+
+                if (list.Any())
+                {
+                    LastTarget = list.Find(agent => agent is ITarget) as ITarget;
+                }
+                else
+                {
+                    LastTarget = null;
+                }
+            }
+            return LastTarget;
+        }
     }
 
 }

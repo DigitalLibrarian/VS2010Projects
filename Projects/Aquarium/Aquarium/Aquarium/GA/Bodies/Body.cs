@@ -21,6 +21,7 @@ namespace Aquarium.GA.Bodies
         public Vector3 Position { get; set; }
         public Matrix World { get; set; }
 
+
         public Body()
         {
             Parts = new List<BodyPart>();

@@ -35,9 +35,6 @@ namespace Aquarium.UI
         }
         
 
-        Vector2 LabelOffset { get { return new Vector2(-Width/2, -16); } }
-  
-
         IOdometerSource Source { get; set; }
 
         GraphicsDevice _graphics;

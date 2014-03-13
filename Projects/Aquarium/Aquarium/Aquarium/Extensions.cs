@@ -51,6 +51,11 @@ namespace Aquarium
             return v;
         }
 
+        public static Vector2 ToVector2(this Point p)
+        {
+            return new Vector2(p.X, p.Y);
+        }
+
         public static BoundingBox ExtendToContain(this BoundingBox me, BoundingBox box)
         {
             return new BoundingBox(Vector3.Min(me.Min, box.Min), Vector3.Max(me.Max, box.Max));

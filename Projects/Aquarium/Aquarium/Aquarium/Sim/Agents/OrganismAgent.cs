@@ -5,17 +5,21 @@ using System.Text;
 using Aquarium.GA;
 using Aquarium.GA.Population;
 using Aquarium.GA.Genomes;
+using Forever.Render;
+using Microsoft.Xna.Framework;
+using Aquarium.UI.Targets;
 
 namespace Aquarium.Sim.Agents
 {
-    public class OrganismAgent : PopulationMember, IAgent
+    public class OrganismAgent : PopulationMember, IAgent, IRayPickable, ITarget
     {
 
         public delegate void OnDeathEventHandler(OrganismAgent agent);
         public event OnDeathEventHandler OnDeath;
-
+        int totalOrgans;
         public OrganismAgent(BodyGenome genome, Organism organism) : base(genome, organism)
         {
+            totalOrgans = organism.Body.Parts.Sum(p => p.Organs.Count);
         }
 
 
@@ -47,5 +51,43 @@ namespace Aquarium.Sim.Agents
         }
 
 
+
+
+        bool IRayPickable.IsHit(Microsoft.Xna.Framework.Ray ray)
+        {
+            var maybe = ray.Intersects(Organism.WorldBB);
+            return maybe != null;
+        }
+
+        string ITarget.Label
+        {
+            get { 
+                return string.Format(
+                        "Organism {0} - {1}\n"
+                    +   "Age: {2} Energy: {3}\n"
+                    +   "Parts: {4} Organs: {5}",
+
+                    Organism.Position.Round().ToString(),
+                    Organism.IsDead ? "Dead" : "Alive",
+                    Organism.Age,
+                    Organism.Energy,
+                    Organism.Body.Parts.Count,
+                    totalOrgans
+                    ); 
+            }
+        }
+
+        IAgent ITarget.Agent
+        {
+            get { return this; }
+        }
+
+
+
+
+        BoundingBox ITarget.TargetBB
+        {
+            get { return Organism.WorldBB; }
+        }
     }
 }

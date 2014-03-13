@@ -35,10 +35,12 @@ namespace Aquarium.Sim
         {
             Space = space;
             Organisms = new Dictionary<IAgent, OrganismAgent>();
+            RayPickers = new TypedSubList<IRayPickable>();
             FoodSpace = new Space<IFood>(gridSize);
         }
 
-         Dictionary<IAgent, OrganismAgent> Organisms { get; set; }
+        Dictionary<IAgent, OrganismAgent> Organisms { get; set; }
+        TypedSubList<IRayPickable> RayPickers { get; set; }
 
          public ICollection<OrganismAgent> OrganismAgents
          {
@@ -64,6 +66,8 @@ namespace Aquarium.Sim
                 }
             }
 
+            RayPickers.CheckAdd(obj);
+
         }
 
         public override void UnAssign(IAgent obj)
@@ -76,6 +80,8 @@ namespace Aquarium.Sim
                 FoodSpace.UnRegister(orgAgent.Organism);
                 orgAgent.Organism.Surroundings = null;
             }
+
+            RayPickers.CheckRemove(obj);
         }
 
 
@@ -95,5 +101,35 @@ namespace Aquarium.Sim
         {
             return FoodSpace.QueryLocalSpace(pos, radius, (c, f) => Vector3.Distance(f.Position, pos) < radius);
         }
+
+        public List<IAgent> FindAll(Ray ray)
+        {
+            //TODO
+            var list = RayPickers.FindAll(picker => picker.IsHit(ray));
+            return list.ConvertAll<IAgent>(new System.Converter<IRayPickable, IAgent>((target) => (IAgent) target));
+        }
     }
+    public class TypedSubList<T> : List<T>
+    {
+        public bool CheckAdd(object item)
+        {
+            if (item is T)
+            {
+                Add((T)item);
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckRemove(object item)
+        {
+            if (item is T)
+            {
+                Remove((T)item);
+                return true;
+            }
+            return false;
+        }
+    }
+
 }

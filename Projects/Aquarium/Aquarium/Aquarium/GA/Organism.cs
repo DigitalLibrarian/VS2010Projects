@@ -43,6 +43,22 @@ namespace Aquarium.GA
             }
         }
 
+
+        public BoundingBox LocalBB { get; private set; }
+        public BoundingBox WorldBB
+        {
+            get
+            {
+                var corners = LocalBB.GetCorners();
+                var newCorners = new List<Vector3>();
+                foreach (var corner in corners)
+                {
+                    newCorners.Add(Vector3.Transform(corner, RigidBody.World));
+                }
+                return BoundingBox.CreateFromPoints(newCorners);
+            }
+        }
+
         public long Age { get; private set; }
 
 
@@ -84,8 +100,22 @@ namespace Aquarium.GA
                         OrganForces.Add(fg);
                     }
                 }
+                UpdateBoundingGeometryToContain(part);
             }
         }
+
+        private void UpdateBoundingGeometryToContain(BodyPart part)
+        {
+            if (LocalBB == null)
+            {
+                LocalBB = part.BodyBB();
+            }
+            else
+            {
+                LocalBB = LocalBB.ExtendToContain(part.BodyBB());
+            }
+        }
+
         private void ConfigureSpawnLevels()
         {
             Age = 0;

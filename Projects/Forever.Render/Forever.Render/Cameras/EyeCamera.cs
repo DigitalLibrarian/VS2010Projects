@@ -16,7 +16,7 @@ namespace Forever.Render.Cameras
         protected float FOV = MathHelper.Pi / 4;
         public float AspectRatio { get { return _graphics.Viewport.AspectRatio; } }
         protected float nearClip =  0.01f;
-        protected float farClip = 10000000.0f;
+        protected float farClip = 10000.0f;
      
      
         protected Vector3 cameraPosition;

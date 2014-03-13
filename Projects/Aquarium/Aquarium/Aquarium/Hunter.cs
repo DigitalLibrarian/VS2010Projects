@@ -49,7 +49,6 @@ namespace Aquarium
 
         protected void UpdateAI(float duration)
         {
-            var target = GetTarget();
             var veloCap = 0.005f;
             if (RigidBody.Velocity.Length() < veloCap)
             {
@@ -64,15 +63,8 @@ namespace Aquarium
 
         }
 
-        private ITarget GetTarget()
-        {
-            return null;
-        }
+      
     }
 
-    public interface ITarget
-    {
-        Vector3 Position { get; }
-
-    }
+    
 }

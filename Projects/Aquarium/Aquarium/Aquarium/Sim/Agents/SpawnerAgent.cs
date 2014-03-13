@@ -44,7 +44,7 @@ namespace Aquarium.Sim.Agents
         public int MaxPopSize = 100;
         public int SpawnRange = 25;
         public int GeneCap = 10000;
-        public int DefaultParts = 4;
+        public int DefaultParts = 7;
         public int DefaultOrgans = 8;
         public int DefaultNN = 5;
         public int DefaultJunk = 0;
@@ -61,7 +61,8 @@ namespace Aquarium.Sim.Agents
             if (spawn != null)
             {
                 spawn.Position = Position + ( Random.NextVector() * SpawnRange );
-                spawn.RigidBody.Orientation = Quaternion.CreateFromYawPitchRoll((float)Random.NextDouble(), (float)Random.NextDouble(), (float)Random.NextDouble());
+                Vector3 rot = Random.NextVector() * (float)Math.PI;
+                spawn.RigidBody.Orientation = Quaternion.CreateFromYawPitchRoll(rot.X, rot.Y, rot.Z);
                 
                 var orgAgent = new OrganismAgent(off, spawn);
                 orgAgent.OnDeath += new OrganismAgent.OnDeathEventHandler(orgAgent_OnDeath);
@@ -79,8 +80,10 @@ namespace Aquarium.Sim.Agents
 
         private void Mutate(BodyGenome off)
         {
-            // TODO - change to mutable frequency
-            Splicer.Mutate(off);
+            if (Random.Next(4) == 0)
+            {
+                Splicer.Mutate(off);
+            }
         }
 
 
