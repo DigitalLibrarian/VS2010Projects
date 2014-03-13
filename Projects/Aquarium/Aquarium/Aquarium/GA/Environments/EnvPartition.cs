@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.GA.SpacePartitions;
 using Microsoft.Xna.Framework;
 using Aquarium.GA.Population;
 using Forever.SpacePartitions;

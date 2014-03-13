@@ -31,7 +31,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
         {
             //TODO - change this sometime, for now we always bite
             double result = 0;
-            var env = nervousSystem.Organism.Env;
+            var env = nervousSystem.Organism.Surroundings;
             if (env != null)
             {
 

@@ -19,7 +19,7 @@ namespace Aquarium.GA
         public IRigidBody RigidBody { get; private set; }
 
         public NervousSystem NervousSystem { get; private set; }
-        public ISurroundings Env { get; set; }
+        public ISurroundings Surroundings { get; set; }
 
         private const float EnergyBleed = 0.99f;
         private const float EnergyFlatline = 1f;

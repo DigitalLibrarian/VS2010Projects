@@ -60,7 +60,7 @@ namespace Aquarium.Sim
                     Organisms.Add(obj, orgAgent);
 
                     FoodSpace.Register(orgAgent.Organism, orgAgent.Organism.Position);
-                    orgAgent.Organism.Env = this;
+                    orgAgent.Organism.Surroundings = this;
                 }
             }
 
@@ -74,7 +74,7 @@ namespace Aquarium.Sim
                 Organisms.Remove(obj);
                 var orgAgent = ((OrganismAgent) obj);
                 FoodSpace.UnRegister(orgAgent.Organism);
-                orgAgent.Organism.Env = null;
+                orgAgent.Organism.Surroundings = null;
             }
         }
 

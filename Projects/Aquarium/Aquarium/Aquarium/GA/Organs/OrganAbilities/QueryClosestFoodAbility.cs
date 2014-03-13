@@ -29,7 +29,7 @@ namespace Aquarium.GA.Organs.OrganAbilities
         public override Signal Fire(Bodies.NervousSystem nervousSystem, Organ parent, Signals.Signal signal, MutableForceGenerator fg)
         {
             Vector3 vector = Vector3.Zero;
-            var env = nervousSystem.Organism.Env;
+            var env = nervousSystem.Organism.Surroundings;
             if (env != null)
             {
 

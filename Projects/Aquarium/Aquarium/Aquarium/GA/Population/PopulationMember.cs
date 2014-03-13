@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Aquarium.GA.Genomes;
 using Microsoft.Xna.Framework;
-using Aquarium.GA.SpacePartitions;
 using Aquarium.GA.Environments;
 
 namespace Aquarium.GA.Population
@@ -58,14 +57,14 @@ namespace Aquarium.GA.Population
         {
             EP = p;
 
-            Organism.Env = p as ISurroundings;
+            Organism.Surroundings = p as ISurroundings;
         }
 
         public void ExitEnvPartition(EnvPartition p)
         {
             EP = null;
 
-            Organism.Env = null;
+            Organism.Surroundings = null;
         }
     }
 }

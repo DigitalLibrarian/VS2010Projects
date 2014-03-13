@@ -163,7 +163,6 @@
     <Compile Include="GA\Signals\ChannelReader.cs" />
     <Compile Include="GA\Signals\ChannelWriter.cs" />
     <Compile Include="GA\Signals\SignalNode.cs" />
-    <Compile Include="GA\SpacePartitions\EnvironmentSpace.cs" />
     <Compile Include="Hunter.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -173,7 +172,6 @@
     <Compile Include="Sim\Agents\OrganismAgent.cs" />
     <Compile Include="Sim\Agents\SpawnerAgent.cs" />
     <Compile Include="Sim\Simulation.cs" />
-    <Compile Include="Sim_V1_Screen.cs" />
     <Compile Include="Sim\SimSpace.cs" />
     <Compile Include="SimulationScreen.cs" />
     <Compile Include="UI\ActionBar\ActionBarAction.cs" />

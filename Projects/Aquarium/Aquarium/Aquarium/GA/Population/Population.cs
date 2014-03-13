@@ -6,7 +6,6 @@ using Aquarium.GA.Genomes;
 using Aquarium.GA.Phenotypes;
 using Aquarium.GA.Codons;
 using Microsoft.Xna.Framework;
-using Aquarium.GA.SpacePartitions;
 
 namespace Aquarium.GA.Population
 {
