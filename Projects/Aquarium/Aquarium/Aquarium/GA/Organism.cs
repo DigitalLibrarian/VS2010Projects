@@ -116,8 +116,10 @@ namespace Aquarium.GA
 
         public void Consume(IFood food)
         {
+            //TODO - this should be moved to organ
             var BiteSize = 75;
-            Energy += food.BeConsumed(BiteSize);
+            float energyEfficiency = .65f;
+            Energy += food.BeConsumed(BiteSize) * energyEfficiency;
         }
 
         List<IForceGenerator> OrganForces { get; set; }
@@ -151,6 +153,7 @@ namespace Aquarium.GA
             {
                 // im dead
                 Energy = 0;
+                EdibleEnergy = 0;
                 return Math.Min(ConsumableEnergy, biteSize);
             }
         }

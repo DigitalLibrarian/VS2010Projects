@@ -13,22 +13,22 @@ namespace Aquarium.GA.Population
     {
         public BodyGenome Genome { get; private set; }
 
-        public Organism Specimen { get; private set; }
+        public Organism Organism { get; private set; }
 
-        public Vector3 Position { get { return Specimen.Position; } }
+        public Vector3 Position { get { return Organism.Position; } }
 
         
         public PopulationMember(BodyGenome genome, Organism specimen)
         {
             Genome = genome;
-            Specimen = specimen;
+            Organism = specimen;
         }
 
         public virtual double Score
         {
             get
             {
-                var b = Specimen.Body;
+                var b = Organism.Body;
                 var g = Genome;
                 int numOrgans = 0;
                 var numConnected = 0;
@@ -58,14 +58,14 @@ namespace Aquarium.GA.Population
         {
             EP = p;
 
-            Specimen.Env = p as ISurroundings;
+            Organism.Env = p as ISurroundings;
         }
 
         public void ExitEnvPartition(EnvPartition p)
         {
             EP = null;
 
-            Specimen.Env = null;
+            Organism.Env = null;
         }
     }
 }

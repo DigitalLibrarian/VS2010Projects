@@ -11,7 +11,7 @@ using Forever.Render;
 
 namespace Aquarium.UI
 {
-    public class ActionBar
+    public class ActionBar : IUIElement
     {
         public int SlotWidth { get; private set; }
         public int SlotHeight { get; private set; }

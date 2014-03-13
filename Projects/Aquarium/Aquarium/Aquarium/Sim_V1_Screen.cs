@@ -143,7 +143,7 @@ namespace Aquarium
                 var members = part.Objects.ToList();
                 foreach (var member in members)
                 {
-                    member.Specimen.Body.Render(RenderContext);
+                    member.Organism.Body.Render(RenderContext);
                 }
 
                 if (part.Box.Contains(camPos) != ContainmentType.Disjoint || part.Objects.Any())
@@ -197,14 +197,14 @@ namespace Aquarium
             foreach (var envMember in UpdateSet)
             {
                 var member = envMember.Member;
-                member.Specimen.Update(duration);
-                if (member.Specimen.IsDead)
+                member.Organism.Update(duration);
+                if (member.Organism.IsDead)
                 {
                     dead.Add(member);
                 }
                 else
                 {
-                    var rigidBody = member.Specimen.RigidBody;
+                    var rigidBody = member.Organism.RigidBody;
                        
                     if (rigidBody.Velocity.LengthSquared() > 0 && rigidBody.Awake)
                     {
@@ -388,7 +388,7 @@ namespace Aquarium
 
             ActionBar.Draw(gameTime, batch);
 
-            Odometer.Draw(gameTime, batch, ScreenManager.Font);
+            //Odometer.Draw(gameTime, batch, ScreenManager.Font);
 
             batch.End();
 
@@ -439,7 +439,7 @@ namespace Aquarium
                     var mem = Pop.RandomMember(DefaultParts);
                     if (mem != null)
                     {
-                        mem.Specimen.Position = random.NextVector() * spawnRange;
+                        mem.Organism.Position = random.NextVector() * spawnRange;
                         Births.Enqueue(mem);
                         numMinLeft--;
                         numQueued++;
@@ -455,8 +455,8 @@ namespace Aquarium
                 var p1 = random.NextElement(members);
                 var p2 = random.NextElement(members);
 
-                var a1 = p1.Specimen.Age;
-                var a2 = p2.Specimen.Age;
+                var a1 = p1.Organism.Age;
+                var a2 = p2.Organism.Age;
 
 
                 var offspring1 = Pop.Splicer.Meiosis(p1.Genome, p2.Genome);

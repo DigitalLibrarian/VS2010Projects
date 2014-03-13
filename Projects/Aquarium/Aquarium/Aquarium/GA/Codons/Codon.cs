@@ -19,7 +19,7 @@ namespace Aquarium.GA.Codons
         public override int FrameSize { get { return _frameSize; } }
         public int Range { get; set; }
 
-        public BodyCodon(int band, int range = 100, int frameSize = 1)
+        public BodyCodon(int band, int range = 100, int frameSize = 3)
         {
             Band = band;
             _frameSize = frameSize;

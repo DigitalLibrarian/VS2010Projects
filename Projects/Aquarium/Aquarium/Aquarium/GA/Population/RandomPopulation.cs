@@ -32,7 +32,7 @@ namespace Aquarium.GA.Population
 
                 if (mem != null)
                 {
-                    mem.Specimen.Position = Random.NextVector() * spawnRange;
+                    mem.Organism.Position = Random.NextVector() * spawnRange;
                     Register(mem);
                 }
             }

@@ -34,14 +34,14 @@ namespace Aquarium.GA.Environments
         public override void Assign(IEnvMember obj)
         {
             base.Assign(obj);
-            FoodSpace.Register(obj.Member.Specimen, obj.Position);
+            FoodSpace.Register(obj.Member.Organism, obj.Position);
             obj.EnterEnvPartition(this);
         }
 
         public override void UnAssign(IEnvMember obj)
         {
             base.UnAssign(obj);
-            FoodSpace.UnRegister(obj.Member.Specimen);
+            FoodSpace.UnRegister(obj.Member.Organism);
             obj.ExitEnvPartition(this);
         }
 

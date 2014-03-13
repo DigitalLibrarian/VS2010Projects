@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.GA;
+using Aquarium.GA.Population;
+using Aquarium.GA.Genomes;
 
 namespace Aquarium.Sim.Agents
 {
-    class OrganismAgent : IAgent
+    public class OrganismAgent : PopulationMember, IAgent
     {
-        Organism Organism { get; set; }
 
-        public OrganismAgent(Organism organism)
+        public delegate void OnDeathEventHandler(OrganismAgent agent);
+        public event OnDeathEventHandler OnDeath;
+
+        public OrganismAgent(BodyGenome genome, Organism organism) : base(genome, organism)
         {
-            Organism = organism;
         }
 
 
@@ -25,9 +28,21 @@ namespace Aquarium.Sim.Agents
         {
             Organism.Update(duration);
 
-            if (Organism.IsDead)
+            CheckDead();
+        }
+
+        bool postMortum = false;
+        private void CheckDead()
+        {
+            if (postMortum) return;
+
+            postMortum = Organism.IsDead;
+            if (postMortum)
             {
-                throw new Exception("Uh oh. Somebody died");
+                if (OnDeath != null)
+                {
+                    OnDeath(this);
+                }
             }
         }
 

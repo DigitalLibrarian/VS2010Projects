@@ -38,6 +38,10 @@ namespace Aquarium
         {
             return list[me.Next(list.Count)];
         }
+        public static T NextElement<T>(this Random me, ICollection<T> list)
+        {
+            return list.ElementAt(me.Next(list.Count()));
+        }
 
         public static Vector3 NextVector(this Random me)
         {

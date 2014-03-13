@@ -7,64 +7,80 @@ using Aquarium.GA.Phenotypes;
 using Aquarium.GA;
 using Aquarium.GA.Codons;
 using Microsoft.Xna.Framework;
+using System.Collections.Concurrent;
 
 namespace Aquarium.Sim.Agents
 {
+    public interface IOrganismAgentPool
+    {
+        ICollection<OrganismAgent> OrganismAgents { get; }
+
+        void Birth(OrganismAgent agent);
+        void Death(OrganismAgent agent);
+    }
+
     public class SpawnerAgent : IAgent
     {
         Vector3 Position { get; set; }
         Random Random = new Random();
         GenomeSplicer Splicer = new GenomeSplicer();
 
-        public SpawnerAgent(Vector3 pos)
+        IOrganismAgentPool Pool;
+
+        ConcurrentQueue<OrganismAgent> Births;
+
+        public SpawnerAgent(Vector3 pos, IOrganismAgentPool pool)
         {
             Position = pos;
+            Pool = pool;
+            Births = new ConcurrentQueue<OrganismAgent>();
         }
 
 
 
-        int SpawnThreadFreq = 500;
-        int MaxPerSpawnPump = 50;
-        int DefaultParts = 10;
-        int BirthsPerUpdate = 1;
-        int MaxBirthQueueSize = 200;
-        int minPopSize = 50;
-        int maxPopSize = 100;
-        int spawnRange = 25;
-        int geneCap = 10000;
-        int DefaultOrgans = 30;
-        int DefaultNN = 5;
-        int DefaultJunk = 1;
+        public int MaxPerSpawnPump = 50;
+        public int BirthsPerUpdate = 1;
+        public int MaxBirthQueueSize = 100;
+        public int MaxPopSize = 100;
+        public int SpawnRange = 25;
+        public int GeneCap = 10000;
+        public int DefaultParts = 4;
+        public int DefaultOrgans = 8;
+        public int DefaultNN = 5;
+        public int DefaultJunk = 0;
 
 
-        private List<BodyGenome> GetGenePool()
-        {
-            throw new NotImplementedException();
-        }
 
         #region Generation Tools
 
-        private bool TryBirth(BodyGenome off)
+        private bool TryEnqueue(BodyGenome off)
         {
             Mutate(off);
 
             var spawn = SpawnFromGenome(off);
             if (spawn != null)
             {
-                spawn.Position = Position + ( Random.NextVector() * spawnRange );
+                spawn.Position = Position + ( Random.NextVector() * SpawnRange );
                 spawn.RigidBody.Orientation = Quaternion.CreateFromYawPitchRoll((float)Random.NextDouble(), (float)Random.NextDouble(), (float)Random.NextDouble());
                 
-                //now we have organism;
-
+                var orgAgent = new OrganismAgent(off, spawn);
+                orgAgent.OnDeath += new OrganismAgent.OnDeathEventHandler(orgAgent_OnDeath);
+                Births.Enqueue(orgAgent);
 
                 return true;
             }
             return false;
         }
 
+        void orgAgent_OnDeath(OrganismAgent agent)
+        {
+            Pool.Death(agent);
+        }
+
         private void Mutate(BodyGenome off)
         {
-            throw new NotImplementedException();
+            // TODO - change to mutable frequency
+            Splicer.Mutate(off);
         }
 
 
@@ -99,39 +115,99 @@ namespace Aquarium.Sim.Agents
                 sizeJunk: DefaultJunk
                 );
 
-            return TryBirth(genome);
+            return TryEnqueue(genome);
         }
 
-        private bool TryMeiosis()
+        private int TryMeiosis()
         {
-            List<BodyGenome> genomes = GetGenePool();
+            int count = 0;
+            List<BodyGenome> genomes = GetNewParents();
 
             if (genomes.Any())
             {
                 var p1 = Random.NextElement(genomes);
                 var p2 = Random.NextElement(genomes);
 
-                int count = 0;
                 foreach (var offspring in Splicer.Meiosis(p1, p2))
                 {
-                    if (TryBirth(offspring)) count++;
+                    if (TryEnqueue(offspring)) count++;
                 }
-                return count > 0;
             }
 
-            return false;
+            return count;
+        }
+
+        private List<BodyGenome> GetNewParents()
+        {
+            if (!Pool.OrganismAgents.Any())
+            {
+                return new List<BodyGenome>();
+            }
+
+            return new List<BodyGenome>
+            {
+                Random.NextElement(Pool.OrganismAgents).Genome,
+                Random.NextElement(Pool.OrganismAgents).Genome
+            };
         }
 
         #endregion
 
         public void Draw(float duration, Forever.Render.RenderContext renderContext)
         {
-            //TODO
         }
 
         public void Update(float duration)
         {
-            //TODO
+
+            if (Pool.OrganismAgents.Count() < MaxPopSize)
+            {
+                UpdateBirths();
+            }
+
         }
+
+        private void UpdateBirths()
+        {
+            int totalBirths = 0;
+            OrganismAgent localValue;
+            while (totalBirths < BirthsPerUpdate && Births.TryPeek(out localValue))
+            {
+                Births.TryDequeue(out localValue);
+
+                if (localValue != null)
+                {
+                    Pool.Birth(localValue);
+                    totalBirths++;
+                }
+            }
+
+        }
+
+        public bool QueueFull
+        {
+            get { return Births.Count() >= MaxBirthQueueSize; }
+        }
+
+        
+
+        public void BackgroundThreadFunc()
+        {
+            if (QueueFull) return;
+            int num = 0;
+
+            while (num < MaxPerSpawnPump)
+            {
+                var mCount = TryMeiosis();
+                num += mCount;
+                if (mCount == 0 && TryGenerateRandom())
+                {
+                    num++;
+                }
+            }
+            
+        }
+
+
     }
 }

@@ -45,7 +45,7 @@ namespace Aquarium.GA.Population
         public virtual bool Register(PopulationMember mem)
         {
             var genome = mem.Genome;
-            var body = mem.Specimen.Body;
+            var body = mem.Organism.Body;
             if (genome.Size > GenomeSizeCap) return false;
             if (!body.Parts.Any()) return false;
             

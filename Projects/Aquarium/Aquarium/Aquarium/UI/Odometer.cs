@@ -11,13 +11,10 @@ namespace Aquarium.UI
 {
     public interface IOdometerSource
     {
-        //Vector3 Velocity { get; }
-        //float MaxSpeed { get; }
-
         float Ratio { get; }
     }
 
-    public class OdometerDashboard
+    public class OdometerDashboard : IUIElement
     {
         Color MeterColor { get { return Color.Maroon; } }
         Color DashColor { get { return Color.DarkSlateGray; } }
@@ -57,16 +54,12 @@ namespace Aquarium.UI
         }
 
 
-        public void Draw(GameTime gameTime, SpriteBatch batch, SpriteFont font)
+        public void Draw(GameTime gameTime, SpriteBatch batch)
         {
             var dashboard = GetDashboardRectangle();
 
             batch.FillRectangle(dashboard, DashColor);
             batch.FillRectangle(GetMeterRectangle(), MeterColor);
-            //var text = string.Format("{0} m/s", Math.Round(Source.Velocity.Length(), 4));
-
-           // var textPos = new Vector2(dashboard.X, dashboard.Y);
-           // batch.DrawString(font, text, textPos, FontColor);
 
         }
 
@@ -104,7 +97,16 @@ namespace Aquarium.UI
 
             return new Rectangle((int)(bottomCenter.X - Width / 2), (int) (bottomCenter.Y - Height), Width, Height);
         }
-      
 
+
+
+        public void HandleInput(Forever.Screens.InputState input)
+        {
+        }
+
+
+        public void Update(GameTime gameTime)
+        {
+        }
     }
 }

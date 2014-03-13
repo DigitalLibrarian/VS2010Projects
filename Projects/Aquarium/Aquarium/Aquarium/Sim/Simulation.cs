@@ -20,14 +20,27 @@ namespace Aquarium.Sim
 
         public Simulation()
         {
-            Space = new SimSpace(gridSize: 500);
+            Space = new SimSpace(gridSize: 500, foodSpaceGridSize: 100);
             UpdateSet = new PartitionSphere<IAgent>(Space, GetUpdateSphere());
             DrawSet = new PartitionSphere<IAgent>(Space, GetDrawSphere());
         }
 
+        const int RefetchFrequency = 10000;
+        int timeLeft = 0;
         public void Update(GameTime gameTime)
         {
-            UpdateSet.Sphere = GetUpdateSphere();
+
+            timeLeft -= gameTime.ElapsedGameTime.Milliseconds;
+            if (timeLeft <= 0)
+            {
+                DrawSet.Refetch();
+                UpdateSet.Refetch();
+                timeLeft = RefetchFrequency;
+            }
+            else
+            {
+                UpdateSet.Sphere = GetUpdateSphere();
+            }
 
             var duration = gameTime.GetDuration();
             foreach (var agent in UpdateSet)
