@@ -120,7 +120,7 @@
     <Compile Include="GA\Bodies\BodyPart.cs" />
     <Compile Include="GA\Bodies\NervousSystem.cs" />
     <Compile Include="GA\Codons\BodyCodonParser.cs" />
-    <Compile Include="GA\Environments\EnvPartition.cs" />
+    <Compile Include="GA\Environments\IEnvMember.cs" />
     <Compile Include="GA\Environments\ISurroundings.cs" />
     <Compile Include="GA\Environments\IFood.cs" />
     <Compile Include="GA\Fuzzy.cs" />

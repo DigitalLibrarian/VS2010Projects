@@ -52,18 +52,13 @@ namespace Aquarium.GA.Population
             get { return this; }
         }
 
-        EnvPartition EP;
-        public void EnterEnvPartition(EnvPartition p)
+        public void EnterEnvPartition(ISurroundings surroundings)
         {
-            EP = p;
-
-            Organism.Surroundings = p as ISurroundings;
+            Organism.Surroundings = surroundings;
         }
 
-        public void ExitEnvPartition(EnvPartition p)
+        public void ExitEnvPartition(ISurroundings surroundings)
         {
-            EP = null;
-
             Organism.Surroundings = null;
         }
     }
