@@ -12,6 +12,7 @@ using System.Threading;
 using Forever.Physics;
 using Aquarium.UI.Steering;
 using Aquarium.UI.Targets;
+using Microsoft.Xna.Framework.Graphics;
 
 
 namespace Aquarium
@@ -46,7 +47,12 @@ namespace Aquarium
             SpawnerAgentThread = new Thread(new ThreadStart(UpdateSpawnerAgentsThreadFunc));
             SpawnerAgentThread.IsBackground = true;
             SpawnerAgentThread.Start();
+
+            var asset = @"Models/UFHSatellite/uhfsat";
+            SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
         }
+
+        Model SpawnerModel { get; set; }
 
         Thread SpawnerAgentThread;
 
@@ -87,8 +93,14 @@ namespace Aquarium
             var principle = Sim.UpdateSet.Principle;
 
             var pos = RenderContext.Camera.Position;
-            var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool);
+
+            var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 15f));
+
+            var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
             Sim.Space.Register(agent, pos);
+
+            SpawnerEditor.Close();
+            SpawnerEditor.Edit(agent);
 
             spawners.Add(agent);
         }
@@ -150,15 +162,19 @@ namespace Aquarium
                 new Vector2(0, 0), 
                 ScreenManager.Font);
 
+            SpawnerEditor = new SpawnerEditor(RenderContext);
+            SpawnerEditor.LoadContent(ScreenManager.Game.Content);
+
             return new List<IUIElement>
             {
                 actionBar,
                 hud, 
                 odometer, 
-                targetWindow
+                targetWindow, 
+                SpawnerEditor
             };
         }
-
+        SpawnerEditor SpawnerEditor;
         bool Engaged = true;
         ITarget LastTarget = null;
         private ITarget GetNextTarget(Microsoft.Xna.Framework.Ray ray)

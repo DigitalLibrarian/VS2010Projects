@@ -8,6 +8,9 @@ using Aquarium.GA;
 using Aquarium.GA.Codons;
 using Microsoft.Xna.Framework;
 using System.Collections.Concurrent;
+using Microsoft.Xna.Framework.Graphics;
+using Forever.Render;
+using Aquarium.UI.Targets;
 
 namespace Aquarium.Sim.Agents
 {
@@ -19,7 +22,7 @@ namespace Aquarium.Sim.Agents
         void Death(OrganismAgent agent);
     }
 
-    public class SpawnerAgent : IAgent
+    public class SpawnerAgent : IAgent,  IRayPickable, ITarget
     {
         Vector3 Position { get; set; }
         Random Random = new Random();
@@ -29,10 +32,15 @@ namespace Aquarium.Sim.Agents
 
         ConcurrentQueue<OrganismAgent> Births;
 
-        public SpawnerAgent(Vector3 pos, IOrganismAgentPool pool)
+        BoundingBox Box { get; set; }
+        Model Model { get; set; }
+
+        public SpawnerAgent(Vector3 pos, IOrganismAgentPool pool, Model model, BoundingBox box)
         {
             Position = pos;
             Pool = pool;
+            Model = model;
+            Box = box;
             Births = new ConcurrentQueue<OrganismAgent>();
         }
 
@@ -158,6 +166,9 @@ namespace Aquarium.Sim.Agents
 
         public void Draw(float duration, Forever.Render.RenderContext renderContext)
         {
+
+            var world = Matrix.CreateTranslation(Position);
+            Renderer.RenderModel(Model, world, renderContext);
         }
 
         public void Update(float duration)
@@ -212,5 +223,27 @@ namespace Aquarium.Sim.Agents
         }
 
 
+
+        public bool IsHit(Ray ray)
+        {
+            //TODO - fix this once you figure out how you want to display this thing
+
+            return ray.Intersects(Box) != null;
+        }
+
+        string ITarget.Label
+        {
+            get { return this.ToString(); }
+        }
+
+        IAgent ITarget.Agent
+        {
+            get { return this; }
+        }
+
+        BoundingBox ITarget.TargetBB
+        {
+            get { return Box; }
+        }
     }
 }
