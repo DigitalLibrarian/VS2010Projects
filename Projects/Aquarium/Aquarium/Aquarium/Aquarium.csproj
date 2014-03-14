@@ -156,9 +156,7 @@
     <Compile Include="GA\Organs\OrganAbilities\QueryPositionAbility.cs" />
     <Compile Include="GA\Organs\OrganAbility.cs" />
     <Compile Include="GA\Phenotypes\BodyPhenotype.cs" />
-    <Compile Include="GA\Population\Population.cs" />
     <Compile Include="GA\Population\PopulationMember.cs" />
-    <Compile Include="GA\Population\RandomPopulation.cs" />
     <Compile Include="GA\Signals\ChanneledSignal.cs" />
     <Compile Include="GA\Signals\ChannelReader.cs" />
     <Compile Include="GA\Signals\ChannelWriter.cs" />

@@ -161,7 +161,7 @@ namespace Aquarium
 
         bool Engaged = true;
         ITarget LastTarget = null;
-        public ITarget GetNextTarget(Microsoft.Xna.Framework.Ray ray)
+        private ITarget GetNextTarget(Microsoft.Xna.Framework.Ray ray)
         {
             if (Engaged)
             {
