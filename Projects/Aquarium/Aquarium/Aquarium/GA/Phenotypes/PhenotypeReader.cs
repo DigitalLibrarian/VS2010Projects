@@ -24,6 +24,8 @@ namespace Aquarium.GA.Phenotypes
 
         public Body ProduceBody(IBodyPhenotype bodyPheno)
         {
+            //TODO - make so there is a pool of Networks and each neural organ point at it's nn
+
             if (!bodyPheno.BodyPartPhenos.Any())
             {
                 return null;

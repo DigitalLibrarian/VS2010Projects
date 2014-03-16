@@ -27,7 +27,7 @@ namespace Aquarium.UI
 
         public RuminateGuiGameScreen()
         {
-            this.PropagateInput = false;
+            this.PropagateInput = true;
             this.PropagateDraw = true;
             this.TransitionOffTime = new TimeSpan(0, 0, 0, 0, 50);
         }
@@ -90,9 +90,13 @@ namespace Aquarium.UI
             foreach (var group in NumPickers)
             {
                 group.UpdateLabel();
+
+                UseRandom.SetToggle(Agent.UseRandom);
+                UseMeiosis.SetToggle(Agent.UseMeiosis);
             }
         }
-
+        CheckBox UseRandom;
+        CheckBox UseMeiosis;
 
         public void Close()
         {
@@ -128,17 +132,19 @@ namespace Aquarium.UI
             var wEvent = new WidgetEvent((width) => this.Close());
             closeButton.ClickEvent += wEvent;
             
-            var panel = new Panel(5, 20, 280, 300);
+            var panel = new Panel(5, 20, 500, 300);
             panel.AddWidget(closeButton);
 
             var pickerHeight = 30;
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 0), "Max Pop", () => { return Agent.MaxPopSize; }, (v) => { Agent.MaxPopSize = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 1), "Range", () => { return Agent.SpawnRange; }, (v) => { Agent.SpawnRange = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 2), "MaxQueue", () => { return Agent.MaxBirthQueueSize; }, (v) => { Agent.MaxBirthQueueSize = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 3), "# Parts", () => { return Agent.DefaultParts; }, (v) => { Agent.DefaultParts = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 4), "# Organs", () => { return Agent.DefaultOrgans; }, (v) => { Agent.DefaultOrgans = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 5), "# Networks", () => { return Agent.DefaultNN; }, (v) => { Agent.DefaultNN = v; }));
-            NumPickers.Add(new NumPickerWidgetGroup(5, 35 + (pickerHeight * 6), "Max Genome", () => { return Agent.GeneCap; }, (v) => { Agent.GeneCap = v; }));
+            int pickers = 0;
+            int start = 35;
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "Max Pop", () => { return Agent.MaxPopSize; }, (v) => { Agent.MaxPopSize = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 200, "Range", () => { return Agent.SpawnRange; }, (v) => { Agent.SpawnRange = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "MaxQueue", () => { return Agent.MaxBirthQueueSize; }, (v) => { Agent.MaxBirthQueueSize = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Parts", () => { return Agent.DefaultParts; }, (v) => { Agent.DefaultParts = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Organs", () => { return Agent.DefaultOrgans; }, (v) => { Agent.DefaultOrgans = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Networks", () => { return Agent.DefaultNN; }, (v) => { Agent.DefaultNN = v; }));
+            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 10000, "Max Genome", () => { return Agent.GeneCap; }, (v) => { Agent.GeneCap = v; }));
 
 
             foreach (var pickerGroup in NumPickers)
@@ -149,6 +155,19 @@ namespace Aquarium.UI
                 }
             }
 
+            var pickersEnd = start + (pickerHeight * pickers);
+
+            UseRandom = new CheckBox(0, pickersEnd, "Random");
+            UseRandom.OnToggle += new WidgetEvent((Widget target) => { Agent.UseRandom = true; });
+            UseRandom.OffToggle += new WidgetEvent((Widget target) => { Agent.UseRandom = false; });
+
+            UseMeiosis = new CheckBox(100, pickersEnd, "Meiosis");
+            UseMeiosis.OnToggle += new WidgetEvent((Widget target) => { Agent.UseMeiosis = true; });
+            UseMeiosis.OffToggle += new WidgetEvent((Widget target) => { Agent.UseMeiosis = false; });
+
+            panel.AddWidget(UseRandom);
+            panel.AddWidget(UseMeiosis);
+
             return new Gui(Game, skin, text, testSkins, testTexts)
             {
                 Widgets = new Widget[] {
@@ -157,63 +176,61 @@ namespace Aquarium.UI
             };
         }
 
-        List<NumPickerWidgetGroup> NumPickers = new List<NumPickerWidgetGroup>();
+        List<SliderWidgetGroup> NumPickers = new List<SliderWidgetGroup>();
 
     }
 
-    class NumPickerWidgetGroup
+    class SliderWidgetGroup
     {
         public List<Widget> Widgets
         {
             get;
             private set;
         }
-
-        public Label DisplayLabel { get; private set; }
+        int Max;
+        int Min;
+        public Slider Slider { get; private set; }
         public Label ValueLabel { get; private set; }
-        public Button DownButton { get; private set; }
-        public Button UpButton { get; private set; }
 
         Func<int> Getter { get; set; }
         Action<int> Setter { get; set; }
 
-        public NumPickerWidgetGroup(int x, int y, string labelText, Func<int> getter, Action<int> setter)
+        public SliderWidgetGroup(int x, int y, int min, int max, string labelText, Func<int> getter, Action<int> setter)
         {
+            Max = max;
+            Min = min;
             Getter = getter;
             Setter = setter;
 
-            var buttonWidth = 15;
             var labelWidth = 150;
-            var valueLabelWidth = 50;
             var pad = 5;
 
+            var sliderWidth = 200;
             var label = new Label(x + pad, y, labelText);
-            var downButton = new Button(x + pad + labelWidth + pad, y, buttonWidth, "-");
-            var valueLabel = new Label(x + pad + labelWidth + pad + buttonWidth + pad, y, Getter().ToString());
-            var upButton = new Button(x + pad + labelWidth + pad + buttonWidth + pad + valueLabelWidth + pad, y, buttonWidth + pad, "+");
+            var sliderLabel = new Label(x + pad + labelWidth + pad + sliderWidth + pad, y, Getter().ToString());
+            var slider = new Slider(x + pad + labelWidth + pad, y, sliderWidth, delegate(Widget w) {
+                        float rawValue = ((Slider)w).Value;
+                        var diff = max - min;
+                        var dist = diff * rawValue;
 
-            DisplayLabel = label;
-            DownButton = downButton;
-            UpButton = upButton;
-            ValueLabel = valueLabel;
+                        int newValue = min + (int) dist;
+                        sliderLabel.Value = newValue.ToString();
 
-            DownButton.ClickEvent += new WidgetEvent((w) =>
-            {
-                Decrement();
-                UpdateLabel();
-            });
-
-            UpButton.ClickEvent += new WidgetEvent((w) => {
-                Increment();
-                UpdateLabel();
-            });
-
+                        Setter(newValue);
+                    });
+            Slider = slider;
+            var v = Getter();
+            var ratio = (v - min) / (max - min);
+            slider.Value = ratio;
+            slider.ValueChanged(slider);
+            ValueLabel = sliderLabel;
+           
             Widgets = new List<Widget>
             {
+               
                 label,
-                downButton,
-                valueLabel,
-                upButton
+                slider,
+                sliderLabel
             };
         }
 
@@ -226,12 +243,15 @@ namespace Aquarium.UI
 
         private void Decrement()
         {
-
+            var value = Getter();
+            value--;
+            Setter(value);
         }
 
         public void UpdateLabel()
         {
            ValueLabel.Value = Getter().ToString();
+            
         }
 
 

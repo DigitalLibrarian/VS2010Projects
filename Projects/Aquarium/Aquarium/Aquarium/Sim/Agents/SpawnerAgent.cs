@@ -54,7 +54,8 @@ namespace Aquarium.Sim.Agents
         public int DefaultOrgans = 30;
         public int DefaultNN = 15;
         public int DefaultJunk = 0;
-
+        public bool UseMeiosis = false;
+        public bool UseRandom = false;
         #region Generation Tools
 
         private bool TryEnqueue(BodyGenome off)
@@ -114,6 +115,7 @@ namespace Aquarium.Sim.Agents
 
         private bool TryGenerateRandom()
         {
+            if (!UseRandom) return false;
             var genome = BodyGenome.Random(
                 Random,
                 numParts: DefaultParts,
@@ -127,6 +129,7 @@ namespace Aquarium.Sim.Agents
 
         private int TryMeiosis()
         {
+            if (!UseMeiosis) return 0;
             int count = 0;
             List<BodyGenome> genomes = GetNewParents();
 

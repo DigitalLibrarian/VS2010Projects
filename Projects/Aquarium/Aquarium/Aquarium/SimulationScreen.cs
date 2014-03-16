@@ -99,7 +99,7 @@ namespace Aquarium
             var pos = RenderContext.Camera.Position;
 
             //TODO - need better box.  i'm sure i have somethign to extract from model
-            var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 15f));
+            var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 5f));
 
             var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
             Sim.Space.Register(agent, pos);

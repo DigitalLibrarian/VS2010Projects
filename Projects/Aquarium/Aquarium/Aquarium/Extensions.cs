@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Aquarium
 {
@@ -60,5 +61,7 @@ namespace Aquarium
         {
             return new BoundingBox(Vector3.Min(me.Min, box.Min), Vector3.Max(me.Max, box.Max));
         }
+
+        
     }
 }
