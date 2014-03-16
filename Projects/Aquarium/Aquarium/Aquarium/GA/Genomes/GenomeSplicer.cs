@@ -35,6 +35,15 @@ namespace Aquarium.GA.Genomes
                     g.Genes.Insert(geneIndex + 1, newGene);
                 },
                 (g) => {
+
+                    var gene = Random.NextElement(g.Genes);
+                    int b = 10;
+                    int place = Random.Next(5);
+                    int sign = Random.Next(1) == 0 ? 1 : -1;
+                    var mutation = (int)(Math.Pow(b, place) * sign);
+                    gene.Value = gene.Value + mutation;
+                },
+                (g) => {
                     var geneIndex = Random.Next(g.Genes.Count());
                     var gene = g.Genes[geneIndex];
                     int sign = 1;

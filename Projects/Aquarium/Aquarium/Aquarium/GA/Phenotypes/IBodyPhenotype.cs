@@ -47,7 +47,7 @@ namespace Aquarium.GA.Phenotypes
         IInstancePointer BodyPartPointer { get; set; }
         IInstancePointer InputSignal { get; set; }
         IInstancePointer OutputSignal { get; set; }
-        IInstancePointer AbilityId { get; set; }
+        IInstancePointer ForeignId { get; set; }
 
         IInstancePointer AbilityParam0 { get; set; }
 
@@ -56,8 +56,6 @@ namespace Aquarium.GA.Phenotypes
     public interface INeuralNetworkPhenotype
     {
 
-        IInstancePointer BodyPartPointer { get; set; }
-        IInstancePointer OrganPointer { get; set; }
 
         int NumHidden { get; set; }
 

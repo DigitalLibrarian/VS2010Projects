@@ -13,7 +13,7 @@ namespace Aquarium.GA.Phenotypes
         public IInstancePointer BodyPartPointer { get; set; }
         public IInstancePointer InputSignal { get; set; }
         public IInstancePointer OutputSignal { get; set; }
-        public IInstancePointer AbilityId { get; set; }
+        public IInstancePointer ForeignId { get; set; }
 
         public IInstancePointer AbilityParam0 { get; set; }
 
@@ -23,7 +23,7 @@ namespace Aquarium.GA.Phenotypes
             BodyPartPointer = new InstancePointer(header.BodyPart);
             InputSignal = new InstancePointer(header.InputSignal);
             OutputSignal = new InstancePointer(header.OutputSignal);
-            AbilityId = new InstancePointer(header.AbilityId);
+            ForeignId = new InstancePointer(header.AbilityId);
             AbilityParam0 = new InstancePointer(header.AbilityParam0);
         }
 

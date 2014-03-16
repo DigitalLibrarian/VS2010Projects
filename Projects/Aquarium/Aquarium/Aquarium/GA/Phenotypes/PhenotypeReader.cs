@@ -33,6 +33,7 @@ namespace Aquarium.GA.Phenotypes
             var body = new Body();
             var partsToMake = bodyPheno.BodyPartPhenos.ToList();
 
+            //Pre generate all the individual part geometry
             var gennedParts = bodyPheno.BodyPartPhenos.Select(partGenome => 
             {
                  var part = NewPartFromIndex(partGenome.BodyPartGeometryIndex);
@@ -45,6 +46,7 @@ namespace Aquarium.GA.Phenotypes
 
             bool first = true;
             
+            //connect body together
             foreach(var part in gennedParts)
             {
                 var partGenome = partsToMake.First();
@@ -71,6 +73,7 @@ namespace Aquarium.GA.Phenotypes
             }
             var goodOrganPhenos = new List<IOrganPhenotype>();
 
+            //connect organ phenos to parts
             foreach (var organPheno in bodyPheno.OrganPhenos)
             {
                 var partId = organPheno.BodyPartPointer.InstanceId;
@@ -78,50 +81,36 @@ namespace Aquarium.GA.Phenotypes
                 goodOrganPhenos.Add(organPheno);
             }
 
+            //need list of organs that will require channels
             var ioOrgans = new Dictionary<IOrganPhenotype, Organ>();
+            //dictionary of type to list
             var typedOrganPhenos = ClassifyOrgans(goodOrganPhenos);
 
 
-            if (typedOrganPhenos.ContainsKey(OrganType.Neural))
+
+
+            if (typedOrganPhenos.ContainsKey(OrganType.Neural) && bodyPheno.NeuralNetworkPhenos.Any())
             {
                 goodOrganPhenos = typedOrganPhenos[OrganType.Neural];
-                var organNNPhenos = new Dictionary<IOrganPhenotype, INeuralNetworkPhenotype>();
 
-                //create dict of all organs that have networks pointing at them
-                foreach (var neuPheno in bodyPheno.NeuralNetworkPhenos)
+
+                foreach (var organPheno in goodOrganPhenos)
                 {
-                    var partId = neuPheno.BodyPartPointer.InstanceId;
+                    var networkId = organPheno.ForeignId.InstanceId;
+                    var partId = organPheno.BodyPartPointer.InstanceId;
                     var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
-                    var organId = neuPheno.OrganPointer.InstanceId;
-                    if (goodOrganPhenos.Any())
-                    {
-                        var organPheno = Fuzzy.ScaledCircleIndex(goodOrganPhenos, organId);
-                        if (!organNNPhenos.ContainsKey(organPheno))
-                        {
-                            organNNPhenos.Add(organPheno, neuPheno);
-                            goodOrganPhenos.Remove(organPheno);
-                        }
-                    }
-                }
-
-
-                //now we can add the neural organs
-                foreach (var noPheno in organNNPhenos.Keys)
-                {
-                    var partId = noPheno.BodyPartPointer.InstanceId;
-                    var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
-                    var nnPheno = organNNPhenos[noPheno];
+                    var nnPheno = Fuzzy.ScaledCircleIndex(bodyPheno.NeuralNetworkPhenos, networkId);
 
                     var network = new NeuralNetwork(nnPheno.NumInputs, nnPheno.NumHidden, nnPheno.NumOutputs);
                     network.SetWeights(nnPheno.Weights);
 
+
                     var organ = new NeuralOrgan(part, network);
                     part.AddOrgan(organ);
-
-                    ioOrgans.Add(noPheno, organ);
-
+                    ioOrgans.Add(organPheno, organ);
                 }
 
+               
 
             } // do all neurals
 
@@ -131,7 +120,7 @@ namespace Aquarium.GA.Phenotypes
 
                 foreach (var organPheno in goodOrganPhenos)
                 {
-                    var rawAbilityId = organPheno.AbilityId.InstanceId;
+                    var rawAbilityId = organPheno.ForeignId.InstanceId;
                     var partId = organPheno.BodyPartPointer.InstanceId;
                     var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
                     var abilityParam0 = organPheno.AbilityParam0.InstanceId;
