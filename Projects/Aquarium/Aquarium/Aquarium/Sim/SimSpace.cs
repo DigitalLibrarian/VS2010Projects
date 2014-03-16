@@ -4,7 +4,7 @@ using Forever.SpacePartitions;
 using Microsoft.Xna.Framework;
 using Forever.Render;
 using System.Collections.Generic;
-using Aquarium.GA.Environments;
+using Aquarium.Life.Environments;
 
 namespace Aquarium.Sim
 {

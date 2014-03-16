@@ -50,7 +50,7 @@ namespace Aquarium
             SpawnerAgentThread.IsBackground = true;
             SpawnerAgentThread.Start();
 
-            var asset = @"Models/UFHSatellite/uhfsat";
+            var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
         }
 
@@ -135,7 +135,6 @@ namespace Aquarium
             PlayerRigidBody.Mass = 0.1f;
             PlayerRigidBody.InertiaTensor = InertiaTensorFactory.Sphere(PlayerRigidBody.Mass, 1f);
             var mouseSteering = new MouseSteering(RenderContext.GraphicsDevice, PlayerRigidBody, 0.000000001f);
-
             var analogSteering = new AnalogSteering(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f, PlayerRigidBody);
 
             var controlForces = new SteeringControls(mouseSteering, analogSteering);
@@ -152,7 +151,6 @@ namespace Aquarium
             var actionBarSlotHeight = 40;
             var actionBar = new ActionBar(RenderContext, 50, actionBarSlotHeight, spriteFont);
             actionBar.Slots[0].Action = new ActionBarAction(AddNewSpawnerAgent);
-
 
             var hud = new ControlledCraftHUD(User, RenderContext);
             hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
@@ -179,6 +177,7 @@ namespace Aquarium
                 targetWindow, 
             };
         }
+        //TODO - make spawner editor manage this
         SpawnerEditor SpawnerEditor;
         bool Engaged = true;
         ITarget LastTarget = null;

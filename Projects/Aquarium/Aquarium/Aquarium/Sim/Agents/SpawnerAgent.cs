@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.GA.Genomes;
-using Aquarium.GA.Phenotypes;
-using Aquarium.GA;
-using Aquarium.GA.Codons;
+using Aquarium.Life.Genomes;
+using Aquarium.Life.Phenotypes;
+using Aquarium.Life;
+using Aquarium.Life.Codons;
 using Microsoft.Xna.Framework;
 using System.Collections.Concurrent;
 using Microsoft.Xna.Framework.Graphics;
@@ -209,14 +209,18 @@ namespace Aquarium.Sim.Agents
             if (QueueFull) return;
             int num = 0;
 
+            int lastNum;
             while (num < MaxPerSpawnPump)
             {
+                lastNum = num;
                 var mCount = TryMeiosis();
                 num += mCount;
                 if (mCount == 0 && TryGenerateRandom())
                 {
                     num++;
                 }
+
+                if (num == lastNum) break;
             }
             
         }

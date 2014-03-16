@@ -7,10 +7,11 @@ using Forever.Render;
 using Microsoft.Xna.Framework.Graphics;
 using Forever.Physics;
 using Microsoft.Xna.Framework;
+using Aquarium.Sim.Agents;
 
 namespace Aquarium
 {
-    public class Hunter
+    public class Hunter : IAgent
     {
         public static string ModelAsset { get { return "Models/enemy"; } }
         public Matrix ModelTransform { get; set; }
@@ -28,7 +29,7 @@ namespace Aquarium
 
             ForceGen = new MutableForceGenerator();
         }
-        public void Draw(RenderContext renderContext)
+        public void Draw(float duration, RenderContext renderContext)
         {
             var world = RigidBody.World;
             Renderer.RenderModel(Model, ModelTransform, world, renderContext);
@@ -63,7 +64,7 @@ namespace Aquarium
 
         }
 
-      
+
     }
 
     

@@ -33,10 +33,10 @@ namespace Aquarium.UI
 
         public void LoadContent(ContentManager content, GraphicsDevice graphics)
         {
-            var emptyCircle = content.Load<Texture2D>("Reticules/SimpleCircleReticule");
+            var emptyCircle = content.Load<Texture2D>(AssetNames.EmptyCircleReticule);
             EmptyCircleReticule = new Reticule(emptyCircle, 0, 200, 200, 35, 35);
 
-            var filledCircle = content.Load<Texture2D>("Reticules/SimpleConcentricReticule");
+            var filledCircle = content.Load<Texture2D>(AssetNames.FilledCircleReticule);
             FilledCircleReticule = new Reticule(filledCircle, 0, 200, 200, 35, 35);
 
             Cursor = new CursorReticule(emptyCircle, 0, 200, 200, 30, 30);

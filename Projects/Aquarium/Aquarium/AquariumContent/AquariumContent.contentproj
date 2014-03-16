@@ -155,6 +155,11 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+    <Compile Include="Models\TurboSquid\Low poly starfighter\wasphunter.FBX">
+      <Name>wasphunter</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
     <None Include="SimpleGui\Skins\GreySkin\Map.txt">
       <Name>Map</Name>
       <Processor>PassThroughProcessor</Processor>
@@ -190,6 +195,14 @@
   <ItemGroup>
     <Compile Include="SimpleGui\beaker.png">
       <Name>beaker</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Models\TurboSquid\Low poly starfighter\wasphunter_texture.jpg">
+      <Name>wasphunter_texture</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

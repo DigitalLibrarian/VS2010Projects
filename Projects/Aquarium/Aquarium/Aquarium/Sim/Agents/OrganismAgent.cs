@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.GA;
-using Aquarium.GA.Population;
-using Aquarium.GA.Genomes;
+using Aquarium.Life;
+using Aquarium.Life.Population;
+using Aquarium.Life.Genomes;
 using Forever.Render;
 using Microsoft.Xna.Framework;
 using Aquarium.UI.Targets;

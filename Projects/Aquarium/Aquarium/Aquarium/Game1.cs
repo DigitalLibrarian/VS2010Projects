@@ -15,13 +15,13 @@ using Forever.Render;
 using Forever.Screens;
 
 using Forever.Neural;
-using Aquarium.GA.Organs;
-using Aquarium.GA.Signals;
-using Aquarium.GA.Genomes;
-using Aquarium.GA.Phenotypes;
-using Aquarium.GA.Headers;
-using Aquarium.GA.Codons;
-using Aquarium.GA.Bodies;
+using Aquarium.Life.Organs;
+using Aquarium.Life.Signals;
+using Aquarium.Life.Genomes;
+using Aquarium.Life.Phenotypes;
+using Aquarium.Life.Headers;
+using Aquarium.Life.Codons;
+using Aquarium.Life.Bodies;
 
 using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;

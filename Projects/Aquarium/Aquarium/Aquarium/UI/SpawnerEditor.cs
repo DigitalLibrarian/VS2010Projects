@@ -18,44 +18,6 @@ using Forever.Screens;
 
 namespace Aquarium.UI
 {
-
-    public abstract class RuminateGuiGameScreen : GameScreen
-    {
-        public Gui Gui { get; private set; }
-
-        protected abstract Gui CreateGui();
-
-        public RuminateGuiGameScreen()
-        {
-            this.PropagateInput = true;
-            this.PropagateDraw = true;
-            this.TransitionOffTime = new TimeSpan(0, 0, 0, 0, 50);
-        }
-
-
-        public override void LoadContent()
-        {
-            base.LoadContent();
-            if (Gui == null)
-            {
-                Gui = CreateGui();
-            }
-        }
-        
-        public override void Draw(GameTime gameTime)
-        {
-            Gui.Draw();
-            base.Draw(gameTime);
-        }
-
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
-        {
-            Gui.Update();
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
-        }
-    }
-
-
     public class SpawnerEditor : RuminateGuiGameScreen
     {
         public SpawnerAgent Agent { get; private set; }
@@ -63,6 +25,9 @@ namespace Aquarium.UI
 
         Game Game { get; set; }
 
+        CheckBox UseRandom;
+        CheckBox UseMeiosis;
+        List<SliderWidgetGroup> Sliders = new List<SliderWidgetGroup>();
 
         public SpawnerEditor(Game game, RenderContext renderContext)
         {
@@ -70,9 +35,6 @@ namespace Aquarium.UI
             RenderContext = renderContext;
         }
 
-        const string ImageMapAsset = @"SimpleGui\Skins\TestSkin\ImageMap";
-        const string MapAsset = @"Content\SimpleGui\Skins\TestSkin\Map.txt";
-        const string FontAsset = @"SimpleGui\Skins\TestSkin\Font";
         
 
 
@@ -87,7 +49,7 @@ namespace Aquarium.UI
             IsOpen = true;
             Agent = agent;
 
-            foreach (var group in NumPickers)
+            foreach (var group in Sliders)
             {
                 group.UpdateLabel();
 
@@ -95,8 +57,6 @@ namespace Aquarium.UI
                 UseMeiosis.SetToggle(Agent.UseMeiosis);
             }
         }
-        CheckBox UseRandom;
-        CheckBox UseMeiosis;
 
         public void Close()
         {
@@ -106,20 +66,13 @@ namespace Aquarium.UI
         }
 
 
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
-        {
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
-        }
-
         
-
-
         protected override Gui CreateGui()
         {
             var content = this.ScreenManager.Game.Content;
-            var imageMap = content.Load<Texture2D>(SpawnerEditor.ImageMapAsset);
-            var map = File.OpenText(SpawnerEditor.MapAsset).ReadToEnd();
-            var font = content.Load<SpriteFont>(SpawnerEditor.FontAsset);
+            var imageMap = content.Load<Texture2D>(AssetNames.SimpleGuiTestSkinImageMap);
+            var map = File.OpenText(AssetNames.SimpleGuiTestSkinMap).ReadToEnd();
+            var font = content.Load<SpriteFont>(AssetNames.SimpleGuiSpriteFont);
             var skin = new Skin(imageMap, map);
             var text = new Text(font, Color.Cyan);
 
@@ -138,16 +91,16 @@ namespace Aquarium.UI
             var pickerHeight = 30;
             int pickers = 0;
             int start = 35;
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "Max Pop", () => { return Agent.MaxPopSize; }, (v) => { Agent.MaxPopSize = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 200, "Range", () => { return Agent.SpawnRange; }, (v) => { Agent.SpawnRange = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "MaxQueue", () => { return Agent.MaxBirthQueueSize; }, (v) => { Agent.MaxBirthQueueSize = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Parts", () => { return Agent.DefaultParts; }, (v) => { Agent.DefaultParts = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Organs", () => { return Agent.DefaultOrgans; }, (v) => { Agent.DefaultOrgans = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Networks", () => { return Agent.DefaultNN; }, (v) => { Agent.DefaultNN = v; }));
-            NumPickers.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 10000, "Max Genome", () => { return Agent.GeneCap; }, (v) => { Agent.GeneCap = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "Max Pop", () => { return Agent.MaxPopSize; }, (v) => { Agent.MaxPopSize = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 200, "Range", () => { return Agent.SpawnRange; }, (v) => { Agent.SpawnRange = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, "MaxQueue", () => { return Agent.MaxBirthQueueSize; }, (v) => { Agent.MaxBirthQueueSize = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Parts", () => { return Agent.DefaultParts; }, (v) => { Agent.DefaultParts = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Organs", () => { return Agent.DefaultOrgans; }, (v) => { Agent.DefaultOrgans = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Networks", () => { return Agent.DefaultNN; }, (v) => { Agent.DefaultNN = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 10000, "Max Genome", () => { return Agent.GeneCap; }, (v) => { Agent.GeneCap = v; }));
 
 
-            foreach (var pickerGroup in NumPickers)
+            foreach (var pickerGroup in Sliders)
             {
                 foreach (var widget in pickerGroup.Widgets)
                 {
@@ -176,86 +129,10 @@ namespace Aquarium.UI
             };
         }
 
-        List<SliderWidgetGroup> NumPickers = new List<SliderWidgetGroup>();
 
     }
 
-    class SliderWidgetGroup
-    {
-        public List<Widget> Widgets
-        {
-            get;
-            private set;
-        }
-        int Max;
-        int Min;
-        public Slider Slider { get; private set; }
-        public Label ValueLabel { get; private set; }
-
-        Func<int> Getter { get; set; }
-        Action<int> Setter { get; set; }
-
-        public SliderWidgetGroup(int x, int y, int min, int max, string labelText, Func<int> getter, Action<int> setter)
-        {
-            Max = max;
-            Min = min;
-            Getter = getter;
-            Setter = setter;
-
-            var labelWidth = 150;
-            var pad = 5;
-
-            var sliderWidth = 200;
-            var label = new Label(x + pad, y, labelText);
-            var sliderLabel = new Label(x + pad + labelWidth + pad + sliderWidth + pad, y, Getter().ToString());
-            var slider = new Slider(x + pad + labelWidth + pad, y, sliderWidth, delegate(Widget w) {
-                        float rawValue = ((Slider)w).Value;
-                        var diff = max - min;
-                        var dist = diff * rawValue;
-
-                        int newValue = min + (int) dist;
-                        sliderLabel.Value = newValue.ToString();
-
-                        Setter(newValue);
-                    });
-            Slider = slider;
-            var v = Getter();
-            var ratio = (v - min) / (max - min);
-            slider.Value = ratio;
-            slider.ValueChanged(slider);
-            ValueLabel = sliderLabel;
-           
-            Widgets = new List<Widget>
-            {
-               
-                label,
-                slider,
-                sliderLabel
-            };
-        }
-
-        private void Increment()
-        {
-            var value = Getter();
-            value++;
-            Setter(value);
-        }
-
-        private void Decrement()
-        {
-            var value = Getter();
-            value--;
-            Setter(value);
-        }
-
-        public void UpdateLabel()
-        {
-           ValueLabel.Value = Getter().ToString();
-            
-        }
-
-
-    }
+    
 
 
 }
