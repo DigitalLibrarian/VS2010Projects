@@ -51,7 +51,7 @@ namespace Aquarium.UI
 
             foreach (var group in Sliders)
             {
-                group.UpdateLabel();
+                group.Reset();
 
                 UseRandom.SetToggle(Agent.UseRandom);
                 UseMeiosis.SetToggle(Agent.UseMeiosis);

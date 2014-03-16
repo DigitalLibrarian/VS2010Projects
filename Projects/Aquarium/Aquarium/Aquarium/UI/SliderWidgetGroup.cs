@@ -76,9 +76,16 @@ namespace Aquarium.UI
             Setter(value);
         }
 
-        public void UpdateLabel()
+        public void Reset()
         {
-            ValueLabel.Value = Getter().ToString();
+            var newValue = Getter();
+            ValueLabel.Value = newValue.ToString();
+
+            float diff = Max -  Min;
+
+            float vDiff = newValue - Min;
+            Slider.Value = (vDiff) / diff;
+            
 
         }
 

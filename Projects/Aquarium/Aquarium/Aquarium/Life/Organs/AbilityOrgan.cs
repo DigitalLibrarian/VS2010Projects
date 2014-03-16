@@ -41,6 +41,7 @@ namespace Aquarium.Life.Organs
             if (HasAbility)
             {
                 OutputSignal = Ability.Fire(nervousSystem, this, signal, _mutaFG);
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.AbilityFiringBaseCost);
             }
 
             base.ReceiveSignal(nervousSystem, signal);

@@ -13,15 +13,18 @@ using Aquarium.Life.Environments;
 
 namespace Aquarium.Life
 {
+   
+
+
     public class Organism : IFood
     {
+        public LifeForce LifeForce { get; private set; }
         public Body Body { get; private set; }
         public IRigidBody RigidBody { get; private set; }
 
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Surroundings { get; set; }
 
-        private const float EnergyFlatline = 1f;
         /// <summary>
         /// Gets or sets the position of the organism.
         /// 
@@ -58,20 +61,13 @@ namespace Aquarium.Life
             }
         }
 
-        public long Age { get; private set; }
 
+        public int TotalOrgans { get; private set; }
 
-        public bool IsDead
-        {
-            get
-            {
-                return Energy <= EnergyFlatline;
-            }
-        }
+     
 
         public Organism(Body b)
         {
-            ConfigureSpawnLevels();
 
             Body = b;
             RigidBody = new RigidBody(b.Position);
@@ -90,6 +86,7 @@ namespace Aquarium.Life
             {
                 foreach (var organ in part.Organs)
                 {
+                    TotalOrgans++;
                     var fg = organ.ForceGenerator;
                     if (fg != null)
                     {
@@ -98,6 +95,8 @@ namespace Aquarium.Life
                 }
                 UpdateBoundingGeometryToContain(part);
             }
+
+            LifeForce = new LifeForce(100, LifeForce.CalcBasal(this));
         }
 
         private void UpdateBoundingGeometryToContain(BodyPart part)
@@ -112,45 +111,34 @@ namespace Aquarium.Life
             }
         }
 
-        private float EnergyBleed = 0.99f;
-        public float MaxEnergy { get; private set; }
-        public float Energy { get; private set; }
-        public float EdibleEnergy { get; private set; }
-
-        private void ConfigureSpawnLevels()
-        {
-            Age = 0;
-            MaxEnergy = 100;
-            Energy = MaxEnergy;
-            EdibleEnergy = Energy;
-        }
-
+        
         long Tick = 0;
         public void Update(float duration)
         {
-            if (!IsDead && ((Tick++ % 10) == 0))
+            if (!IsDead && ((Tick++ % 2) == 0))
             {
-                UpdateMetabolism(duration);
+                LifeForce.Update(duration);
                 NervousSystem.Update();
             }
 
             UpdatePhysics(duration);
         }
 
-        protected void UpdateMetabolism(float duration)
-        {
-            Energy *= EnergyBleed;
-            Age++;
-        }
+        public bool IsDead { get { return LifeForce.IsDead; } }
+        public float Energy { get { return LifeForce.Energy; } }
+        public float EdibleEnergy { get { return LifeForce.Energy; } }
+        public float MaxEnergy { get { return LifeForce.MaxEnergy; } }
+        public long Age { get { return LifeForce.Age; } }
+       
 
 
 
         public void Consume(IFood food)
         {
-            //TODO - this should be moved to organ
             var BiteSize = 75;
             float energyEfficiency = .65f;
-            Energy += food.BeConsumed(BiteSize) * energyEfficiency;
+
+            LifeForce.AddEnergy(food.BeConsumed(BiteSize) * energyEfficiency);
         }
 
         List<IForceGenerator> OrganForces { get; set; }
@@ -172,21 +160,15 @@ namespace Aquarium.Life
 
         public float BeConsumed(float biteSize)
         {
-            var energy = Energy - biteSize;
-
-            if (energy > 0)
+            if (LifeForce.PayEnergyCost(biteSize))
             {
-                Energy = energy;
-                EdibleEnergy = Energy;
                 return biteSize;
             }
             else
             {
-                // im dead
-                Energy = 0;
-                EdibleEnergy = 0;
-                return Math.Min(ConsumableEnergy, biteSize);
+                return 0f;
             }
+
         }
 
     }
