@@ -43,9 +43,7 @@ namespace Aquarium.Sim.Agents
             Box = box;
             Births = new ConcurrentQueue<OrganismAgent>();
         }
-
-
-
+        
         public int MaxPerSpawnPump = 50;
         public int BirthsPerUpdate = 1;
         public int MaxBirthQueueSize = 100;
@@ -53,11 +51,9 @@ namespace Aquarium.Sim.Agents
         public int SpawnRange = 25;
         public int GeneCap = 10000;
         public int DefaultParts = 7;
-        public int DefaultOrgans = 8;
-        public int DefaultNN = 5;
+        public int DefaultOrgans = 30;
+        public int DefaultNN = 15;
         public int DefaultJunk = 0;
-
-
 
         #region Generation Tools
 
@@ -226,8 +222,6 @@ namespace Aquarium.Sim.Agents
 
         public bool IsHit(Ray ray)
         {
-            //TODO - fix this once you figure out how you want to display this thing
-
             return ray.Intersects(Box) != null;
         }
 

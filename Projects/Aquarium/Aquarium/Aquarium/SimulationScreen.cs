@@ -23,9 +23,11 @@ namespace Aquarium
 
         ControlledCraft User { get; set; }
 
+
         public SimulationScreen(RenderContext renderContext) : base(renderContext)
         {
         }
+
 
         public override void HandleInput(InputState input)
         {
@@ -72,6 +74,8 @@ namespace Aquarium
         public override void Draw(GameTime gameTime)
         {
             Sim.Draw(gameTime, RenderContext);
+
+
             base.Draw(gameTime);
         }
 
@@ -94,13 +98,13 @@ namespace Aquarium
 
             var pos = RenderContext.Camera.Position;
 
+            //TODO - need better box.  i'm sure i have somethign to extract from model
             var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 15f));
 
             var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
             Sim.Space.Register(agent, pos);
 
-            SpawnerEditor.Close();
-            SpawnerEditor.Edit(agent);
+
 
             spawners.Add(agent);
         }
@@ -156,22 +160,23 @@ namespace Aquarium
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
 
+            SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
                 RenderContext, 
                 new Vector2(0, 0), 
-                ScreenManager.Font);
+                ScreenManager.Font,
+                this,
+                SpawnerEditor);
 
-            SpawnerEditor = new SpawnerEditor(RenderContext);
-            SpawnerEditor.LoadContent(ScreenManager.Game.Content);
 
+            
             return new List<IUIElement>
             {
                 actionBar,
                 hud, 
                 odometer, 
                 targetWindow, 
-                SpawnerEditor
             };
         }
         SpawnerEditor SpawnerEditor;

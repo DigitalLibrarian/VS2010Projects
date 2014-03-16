@@ -212,6 +212,7 @@ namespace Forever.Screens
                  if (!UpdateTransition(gameTime, transitionOffTime, 1))
                  {
                       // When the transition finishes, remove the screen.
+                     IsExiting = false;
                       ScreenManager.RemoveScreen(this);
                  }
             }

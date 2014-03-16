@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework;
 using Aquarium.Sim.Agents;
 using Microsoft.Xna.Framework.Graphics;
 using Forever.Render;
+using Forever.Screens;
 
 namespace Aquarium.UI.Targets
 {
-    interface ITarget
+    public interface ITarget
     {
         string Label { get; }
         IAgent Agent { get; }
@@ -27,18 +28,32 @@ namespace Aquarium.UI.Targets
 
         public SpriteFont SpriteFont { get; private set; }
         Func<Ray, ITarget> Source { get; set; }
-        public TargetWindow(Func<Ray, ITarget> source, RenderContext renderContext, Vector2 offset, SpriteFont font)
+
+        SimulationScreen Screen { get; set;}
+
+        SpawnerEditor SpawnerEditor;
+
+        public TargetWindow(
+            Func<Ray, ITarget> source, RenderContext renderContext, Vector2 offset, SpriteFont font, 
+            SimulationScreen screen,
+            SpawnerEditor spawnerAgentEditor
+            )
         {
             Source = source;
             RenderContext = renderContext;
             Offset = offset;
             SpriteFont = font;
+            Screen = screen;
+            SpawnerEditor = spawnerAgentEditor;
+
+
         }
         
         public void HandleInput(Forever.Screens.InputState input)
         {
-            // if mouse click, produce ray and test for new target
+            if (SpawnerEditor.IsOpen || SpawnerEditor.IsExiting) return;
 
+            // if mouse click, produce ray and test for new target
             if (input.IsMouseLeftClick())
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
@@ -46,6 +61,19 @@ namespace Aquarium.UI.Targets
                 var ray = GetMouseRay(mousePoint);
 
                 Target = Source(ray);
+                OnNewTarget();
+            }
+        }
+
+        private void OnNewTarget()
+        {
+            if (Target != null)
+            {
+                if (Target is SpawnerAgent)
+                {
+                    SpawnerEditor.AcquireTarget(Target);
+                    LoadNewPopup(SpawnerEditor);
+                }
             }
         }
 
@@ -93,6 +121,11 @@ namespace Aquarium.UI.Targets
         {
           
 
+        }
+
+        private void LoadNewPopup(GameScreen screen)
+        {
+            Screen.ScreenManager.AddScreen(screen);
         }
     }
 }

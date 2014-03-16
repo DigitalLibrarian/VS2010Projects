@@ -41,7 +41,10 @@ namespace Aquarium.UI
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            Visit((ele) => ele.Update(gameTime));
+            if (!otherScreenHasFocus)
+            {
+                Visit((ele) => ele.Update(gameTime));
+            }
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }

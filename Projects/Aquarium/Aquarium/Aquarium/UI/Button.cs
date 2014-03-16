@@ -9,32 +9,32 @@ using Forever.Screens;
 
 namespace Aquarium.UI
 {
-    public class Button
-    {
-        public delegate void OnClickEventHandler();
-        public event OnClickEventHandler OnClick;
+    //public class Button
+    //{
+    //    public delegate void OnClickEventHandler();
+    //    public event OnClickEventHandler OnClick;
 
-        public Rectangle ScreenRect { get; private set; }
-        public Texture2D Texture { get; private set; }
-        public Color Color { get; set; }
-        public Button(Rectangle rect, Texture2D texture)
-        {
-            ScreenRect = rect;
-            Texture = texture;
-            Color = Color.White;
-        }
+    //    public Rectangle ScreenRect { get; private set; }
+    //    public Texture2D Texture { get; private set; }
+    //    public Color Color { get; set; }
+    //    public Button(Rectangle rect, Texture2D texture)
+    //    {
+    //        ScreenRect = rect;
+    //        Texture = texture;
+    //        Color = Color.White;
+    //    }
 
-        public void HandleInput(InputState input)
-        {
-            if (input.IsMouseLeftClick() && ScreenRect.Contains(input.CurrentMousePoint))
-            {
-                if(OnClick != null) OnClick();
-            }
-        }
+    //    public void HandleInput(InputState input)
+    //    {
+    //        if (input.IsMouseLeftClick() && ScreenRect.Contains(input.CurrentMousePoint))
+    //        {
+    //            if(OnClick != null) OnClick();
+    //        }
+    //    }
 
-        public void Draw(GameTime gameTime, SpriteBatch batch, RenderContext renderContext)
-        {
-            batch.Draw(Texture, ScreenRect, Color);
-        }
-    }
+    //    public void Draw(GameTime gameTime, SpriteBatch batch, RenderContext renderContext)
+    //    {
+    //        batch.Draw(Texture, ScreenRect, Color);
+    //    }
+    //}
 }

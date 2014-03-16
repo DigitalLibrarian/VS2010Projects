@@ -23,6 +23,11 @@ using Aquarium.GA.Headers;
 using Aquarium.GA.Codons;
 using Aquarium.GA.Bodies;
 
+using Ruminate.GUI.Framework;
+using Ruminate.GUI.Content;
+using System.IO;
+
+
 namespace Aquarium
 {
     /// <summary>
@@ -38,6 +43,7 @@ namespace Aquarium
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
 
+        Gui Gui { get; set; }
         
         public Game1()
         {
@@ -45,6 +51,7 @@ namespace Aquarium
             Content.RootDirectory = "Content";
 
             ScreenManager = new ScreenManager(this);
+
         }
 
        
@@ -63,6 +70,8 @@ namespace Aquarium
 
             ScreenManager.Initialize();
         }
+
+
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
@@ -82,7 +91,7 @@ namespace Aquarium
 
             ScreenManager.AddScreen(new SimulationScreen(RenderContext));
             Components.Add(ScreenManager);
-
+           
 
         }
 
@@ -112,7 +121,6 @@ namespace Aquarium
             Terminal.CheckOpen(Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 
             base.Update(gameTime);
-
         }
       
 
@@ -124,11 +132,13 @@ namespace Aquarium
         {
             GraphicsDevice.Clear(Color.Black);
 
+
             RenderContext.Set3DRenderStates();
             base.Draw(gameTime);
 
             RenderContext.Set2DRenderStates();
             Terminal.CheckDraw(true);
+
         }
 
     }
