@@ -28,6 +28,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             float ratio = 0f;
             if (signal.Value[0] > 0.5f)
             {
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.SensorFiringCost);
                 var p = nervousSystem.Organism.Body.Position;
                 p = p.Round(3);
                 ratio = nervousSystem.Organism.Energy / nervousSystem.Organism.MaxEnergy;

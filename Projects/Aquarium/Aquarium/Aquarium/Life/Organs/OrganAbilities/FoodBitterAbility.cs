@@ -15,7 +15,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
 
         }
 
-
+        // param0 could be socket index whose normal we use to construct a ray to find find to bite
 
         public override int NumInputs
         {
@@ -34,7 +34,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             var env = nervousSystem.Organism.Surroundings;
             if (env != null)
             {
-
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.BitterFiringCost);
                 var searchRadius = 50;
                 //find food
                 var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);

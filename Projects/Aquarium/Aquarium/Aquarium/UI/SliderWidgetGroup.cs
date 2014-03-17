@@ -47,10 +47,6 @@ namespace Aquarium.UI
                 Setter(newValue);
             });
             Slider = slider;
-            var v = Getter();
-            var ratio = (v - min) / (max - min);
-            slider.Value = ratio;
-            slider.ValueChanged(slider);
             ValueLabel = sliderLabel;
 
             Widgets = new List<Widget>
@@ -85,7 +81,6 @@ namespace Aquarium.UI
 
             float vDiff = newValue - Min;
             Slider.Value = (vDiff) / diff;
-            
 
         }
 

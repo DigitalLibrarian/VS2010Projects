@@ -35,6 +35,8 @@ namespace Aquarium.Life.Organs.OrganAbilities
             float result = 0;
             if (num > 0.5)
             {
+
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.ThrusterFiringCost);
                 if (num > 1) num = 1;
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);

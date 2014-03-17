@@ -101,10 +101,10 @@ namespace Aquarium.Sim
         {
             return FoodSpace.QueryLocalSpace(pos, radius, (c, f) => Vector3.Distance(f.Position, pos) < radius);
         }
-
+        
         public List<IAgent> FindAll(Ray ray)
         {
-            //TODO
+            //TODO- move this into all spaces
             var list = RayPickers.FindAll(picker => picker.IsHit(ray));
             return list.ConvertAll<IAgent>(new System.Converter<IRayPickable, IAgent>((target) => (IAgent) target));
         }

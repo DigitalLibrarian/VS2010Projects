@@ -30,7 +30,7 @@ namespace Aquarium.Sim.Agents
 
         IOrganismAgentPool Pool;
 
-        ConcurrentQueue<OrganismAgent> Births;
+        public ConcurrentQueue<OrganismAgent> Births { get; private set; }
 
         BoundingBox Box { get; set; }
         Model Model { get; set; }
@@ -46,11 +46,11 @@ namespace Aquarium.Sim.Agents
         
         public int MaxPerSpawnPump = 50;
         public int BirthsPerUpdate = 1;
-        public int MaxBirthQueueSize = 100;
-        public int MaxPopSize = 100;
+        public int MaxBirthQueueSize = 20;
+        public int MaxPopSize = 10;
         public int SpawnRange = 25;
         public int GeneCap = 10000;
-        public int DefaultParts = 7;
+        public int DefaultParts = 25;
         public int DefaultOrgans = 30;
         public int DefaultNN = 15;
         public int DefaultJunk = 0;

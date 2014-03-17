@@ -27,6 +27,7 @@ namespace Aquarium.UI
 
         CheckBox UseRandom;
         CheckBox UseMeiosis;
+        Label QueueSizeLabel;
         List<SliderWidgetGroup> Sliders = new List<SliderWidgetGroup>();
 
         public SpawnerEditor(Game game, RenderContext renderContext)
@@ -34,8 +35,6 @@ namespace Aquarium.UI
             Game = game;
             RenderContext = renderContext;
         }
-
-        
 
 
         public bool IsOpen { get; private set; }
@@ -84,9 +83,12 @@ namespace Aquarium.UI
             var closeButton = new Button(5, 5, "x") { Skin = "testSkin", Text = "testText" };
             var wEvent = new WidgetEvent((width) => this.Close());
             closeButton.ClickEvent += wEvent;
+
+            QueueSizeLabel = new Label(35, 5, "");
             
             var panel = new Panel(5, 20, 500, 300);
             panel.AddWidget(closeButton);
+            panel.AddWidget(QueueSizeLabel);
 
             var pickerHeight = 30;
             int pickers = 0;
@@ -129,6 +131,16 @@ namespace Aquarium.UI
             };
         }
 
+
+        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        {
+            if (IsOpen)
+            {
+                QueueSizeLabel.Value = string.Format("Queued: {0}", Agent.Births.Count());
+            }
+
+            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+        }
 
     }
 

@@ -46,7 +46,7 @@ namespace Aquarium.UI.Targets
             Screen = screen;
             SpawnerEditor = spawnerAgentEditor;
 
-
+            
         }
         
         public void HandleInput(Forever.Screens.InputState input)
