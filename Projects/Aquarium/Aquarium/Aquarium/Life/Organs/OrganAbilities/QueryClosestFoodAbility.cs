@@ -9,11 +9,13 @@ namespace Aquarium.Life.Organs.OrganAbilities
 {
     public class QueryClosestFoodAbility : OrganAbility
     {
-
+        private float MinRadius = 25f;
+        private float MaxRadius = 150f;
+        public float SearchRadius { get; private set; }
         public QueryClosestFoodAbility(int param0)
             : base(param0)
         {
-
+            SearchRadius = (float)Fuzzy.InRange((int)param0, (int)MinRadius, (int)MaxRadius);
         }
 
         public override int NumInputs
@@ -33,9 +35,8 @@ namespace Aquarium.Life.Organs.OrganAbilities
             if (env != null)
             {
                 nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.SensorFiringCost);
-                var searchRadius = 25f;
                 //find food
-                var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
+                var foods = env.ClosestFoods(nervousSystem.Organism.Position, SearchRadius);
                 if (foods.Any())
                 {
                     var food = foods.FirstOrDefault(f => f != nervousSystem.Organism);

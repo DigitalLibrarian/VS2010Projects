@@ -113,12 +113,12 @@ namespace Aquarium.UI
             var pickersEnd = start + (pickerHeight * pickers);
 
             UseRandom = new CheckBox(0, pickersEnd, "Random");
-            UseRandom.OnToggle += new WidgetEvent((Widget target) => { Agent.UseRandom = true; });
-            UseRandom.OffToggle += new WidgetEvent((Widget target) => { Agent.UseRandom = false; });
+            UseRandom.OnToggle += new WidgetEvent((Widget target) => { if(Agent != null) Agent.UseRandom = true; });
+            UseRandom.OffToggle += new WidgetEvent((Widget target) => { if (Agent != null) Agent.UseRandom = false; });
 
             UseMeiosis = new CheckBox(100, pickersEnd, "Meiosis");
-            UseMeiosis.OnToggle += new WidgetEvent((Widget target) => { Agent.UseMeiosis = true; });
-            UseMeiosis.OffToggle += new WidgetEvent((Widget target) => { Agent.UseMeiosis = false; });
+            UseMeiosis.OnToggle += new WidgetEvent((Widget target) => { if (Agent != null) Agent.UseMeiosis = true; });
+            UseMeiosis.OffToggle += new WidgetEvent((Widget target) => { if (Agent != null) Agent.UseMeiosis = false; });
 
             panel.AddWidget(UseRandom);
             panel.AddWidget(UseMeiosis);

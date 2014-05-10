@@ -9,7 +9,6 @@ namespace Aquarium.Life
         public class LifeForce
         {
             private const float EnergyFlatline = 1f;
-            public const float EnergyDamping = 0.999f;
             public float BasalEnergyCost { get; private set; }
             public float MaxEnergy { get; private set; }
             public float Energy { get; private set; }
@@ -53,20 +52,19 @@ namespace Aquarium.Life
                 {
                     PayEnergyCost(BasalEnergyCost);
                     Age++;
-
-                    Energy *= EnergyDamping;
                 }
             }
 
         public const float BodyPartUnitCost     = 0.01f;
-        public const float NeuralOrganCost      = 0.001f;
-        public const float AbilityOrganCost     = 0.001f;
-        public const float OrganUnitCost        = 0.0001f;
-        public const float AbilityFiringBaseCost    = 0.00001f;
+        public const float NeuralOrganCost = 0.001f;
+        public const float AbilityOrganCost = 0.001f;
+        public const float TimerOrganCost = 0.00001f;
+        public const float OrganUnitCost = 0.0001f;
+        public const float AbilityFiringBaseCost = 0.00001f;
         public const float ThrusterFiringCost       = 0.01f;
-        public const float SpinnerFiringCost        = 0.001f;
-        public const float SensorFiringCost         = 0.0001f;
-        public const float BitterFiringCost         = 0.1f;
+        public const float SpinnerFiringCost        = 0.1f;
+        public const float SensorFiringCost         = 0.001f;
+        public const float BitterFiringCost         = 0.01f;
 
         public static float CalcBasal(Organism org)
         {
@@ -86,8 +84,11 @@ namespace Aquarium.Life
                         case Organs.OrganType.Ability:
                             totalCost += AbilityOrganCost;
                             break;
+                        case Organs.OrganType.Timer:
+                            totalCost += TimerOrganCost;
+                            break;
                         default:
-                            throw new NotImplementedException("organ type need cost algorithm");
+                            throw new NotImplementedException(string.Format("organ type {0} needs cost algorithm",  organ.OrganType));
                     }
                 }
             }

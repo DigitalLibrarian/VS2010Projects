@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using Microsoft.Xna.Framework.Graphics;
 using Forever.Render;
 using Aquarium.UI.Targets;
+using System.Threading;
 
 namespace Aquarium.Sim.Agents
 {
@@ -35,6 +36,8 @@ namespace Aquarium.Sim.Agents
         BoundingBox Box { get; set; }
         Model Model { get; set; }
 
+        public Thread Thread { get; private set; }
+
         public SpawnerAgent(Vector3 pos, IOrganismAgentPool pool, Model model, BoundingBox box)
         {
             Position = pos;
@@ -42,6 +45,8 @@ namespace Aquarium.Sim.Agents
             Model = model;
             Box = box;
             Births = new ConcurrentQueue<OrganismAgent>();
+
+            Thread = new Thread(BackgroundThreadFunc);
         }
         
         public int MaxPerSpawnPump = 50;
@@ -206,25 +211,28 @@ namespace Aquarium.Sim.Agents
 
         public void BackgroundThreadFunc()
         {
-            if (QueueFull) return;
-            int num = 0;
 
-            int lastNum;
-            while (num < MaxPerSpawnPump)
+            while (true)
             {
-                lastNum = num;
-                var mCount = TryMeiosis();
-                num += mCount;
-                if (mCount == 0 && TryGenerateRandom())
-                {
-                    num++;
-                }
+                Thread.Sleep(500);
 
-                if (num == lastNum) break;
+                if (QueueFull) continue;
+                if (!Producing) continue;
+                int num = 0;
+
+                while (num < MaxPerSpawnPump)
+                {
+                    var mCount = TryMeiosis();
+                    num += mCount;
+                    if (mCount == 0 && TryGenerateRandom())
+                    {
+                        num++;
+                    }
+                }
             }
-            
         }
 
+        public bool Producing { get { return UseMeiosis || UseRandom; } } 
 
 
         public bool IsHit(Ray ray)

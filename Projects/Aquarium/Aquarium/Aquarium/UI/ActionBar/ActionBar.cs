@@ -47,9 +47,10 @@ namespace Aquarium.UI
                 Keys.D8,
                 Keys.D9,
                 Keys.D0
+                //TODO - find key for  - and = 
             };
 
-            int coolDowns = 3000;
+            int coolDowns = 1000;
             var index = 0;
             foreach (var key in keys)
             {

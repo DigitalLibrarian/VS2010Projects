@@ -20,7 +20,7 @@ namespace Aquarium.Sim
 
         public Simulation()
         {
-            Space = new SimSpace(gridSize: 500, foodSpaceGridSize: 100);
+            Space = new SimSpace(gridSize: 500, foodSpaceGridSize: 500);
             UpdateSet = new PartitionSphere<IAgent>(Space, GetUpdateSphere());
             DrawSet = new PartitionSphere<IAgent>(Space, GetDrawSphere());
         }

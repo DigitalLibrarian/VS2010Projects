@@ -124,9 +124,41 @@ namespace Aquarium.Life.Phenotypes
                     var partId = organPheno.BodyPartPointer.InstanceId;
                     var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
                     var abilityParam0 = organPheno.AbilityParam0.InstanceId;
+                    var abilityParam1 = organPheno.AbilityParam1.InstanceId;
 
-                    var organAbility = GetOrganAbility(rawAbilityId, abilityParam0);
+                    var organAbility = GetOrganAbility(rawAbilityId, abilityParam0, abilityParam1);
                     var organ = new AbilityOrgan(part, organAbility);
+
+                    part.AddOrgan(organ);
+                    ioOrgans.Add(organPheno, organ);
+
+                }
+            }
+
+
+            if (typedOrganPhenos.ContainsKey(OrganType.Timer))
+            {
+                goodOrganPhenos = typedOrganPhenos[OrganType.Timer];
+
+                foreach (var organPheno in goodOrganPhenos)
+                {
+                    var rawAbilityId = organPheno.ForeignId.InstanceId;
+                    var partId = organPheno.BodyPartPointer.InstanceId;
+                    var part = Fuzzy.ScaledCircleIndex(body.Parts, partId);
+                    var abilityParam0 = organPheno.AbilityParam0.InstanceId;
+                    var abilityParam1 = organPheno.AbilityParam1.InstanceId;
+
+
+                    int lowHz = 1;
+                    int highHz = 10;
+                    var hz  = Fuzzy.InRange(abilityParam0, lowHz, highHz);
+                    int lowBand = 1;
+                    int highBand = 20;
+
+                    var outputBand = Fuzzy.InRange(abilityParam1, lowBand, highBand);
+
+
+                    var organ = new TimerOrgan(part, hz, outputBand);
 
                     part.AddOrgan(organ);
                     ioOrgans.Add(organPheno, organ);
@@ -195,7 +227,7 @@ namespace Aquarium.Life.Phenotypes
         }
 
 
-        public OrganAbility GetOrganAbility(int rawAbilityId, int abilityParam0)
+        public OrganAbility GetOrganAbility(int rawAbilityId, int abilityParam0, int abilityParam1)
         {
             var list = new List<Func<OrganAbility>>
             {

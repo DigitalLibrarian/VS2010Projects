@@ -82,7 +82,7 @@ Each sensory organ must  have a processor in front of it's input, and also behin
             Part = bodyPart;
         }
 
-        public abstract void Update(NervousSystem nervousSystem);
+        public abstract void Update(NervousSystem nervousSystem, float duration);
 
         public Signal LastInput { get; private set; }
         public Signal OutputSignal { get; protected set; }
@@ -119,7 +119,7 @@ Each sensory organ must  have a processor in front of it's input, and also behin
         public IOOrgan(BodyPart bodyPart) : base(bodyPart) { }
 
         
-        public override void Update(NervousSystem nervousSystem)
+        public override void Update(NervousSystem nervousSystem, float duration)
         {
             var readSignal = InputReader.Read();
             if (readSignal.Band > 0)

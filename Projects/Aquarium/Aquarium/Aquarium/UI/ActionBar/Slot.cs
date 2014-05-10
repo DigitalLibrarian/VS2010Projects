@@ -15,7 +15,7 @@ namespace Aquarium.UI
         public SlotState State { get; private set; }
         public Keys Key { get; private set; }
 
-        public int TotalCoolDown { get; private set; }
+        public int TotalCoolDown { get; set; }
         public int CoolDownLeft { get; private set; }
         public double RatioCooldownLeft
         {

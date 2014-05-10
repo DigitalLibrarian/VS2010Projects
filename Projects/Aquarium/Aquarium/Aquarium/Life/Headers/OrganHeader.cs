@@ -7,7 +7,7 @@ namespace Aquarium.Life.Headers
 {
     public struct OrganHeader
     {   
-        public static int Size { get { return 6; } }
+        public static int Size { get { return 7; } }
 
         public int OrganType;
         public int BodyPart;
@@ -16,8 +16,9 @@ namespace Aquarium.Life.Headers
         public int AbilityId;
 
         public int AbilityParam0;
+        public int AbilityParam1;
 
-        public OrganHeader(int organType, int bodyPart, int inputSignal, int outputSignal, int abilityId, int abilityParam0)
+        public OrganHeader(int organType, int bodyPart, int inputSignal, int outputSignal, int abilityId, int abilityParam0, int abilityParam1)
         {
             OrganType = Fuzzy.PositiveInteger(organType);
             BodyPart = Fuzzy.PositiveInteger(bodyPart);
@@ -25,6 +26,7 @@ namespace Aquarium.Life.Headers
             OutputSignal = Fuzzy.PositiveInteger(outputSignal);
             AbilityId = Fuzzy.PositiveInteger(abilityId);
             AbilityParam0 = Fuzzy.PositiveInteger(abilityParam0);
+            AbilityParam1 = Fuzzy.PositiveInteger(abilityParam1);
         }
 
         public static OrganHeader FromGenes(List<int> partGene)
@@ -35,7 +37,8 @@ namespace Aquarium.Life.Headers
                     partGene[2],
                     partGene[3],
                     partGene[4],
-                    partGene[5]
+                    partGene[5],
+                    partGene[6]
                     );
         }
     }

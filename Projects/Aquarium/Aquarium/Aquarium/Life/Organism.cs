@@ -118,7 +118,7 @@ namespace Aquarium.Life
             if (!IsDead && ((Tick++ % 2) == 0))
             {
                 LifeForce.Update(duration);
-                NervousSystem.Update();
+                NervousSystem.Update(duration);
             }
 
             UpdatePhysics(duration);

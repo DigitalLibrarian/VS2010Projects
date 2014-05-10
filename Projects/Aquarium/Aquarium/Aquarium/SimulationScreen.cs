@@ -45,21 +45,22 @@ namespace Aquarium
             User = CreateControlledCraft();
 
             UIElements.AddRange(CreateUILayout());
-
+            /*
             SpawnerAgentThread = new Thread(new ThreadStart(UpdateSpawnerAgentsThreadFunc));
             SpawnerAgentThread.IsBackground = true;
             SpawnerAgentThread.Start();
-
+            */
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
         }
 
         Model SpawnerModel { get; set; }
 
-        Thread SpawnerAgentThread;
+        //Thread SpawnerAgentThread;
 
         public override void UnloadContent()
         {
+            /*
             SpawnerAgentThread.Abort();
             System.Threading.SpinWait.SpinUntil(() =>
             {
@@ -67,8 +68,26 @@ namespace Aquarium
                 return !SpawnerAgentThread.IsAlive;
             }
                 );
-            base.UnloadContent();
+            */
 
+            foreach (var agent in spawners)
+            {
+                agent.Thread.Abort();
+            }
+
+            System.Threading.SpinWait.SpinUntil(() =>
+            {
+                bool allAlive = true;
+                System.Threading.Thread.Sleep(100);
+                foreach (var agent in spawners)
+                {
+                    allAlive &= agent.Thread.IsAlive;
+                }
+                return !allAlive;
+            }
+                );
+
+            base.UnloadContent();
         }
 
         public override void Draw(GameTime gameTime)
@@ -103,14 +122,14 @@ namespace Aquarium
 
             var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
             Sim.Space.Register(agent, pos);
-
+            agent.Thread.Start();
 
 
             spawners.Add(agent);
         }
 
         List<SpawnerAgent> spawners = new List<SpawnerAgent>();
-
+        /*
         private void UpdateSpawnerAgentsThreadFunc()
         {
             while (true)
@@ -123,7 +142,7 @@ namespace Aquarium
 
             }
         }
-
+        */
         ControlledCraft CreateControlledCraft()
         {
             var cam = this.RenderContext.Camera;
@@ -167,7 +186,18 @@ namespace Aquarium
                 this,
                 SpawnerEditor);
 
+            actionBar.Slots[1].Action = new ActionBarAction(() =>
+            {
+                var target = targetWindow.Target;
 
+                if (target != null && target is OrganismAgent)
+                {
+                    var orgAgent = target as OrganismAgent;
+
+                    orgAgent.Organism.BeConsumed(orgAgent.Organism.ConsumableEnergy);
+                }
+            });
+            actionBar.Slots[1].TotalCoolDown = 200;
             
             return new List<IUIElement>
             {

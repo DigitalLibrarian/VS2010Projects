@@ -50,6 +50,7 @@ namespace Aquarium.Life.Phenotypes
         IInstancePointer ForeignId { get; set; }
 
         IInstancePointer AbilityParam0 { get; set; }
+        IInstancePointer AbilityParam1 { get; set; }
 
     }
 

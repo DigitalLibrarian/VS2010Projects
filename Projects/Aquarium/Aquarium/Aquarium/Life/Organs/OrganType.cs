@@ -8,6 +8,7 @@ namespace Aquarium.Life.Organs
     public enum OrganType
     {
         Neural,
-        Ability
+        Ability,
+        Timer
     }
 }

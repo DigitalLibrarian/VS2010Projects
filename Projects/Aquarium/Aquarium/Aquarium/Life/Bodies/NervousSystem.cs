@@ -22,13 +22,13 @@ namespace Aquarium.Life.Bodies
         }
         
 
-        public void Update()
+        public void Update(float duration)
         {
             foreach (var part in Organism.Body.Parts)
             {
                 foreach (var organ in part.Organs)
                 {
-                    organ.Update(this);
+                    organ.Update(this, duration);
                 }
             }
         }
