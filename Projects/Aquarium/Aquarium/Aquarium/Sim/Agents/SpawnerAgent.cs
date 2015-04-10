@@ -102,7 +102,7 @@ namespace Aquarium.Sim.Agents
         {
             PhenotypeReader gR = new PhenotypeReader();
 
-           // gR.AbilityFactories.Add((a, b) => new MatingOrganAbility(this, a));
+            gR.AbilityFactories.Add((a, b) => new MatingOrganAbility(this, a));
 
             var t = new RandomIntGenomeTemplate(Random);
             var parser = new BodyCodonParser();
