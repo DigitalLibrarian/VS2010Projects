@@ -220,7 +220,7 @@ namespace Aquarium.Sim.Agents
                 if (!Producing) continue;
                 int num = 0;
 
-                while (num < MaxPerSpawnPump)
+                while (!QueueFull && num < MaxPerSpawnPump)
                 {
                     var mCount = TryMeiosis();
                     num += mCount;
