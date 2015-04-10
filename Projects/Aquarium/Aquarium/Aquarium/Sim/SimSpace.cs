@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Forever.Render;
 using System.Collections.Generic;
 using Aquarium.Life.Environments;
+using Aquarium.Life;
 
 namespace Aquarium.Sim
 {
@@ -28,8 +29,9 @@ namespace Aquarium.Sim
     {
         SimSpace Space;
 
-        
         public Space<IFood> FoodSpace { get; private set; }
+
+        public Space<OrganismAgent> InnerSpace { get; private set; }
 
         public SimSpacePartition(SimSpace space, BoundingBox box, int gridSize) : base(box) 
         {
@@ -37,6 +39,7 @@ namespace Aquarium.Sim
             Organisms = new Dictionary<IAgent, OrganismAgent>();
             RayPickers = new TypedSubList<IRayPickable>();
             FoodSpace = new Space<IFood>(gridSize);
+            InnerSpace = new Space<OrganismAgent>(gridSize);
         }
 
         Dictionary<IAgent, OrganismAgent> Organisms { get; set; }
@@ -60,8 +63,9 @@ namespace Aquarium.Sim
                 {
                     var orgAgent = (OrganismAgent)obj;
                     Organisms.Add(obj, orgAgent);
-
-                    FoodSpace.Register(orgAgent.Organism, orgAgent.Organism.Position);
+                    var pos = orgAgent.Organism.Position;
+                    InnerSpace.Register(orgAgent, pos);
+                    FoodSpace.Register(orgAgent.Organism, pos);
                     orgAgent.Organism.Surroundings = this;
                 }
             }
@@ -77,6 +81,7 @@ namespace Aquarium.Sim
             {
                 Organisms.Remove(obj);
                 var orgAgent = ((OrganismAgent) obj);
+                InnerSpace.UnRegister(orgAgent);
                 FoodSpace.UnRegister(orgAgent.Organism);
                 orgAgent.Organism.Surroundings = null;
             }
@@ -102,13 +107,31 @@ namespace Aquarium.Sim
             return FoodSpace.QueryLocalSpace(pos, radius, (c, f) => Vector3.Distance(f.Position, pos) < radius);
         }
 
+        public IEnumerable<OrganismAgent> ClosestOrganisms(Vector3 pos, float radius)
+        {
+            return InnerSpace.QueryLocalSpace(pos, radius, (c, f) => Vector3.Distance(f.Position, pos) < radius);
+        }
+
         public List<IAgent> FindAll(Ray ray)
         {
             //TODO
             var list = RayPickers.FindAll(picker => picker.IsHit(ray));
             return list.ConvertAll<IAgent>(new System.Converter<IRayPickable, IAgent>((target) => (IAgent) target));
         }
+
+
+
+        void ISurroundings.Track(Life.Organism org)
+        {
+            
+        }
+
+
+     
     }
+
+
+
     public class TypedSubList<T> : List<T>
     {
         public bool CheckAdd(object item)

@@ -13,9 +13,6 @@ using Aquarium.Life.Environments;
 
 namespace Aquarium.Life
 {
-   
-
-
     public class Organism : IFood
     {
         public LifeForce LifeForce { get; private set; }
@@ -24,6 +21,7 @@ namespace Aquarium.Life
 
         public NervousSystem NervousSystem { get; private set; }
         public ISurroundings Surroundings { get; set; }
+
 
         /// <summary>
         /// Gets or sets the position of the organism.
@@ -45,7 +43,6 @@ namespace Aquarium.Life
             }
         }
 
-
         public BoundingBox LocalBB { get; private set; }
         public BoundingBox WorldBB
         {
@@ -61,10 +58,7 @@ namespace Aquarium.Life
             }
         }
 
-
         public int TotalOrgans { get; private set; }
-
-     
 
         public Organism(Body b)
         {
@@ -122,6 +116,8 @@ namespace Aquarium.Life
             }
 
             UpdatePhysics(duration);
+
+            Surroundings.Track(this);
         }
 
         public bool IsDead { get { return LifeForce.IsDead; } }
@@ -130,8 +126,6 @@ namespace Aquarium.Life
         public float MaxEnergy { get { return LifeForce.MaxEnergy; } }
         public long Age { get { return LifeForce.Age; } }
        
-
-
 
         public void Consume(IFood food)
         {
@@ -168,10 +162,10 @@ namespace Aquarium.Life
             {
                 return 0f;
             }
-
         }
 
     }
+
 
 
 

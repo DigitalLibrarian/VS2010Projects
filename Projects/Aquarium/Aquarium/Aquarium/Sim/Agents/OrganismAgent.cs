@@ -83,8 +83,6 @@ namespace Aquarium.Sim.Agents
         }
 
 
-
-
         BoundingBox ITarget.TargetBB
         {
             get { return Organism.WorldBB; }

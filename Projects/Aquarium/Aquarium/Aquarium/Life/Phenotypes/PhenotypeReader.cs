@@ -16,10 +16,29 @@ namespace Aquarium.Life.Phenotypes
     public class PhenotypeReader
     {
         List<Func<BodyPart>> PartIndex { get; set; }
+        public List<Func<int, int, OrganAbility>> AbilityFactories { get; private set; }
         public PhenotypeReader()
         {
             PartIndex = BodyGenerator.ProduceLibraryOfParts();
+
+            // TODO - move this defaulting
+            AbilityFactories = new List<Func<int, int, OrganAbility>>
+            {
+                (a,b) => new ThrusterAbility(a),
+                (a,b) => new SpinnerAbility(a),
+                (a,b) => new FoodBitterAbility(a),
+                (a,b) => new QueryClosestFoodAbility(a),
+                (a,b) => new QueryPositionAbility(a),
+                (a,b) => new QueryVelocityAbility(a),
+                (a,b) => new QueryEnergyRemainingAbility(a)
+            };
         }
+
+        public OrganAbility GetOrganAbility(int rawAbilityId, int abilityParam0, int abilityParam1)
+        {
+            return Fuzzy.CircleIndex(AbilityFactories, rawAbilityId)(abilityParam0, abilityParam1);
+        }
+
 
 
         public Body ProduceBody(IBodyPhenotype bodyPheno)
@@ -225,24 +244,6 @@ namespace Aquarium.Life.Phenotypes
 
             return dict;
         }
-
-
-        public OrganAbility GetOrganAbility(int rawAbilityId, int abilityParam0, int abilityParam1)
-        {
-            var list = new List<Func<OrganAbility>>
-            {
-                () => new ThrusterAbility(abilityParam0),
-                () => new SpinnerAbility(abilityParam0),
-                () => new FoodBitterAbility(abilityParam0),
-                () => new QueryClosestFoodAbility(abilityParam0),
-                () => new QueryPositionAbility(abilityParam0),
-                () => new QueryVelocityAbility(abilityParam0),
-                () => new QueryEnergyRemainingAbility(abilityParam0)
-            };
-
-            return Fuzzy.CircleIndex(list, rawAbilityId)();
-        }
-        
 
         private bool ConnectPartFromAnchor(Body body, BodyPart anchorPart, IBodyPartPhenotype partGenome, BodyPart part, bool autoTryOthers=true)
         {

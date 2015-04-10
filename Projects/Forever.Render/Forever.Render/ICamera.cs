@@ -51,12 +51,12 @@ namespace Forever.Render
         /// <param name="yaw">Rotation dun on the y axis</param>
         /// <param name="pitch">Rotation dun on the x axis</param>
         /// <param name="roll">Rotation dun on the z axis</param>
-        void Rotate(float yaw, float pitch, float roll);
+        //void Rotate(float yaw, float pitch, float roll);
         /// <summary>
         /// This is a Translation method for relative translations specified in the camera's local coordinate space
         /// </summary>
         /// <param name="distance">A vector representing the amount of translation to be done from the camera's perspective</param>
-        void Translate(Vector3 translation);
+        //void Translate(Vector3 translation);
 
         //TODO - think about a LookAt(Vector3 pos, Vector3 up)
     }

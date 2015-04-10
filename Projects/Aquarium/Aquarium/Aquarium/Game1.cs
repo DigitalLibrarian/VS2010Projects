@@ -51,7 +51,6 @@ namespace Aquarium
             Content.RootDirectory = "Content";
 
             ScreenManager = new ScreenManager(this);
-
         }
 
        

@@ -12,18 +12,19 @@ using Microsoft.Xna.Framework.Graphics;
 using Forever.Render;
 using Aquarium.UI.Targets;
 using System.Threading;
+using Aquarium.Life.Organs.OrganAbilities;
 
 namespace Aquarium.Sim.Agents
 {
     public interface IOrganismAgentPool
     {
         ICollection<OrganismAgent> OrganismAgents { get; }
-
+        
         void Birth(OrganismAgent agent);
         void Death(OrganismAgent agent);
     }
 
-    public class SpawnerAgent : IAgent,  IRayPickable, ITarget
+    public class SpawnerAgent : IAgent,  IRayPickable, ITarget, IMatingManager
     {
         Vector3 Position { get; set; }
         Random Random = new Random();
@@ -63,6 +64,7 @@ namespace Aquarium.Sim.Agents
         public bool UseRandom = false;
         #region Generation Tools
 
+
         private bool TryEnqueue(BodyGenome off)
         {
             Mutate(off);
@@ -95,11 +97,12 @@ namespace Aquarium.Sim.Agents
                 Splicer.Mutate(off);
             }
         }
-
-
+        
         public Organism SpawnFromGenome(BodyGenome g)
         {
             PhenotypeReader gR = new PhenotypeReader();
+
+           // gR.AbilityFactories.Add((a, b) => new MatingOrganAbility(this, a));
 
             var t = new RandomIntGenomeTemplate(Random);
             var parser = new BodyCodonParser();
@@ -121,19 +124,31 @@ namespace Aquarium.Sim.Agents
         private bool TryGenerateRandom()
         {
             if (!UseRandom) return false;
-            var genome = BodyGenome.Random(
-                Random,
-                numParts: DefaultParts,
-                numOrgans: DefaultOrgans,
-                numNN: DefaultNN,
-                sizeJunk: DefaultJunk
-                );
+            BodyGenome genome;
+            var list = Pool.OrganismAgents.ToList();
+
+            if (list.Count() < 5)
+            {
+
+                genome = BodyGenome.Random(
+                    Random,
+                    numParts: DefaultParts,
+                    numOrgans: DefaultOrgans,
+                    numNN: DefaultNN,
+                    sizeJunk: DefaultJunk
+                    );
+            }
+            else
+            {
+                genome = Random.NextElement(list).Genome;
+            }
 
             return TryEnqueue(genome);
         }
 
         private int TryMeiosis()
         {
+            return 0;
             if (!UseMeiosis) return 0;
             int count = 0;
             List<BodyGenome> genomes = GetNewParents();
@@ -158,6 +173,7 @@ namespace Aquarium.Sim.Agents
             {
                 return new List<BodyGenome>();
             }
+
 
             return new List<BodyGenome>
             {
@@ -211,7 +227,6 @@ namespace Aquarium.Sim.Agents
 
         public void BackgroundThreadFunc()
         {
-
             while (true)
             {
                 Thread.Sleep(500);
@@ -253,6 +268,20 @@ namespace Aquarium.Sim.Agents
         BoundingBox ITarget.TargetBB
         {
             get { return Box; }
+        }
+
+        public bool TryMate(OrganismAgent me, OrganismAgent other)
+        {
+            if (QueueFull) return false;
+            var p1 = me.Genome;
+            var p2 = other.Genome;
+
+            int count = 0;
+            foreach (var offspring in Splicer.Meiosis(p1, p2))
+            {
+                if (TryEnqueue(offspring)) count++;
+            }
+            return count > 0;
         }
     }
 }

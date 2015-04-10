@@ -66,6 +66,9 @@ namespace Aquarium.Life
         public const float SensorFiringCost         = 0.001f;
         public const float BitterFiringCost         = 0.01f;
 
+        public const float TryingToMate = 1f;
+        public const float SuccessfullyMating = 200f;
+
         public static float CalcBasal(Organism org)
         {
 
