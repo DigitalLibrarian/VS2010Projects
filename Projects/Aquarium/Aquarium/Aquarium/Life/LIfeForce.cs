@@ -55,16 +55,16 @@ namespace Aquarium.Life
                 }
             }
 
-        public const float BodyPartUnitCost     = 0.01f;
-        public const float NeuralOrganCost = 0.001f;
-        public const float AbilityOrganCost = 0.001f;
-        public const float TimerOrganCost = 0.00001f;
-        public const float OrganUnitCost = 0.0001f;
-        public const float AbilityFiringBaseCost = 0.00001f;
+        public const float BodyPartUnitCost         = 0.01f;
+        public const float NeuralOrganCost          = 0.001f;
+        public const float AbilityOrganCost         = 0.001f;
+        public const float TimerOrganCost           = 0.00001f;
+        public const float OrganUnitCost            = 0.0001f;
+        public const float AbilityFiringBaseCost    = 0.00001f;
         public const float ThrusterFiringCost       = 0.01f;
         public const float SpinnerFiringCost        = 0.1f;
         public const float SensorFiringCost         = 0.001f;
-        public const float BitterFiringCost         = 0.01f;
+        public const float BiterFiringCost          = 0.01f;
 
         public static float CalcBasal(Organism org)
         {

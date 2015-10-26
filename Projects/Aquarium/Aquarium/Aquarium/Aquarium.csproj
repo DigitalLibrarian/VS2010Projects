@@ -143,7 +143,7 @@
     <Compile Include="Life\Organs\AbilityOrgan.cs" />
     <Compile Include="Life\Signals\SignalEncoding.cs" />
     <Compile Include="MutableForceGenerator.cs" />
-    <Compile Include="Life\Organs\OrganAbilities\FoodBitterAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\FoodBiterAbility.cs" />
     <Compile Include="Life\Organs\OrganAbilities\QueryClosestFoodAbility.cs" />
     <Compile Include="Life\Organs\OrganAbilities\QueryEnergyRemainingAbility.cs" />
     <Compile Include="Life\Organs\OrganAbilities\QueryVelocityAbility.cs" />

@@ -6,10 +6,10 @@ using Microsoft.Xna.Framework;
 
 namespace Aquarium.Life.Organs.OrganAbilities
 {
-    public class FoodBitterAbility : OrganAbility
+    public class FoodBiterAbility : OrganAbility
     {
 
-        public FoodBitterAbility(int param0)
+        public FoodBiterAbility(int param0)
             : base(param0)
         {
 
@@ -34,7 +34,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             var env = nervousSystem.Organism.Surroundings;
             if (env != null)
             {
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.BitterFiringCost);
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.BiterFiringCost);
                 var searchRadius = 50;
                 //find food
                 var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
