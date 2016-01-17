@@ -8,7 +8,7 @@ using Forever.Physics;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Aquarium.UI.Steering
+namespace Aquarium.Ui.Steering
 {
     public class MouseSteering : ISteering
     {

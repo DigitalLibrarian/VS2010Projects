@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.Life;
-using Aquarium.Life.Population;
-using Aquarium.Life.Genomes;
-using Forever.Render;
-using Microsoft.Xna.Framework;
-using Aquarium.UI.Targets;
 
-namespace Aquarium.Sim.Agents
+using Microsoft.Xna.Framework;
+
+using Forever.Physics;
+using Forever.Render;
+
+using Aquarium.Life;
+using Aquarium.Life.Genomes;
+using Aquarium.Life.Population;
+
+using Aquarium.Ui.Targets;
+
+using Aquarium.Sim;
+
+namespace Aquarium.Agent
 {
     public class OrganismAgent : PopulationMember, IAgent, IRayPickable, ITarget
     {
@@ -23,7 +30,7 @@ namespace Aquarium.Sim.Agents
         }
 
 
-        public void Draw(float duration, Forever.Render.RenderContext renderContext)
+        public void Draw(float duration, RenderContext renderContext)
         {
             Organism.Body.Render(renderContext);
         }
@@ -81,9 +88,6 @@ namespace Aquarium.Sim.Agents
         {
             get { return this; }
         }
-
-
-
 
         BoundingBox ITarget.TargetBB
         {

@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 using Forever.Render;
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public class Slot
     {

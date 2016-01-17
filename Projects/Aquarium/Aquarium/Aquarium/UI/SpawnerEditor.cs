@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.Sim.Agents;
+using Aquarium.Agent;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,10 +13,10 @@ using Ruminate.GUI.Content;
 using Forever.Render;
 using System.IO;
 using Microsoft.Xna.Framework;
-using Aquarium.UI.Targets;
+using Aquarium.Ui.Targets;
 using Forever.Screens;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public class SpawnerEditor : RuminateGuiGameScreen
     {

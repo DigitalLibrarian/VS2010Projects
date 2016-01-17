@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Forever.Physics;
+
 namespace Aquarium.Life.Genomes
 {
     public class GenomeSplicer

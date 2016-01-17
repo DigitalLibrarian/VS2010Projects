@@ -7,14 +7,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 using Forever.Render;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public interface IOdometerSource
     {
         float Ratio { get; }
     }
 
-    public class OdometerDashboard : IUIElement
+    public class OdometerDashboard : IUiElement
     {
         Color MeterColor { get { return Color.Maroon; } }
         Color DashColor { get { return Color.DarkSlateGray; } }

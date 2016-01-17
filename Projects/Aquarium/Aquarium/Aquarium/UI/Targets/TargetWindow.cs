@@ -2,23 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Microsoft.Xna.Framework;
-using Aquarium.Sim.Agents;
 using Microsoft.Xna.Framework.Graphics;
+
+using Forever.Physics;
 using Forever.Render;
 using Forever.Screens;
 
-namespace Aquarium.UI.Targets
+using Aquarium.Agent;
+
+namespace Aquarium.Ui.Targets
 {
-    public interface ITarget
-    {
-        string Label { get; }
-        IAgent Agent { get; }
-        BoundingBox TargetBB { get; }
-    }
-
-
-    class TargetWindow : IUIElement
+    class TargetWindow : IUiElement
     {
         RenderContext RenderContext { get; set; }
         Vector2 Offset { get; set; }

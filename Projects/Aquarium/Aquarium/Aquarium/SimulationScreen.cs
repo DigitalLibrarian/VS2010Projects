@@ -1,74 +1,68 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using System.Threading;
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Forever.Physics;
 using Forever.Render;
 using Forever.Screens;
-using Microsoft.Xna.Framework;
+
+using Aquarium.Agent;
 using Aquarium.Sim;
-using Aquarium.UI;
-using Aquarium.Sim.Agents;
-using System.Threading;
-using Forever.Physics;
-using Aquarium.UI.Steering;
-using Aquarium.UI.Targets;
-using Microsoft.Xna.Framework.Graphics;
+using Aquarium.Ui;
+using Aquarium.Ui.Steering;
+using Aquarium.Ui.Targets;
+using Forever.Render.Cameras;
 
 
 namespace Aquarium
 {
-    class SimulationScreen : UIGameScreen
+    class SimulationScreen : UiOverlayGameScreen
     {
         Simulation Sim { get; set; }
 
         ControlledCraft User { get; set; }
 
-
-        public SimulationScreen(RenderContext renderContext) : base(renderContext)
-        {
-        }
-
-
         public override void HandleInput(InputState input)
         {
-            base.HandleInput(input);
-
             User.HandleInput(input);
+            
+            base.HandleInput(input);
         }
 
         public override void LoadContent()
         {
             base.LoadContent();
 
+            var gd = ScreenManager.GraphicsDevice;
+            RenderContext = new RenderContext(
+                    new EyeCamera(gd),
+                    gd
+                );
+            Ui = new UiOverlay(
+                ScreenManager,
+                RenderContext
+               );
+
             Sim = new Simulation();
 
             User = CreateControlledCraft();
 
-            UIElements.AddRange(CreateUILayout());
-            /*
-            SpawnerAgentThread = new Thread(new ThreadStart(UpdateSpawnerAgentsThreadFunc));
-            SpawnerAgentThread.IsBackground = true;
-            SpawnerAgentThread.Start();
-            */
+            Ui.Elements.AddRange(CreateUILayout());
+
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
         }
 
         Model SpawnerModel { get; set; }
 
-        //Thread SpawnerAgentThread;
-
         public override void UnloadContent()
         {
-            /*
-            SpawnerAgentThread.Abort();
-            System.Threading.SpinWait.SpinUntil(() =>
-            {
-                System.Threading.Thread.Sleep(100);
-                return !SpawnerAgentThread.IsAlive;
-            }
-                );
-            */
 
             foreach (var agent in spawners)
             {
@@ -93,7 +87,6 @@ namespace Aquarium
         public override void Draw(GameTime gameTime)
         {
             Sim.Draw(gameTime, RenderContext);
-
 
             base.Draw(gameTime);
         }
@@ -120,7 +113,7 @@ namespace Aquarium
             //TODO - need better box.  i'm sure i have somethign to extract from model
             var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 5f));
 
-            var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
+            var agent = new SpawnerAgent(pos, principle as IOrganismAgentGroup, SpawnerModel, box);
             Sim.Space.Register(agent, pos);
             agent.Thread.Start();
 
@@ -129,20 +122,7 @@ namespace Aquarium
         }
 
         List<SpawnerAgent> spawners = new List<SpawnerAgent>();
-        /*
-        private void UpdateSpawnerAgentsThreadFunc()
-        {
-            while (true)
-            {
-                System.Threading.Thread.Sleep(500);
-                foreach (var spawner in spawners.ToList())
-                {
-                    spawner.BackgroundThreadFunc();
-                }
 
-            }
-        }
-        */
         ControlledCraft CreateControlledCraft()
         {
             var cam = this.RenderContext.Camera;
@@ -164,7 +144,7 @@ namespace Aquarium
             return new ControlledCraft(PlayerRigidBody, controlForces);
         }
 
-        List<IUIElement> CreateUILayout()
+        List<IUiElement> CreateUILayout()
         {
             var spriteFont = ScreenManager.Font;
             var actionBarSlotHeight = 40;
@@ -199,7 +179,7 @@ namespace Aquarium
             });
             actionBar.Slots[1].TotalCoolDown = 200;
             
-            return new List<IUIElement>
+            return new List<IUiElement>
             {
                 actionBar,
                 hud, 

@@ -9,13 +9,13 @@ using Forever.Physics;
 using Forever.Neural;
 using Aquarium.Life.Bodies;
 using Aquarium.Life.Environments;
+using Aquarium.Life.Phenotypes;
+using Aquarium.Life.Genomes;
+using Aquarium.Life.Codons;
 
 
 namespace Aquarium.Life
 {
-   
-
-
     public class Organism : IFood
     {
         public LifeForce LifeForce { get; private set; }
@@ -64,7 +64,26 @@ namespace Aquarium.Life
 
         public int TotalOrgans { get; private set; }
 
-     
+        public static Organism CreateFromGenome(BodyGenome g)
+        {
+            PhenotypeReader gR = new PhenotypeReader();
+
+            var t = new RandomIntGenomeTemplate(new Random());
+            var parser = new BodyCodonParser();
+
+            var pheno = parser.ParseBodyPhenotype(g, t);
+
+            if (pheno != null)
+            {
+                var body = gR.ProduceBody(pheno);
+                if (body != null)
+                {
+                    return new Organism(body);
+                }
+            }
+
+            return null;
+        }
 
         public Organism(Body b)
         {

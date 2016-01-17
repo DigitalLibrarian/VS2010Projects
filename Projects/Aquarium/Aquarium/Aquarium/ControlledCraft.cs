@@ -6,8 +6,8 @@ using System.Text;
 using Forever.Physics;
 using Microsoft.Xna.Framework;
 using Forever.Screens;
-using Aquarium.UI.Steering;
-using Aquarium.UI;
+using Aquarium.Ui.Steering;
+using Aquarium.Ui;
 
 
 namespace Aquarium

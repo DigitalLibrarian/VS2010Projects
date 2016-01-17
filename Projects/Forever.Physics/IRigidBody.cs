@@ -43,7 +43,7 @@ namespace Forever.Physics
 
       bool CanSleep { get; set; }
 
-      void addTorque(Vector3 torque);
+     // void addTorque(Vector3 torque);
       new void addForce(Vector3 force, Vector3 point);
       void clearAccumulators();
       new void integrate(float duration);

@@ -6,6 +6,8 @@ using Aquarium.Life.Bodies;
 using Aquarium.Life.Signals;
 using Microsoft.Xna.Framework;
 
+using Forever.Physics;
+
 namespace Aquarium.Life.Organs.OrganAbilities
 {
     public class QueryPositionAbility : OrganAbility

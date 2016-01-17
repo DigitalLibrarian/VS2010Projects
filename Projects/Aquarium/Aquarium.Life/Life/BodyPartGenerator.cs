@@ -6,115 +6,27 @@ using Microsoft.Xna.Framework;
 using Aquarium.Life.Organs;
 using Forever.Neural;
 using Forever.Physics;
+
 using Aquarium.Life.Signals;
 using Aquarium.Life.Organs.OrganAbilities;
 
 namespace Aquarium.Life.Bodies
 {
-    public class BodyGenerator
+    public class BodyPartGenerator
     {
-        public static bool MoveToFitLocalSocket(Body body, BodyPartSocket socket, BodyPart test)
+        List<Func<BodyPart>> PartIndex { get; set; }
+        public BodyPartGenerator()
         {
-            var tempSockets = test.Sockets;
-            var tempUCT = test.UCTransform;
-            var tempRot = test.Rotation;
-
-            var part = socket.Part;
-            // restore original part geometry
-            test.UCTransform = tempUCT;
-
-
-            // copy all the sockets over to fresh ones we can play with
-            test.Sockets = new List<BodyPartSocket>();
-            foreach (var fSocket in tempSockets)
-            {
-                var socketUCPos = fSocket.UnitCubePosition;
-                var socketUCNormal = fSocket.UnitCubeNormal;
-                test.Sockets.Add(new BodyPartSocket(test, socketUCPos, socketUCNormal));
-            }
-
-            for (int i = 0; i < test.Sockets.Count; i++)
-            {
-                // we are going to attempt  to connect  our local socket to this new one
-                var testSocket = test.Sockets[i];
-
-                if (float.IsNaN(testSocket.Normal.X)) throw new Exception();
-
-                var fromLocalPart = socket.LocalPosition;
-                var localSocketNormal = socket.Normal.Round(3);
-                var foreignSocketNormal = testSocket.Normal.Round(3);
-                var goalNormal = -localSocketNormal;
-
-                if (float.IsNaN(testSocket.Normal.X)) throw new Exception();
-
-                // figure  out how much rotation will be needed to align the contact normals
-                Matrix rotate = Matrix.Identity;
-                if (foreignSocketNormal == -localSocketNormal)
-                    rotate = Matrix.Identity;
-                else if (foreignSocketNormal == localSocketNormal)
-                    rotate = Matrix.CreateFromAxisAngle(Vector3.Cross(foreignSocketNormal, -foreignSocketNormal), (float)Math.PI);
-                else
-                {
-                    rotate = MathHelper.GetRotationAToB(foreignSocketNormal, goalNormal);
-                    if (NaNny.IsNaN(rotate)) continue;
-                }
-
-
-                //now rotate the body part that much
-                test.Rotation = rotate;
-
-                if (float.IsNaN(testSocket.LocalPosition.X)) throw new Exception();
-
-                var a = part.LocalPosition; // from body to part
-                var b = socket.LocalPosition; // from part to socket
-                var c = testSocket.LocalPosition; // from free part to it's socket
-                if (float.IsNaN(testSocket.LocalPosition.X)) throw new Exception();
-
-
-                test.LocalPosition = a + b - c;
-                // we need to add a little so that there won't be overlap with the piece we are connecting with
-                test.LocalPosition += socket.Normal * 0.001f;
-
-                if (body.WillFit(socket, testSocket))
-                {
-                    return true;
-                }
-
-            }
-
-            test.Rotation = tempRot;
-            test.Sockets = tempSockets;
-            test.UCTransform = tempUCT;
-            return false;
+            PartIndex = ProduceLibraryOfParts();
         }
 
 
-        public static bool AutoConnectPartSockets(Body body, BodyPart part)
+        public BodyPart NewPartFromIndex(int index)
         {
-            if (!body.Parts.Any())
-            {
-                body.Parts.Add(part);
-                return true;
-            }
+            var max = PartIndex.Count();
 
-            foreach (var foreignSocket in part.Sockets)
-            {
-                if (!foreignSocket.HasAvailable) continue;
-                foreach (var bPart in body.Parts)
-                {
-                    BodyPartSocket winner = bPart.Sockets.FirstOrDefault(socket => socket.HasAvailable && body.WillFit(socket, foreignSocket));
-                    if (winner != null)
-                    {
-                        winner.ConnectSocket(foreignSocket);
-                        body.Parts.Add(part);
-                        return true;
-                    }
-                }
-            }
-            return false;
-
+            return PartIndex[index % max]();
         }
-        
       
         #region BodyPart strategies
 
@@ -123,18 +35,13 @@ namespace Aquarium.Life.Bodies
         public static BodyPart ChiefPart()
         {
 
-            var chiefPart = new TestBodyPart();
-            chiefPart.UCTransform = Matrix.CreateScale(SCALE * .5f);
+            var part = new TestBodyPart();
+            part.UCTransform = Matrix.CreateScale(SCALE * .5f);
 
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, Vector3.UnitX, Vector3.UnitX));
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, -Vector3.UnitX, -Vector3.UnitX));
+            AddAllFaces(part);
+            AddAllCorners(part);
 
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, Vector3.UnitY, Vector3.UnitY));
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, -Vector3.UnitY, -Vector3.UnitY));
-
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, Vector3.UnitZ, Vector3.UnitZ));
-            chiefPart.Sockets.Add(new BodyPartSocket(chiefPart, -Vector3.UnitZ, -Vector3.UnitZ));
-            return chiefPart;
+            return part;
         }
 
         public static  BodyPart BarShape()
@@ -251,20 +158,23 @@ namespace Aquarium.Life.Bodies
 
             part.UCTransform = Matrix.CreateScale(scale / 4f, scale, scale / 4f);
 
-            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitY, Vector3.UnitY));
-            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitY, -Vector3.UnitY));
+            AddAllFaces(part);
+            AddAllCorners(part);
 
-
-            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitX, Vector3.UnitX));
-            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitX, -Vector3.UnitX));
-
-
-            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitZ, Vector3.UnitZ));
-            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitZ, -Vector3.UnitZ));
             return part;
         }
 
+        public static void AddAllFaces(TestBodyPart part)
+        {
+            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitX, Vector3.UnitX));
+            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitX, -Vector3.UnitX));
 
+            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitY, Vector3.UnitY));
+            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitY, -Vector3.UnitY));
+
+            part.Sockets.Add(new BodyPartSocket(part, Vector3.UnitZ, Vector3.UnitZ));
+            part.Sockets.Add(new BodyPartSocket(part, -Vector3.UnitZ, -Vector3.UnitZ));
+        }
 
         public static  void AddAllCorners(TestBodyPart part)
         {
@@ -289,12 +199,13 @@ namespace Aquarium.Life.Bodies
 
         }
 
-        public static List<Func<BodyPart>> ProduceLibraryOfParts()
+        private List<Func<BodyPart>> ProduceLibraryOfParts()
         {
             var lib = new List<Func<BodyPart>>();
 
 
             lib.Add(ChiefPart);
+            
             lib.Add(BarShape);
             lib.Add(FlatShape);
             lib.Add(BigBarShape);
@@ -305,7 +216,6 @@ namespace Aquarium.Life.Bodies
             lib.Add(BoxWithCorners);
             
             lib.Add(OblongBlock);
-
             return lib;
         }
         #endregion

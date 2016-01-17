@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Aquarium.Sim.Agents;
 
-namespace Aquarium.Sim.Agents
+namespace Aquarium.Sim
 {
-    public interface IRayPickable : IAgent
+    public interface IRayPickable
     {
         bool IsHit(Ray ray);
     }

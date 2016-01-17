@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forever.Physics", "..\Forev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forever.SpacePartitions", "..\Forever.SpacePartitions\Forever.SpacePartitions.csproj", "{780CD23C-C486-4152-A13C-9BEDCF1AE569}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aquarium.Life", "Aquarium.Life\Aquarium.Life.csproj", "{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +111,18 @@ Global
 		{780CD23C-C486-4152-A13C-9BEDCF1AE569}.Release|x86.ActiveCfg = Release|x86
 		{780CD23C-C486-4152-A13C-9BEDCF1AE569}.Release|x86.Build.0 = Release|x86
 		{780CD23C-C486-4152-A13C-9BEDCF1AE569}.Release|Xbox 360.ActiveCfg = Release|x86
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Debug|Xbox 360.ActiveCfg = Debug|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}.Release|Xbox 360.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

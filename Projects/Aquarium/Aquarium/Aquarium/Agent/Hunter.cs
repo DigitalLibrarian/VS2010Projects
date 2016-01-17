@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.UI;
-using Forever.Render;
-using Microsoft.Xna.Framework.Graphics;
-using Forever.Physics;
-using Microsoft.Xna.Framework;
-using Aquarium.Sim.Agents;
 
-namespace Aquarium
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+
+
+using Forever.Physics;
+using Forever.Render;
+using Aquarium.Life;
+
+namespace Aquarium.Agent
 {
     public class Hunter : IAgent
     {
@@ -18,6 +20,8 @@ namespace Aquarium
 
         Model Model { get; set; }
         public IRigidBody RigidBody { get; private set; }
+
+        public Vector3 Position { get { return RigidBody.Position; } }
 
         MutableForceGenerator ForceGen { get; set; }
 

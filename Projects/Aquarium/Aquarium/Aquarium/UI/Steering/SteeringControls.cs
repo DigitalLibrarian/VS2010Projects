@@ -5,7 +5,7 @@ using System.Text;
 using Forever.Physics;
 using Forever.Screens;
 
-namespace Aquarium.UI.Steering
+namespace Aquarium.Ui.Steering
 {
     public class SteeringControls
     {

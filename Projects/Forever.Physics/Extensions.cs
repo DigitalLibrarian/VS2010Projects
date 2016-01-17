@@ -5,9 +5,9 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Aquarium
+namespace Forever.Physics
 {
-    static class AqExtensions
+    public static class XnaExtensions
     {
         public static Vector3 HalfwayTo(this Vector3 v1, Vector3 v2)
         {

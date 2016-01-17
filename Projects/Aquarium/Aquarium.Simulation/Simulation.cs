@@ -9,15 +9,13 @@ using Forever.Render;
 using Forever.SpacePartitions;
 using Forever.Physics;
 
-using Aquarium.Agent;
-
 namespace Aquarium.Sim
 {
     public class Simulation
     {
         public SimSpace Space { get; private set; }
-        public PartitionSphere<IAgent> UpdateSet { get; set; }
-        public PartitionSphere<IAgent> DrawSet { get; set; }
+        public PartitionSphere<ISimObject> UpdateSet { get; set; }
+        public PartitionSphere<ISimObject> DrawSet { get; set; }
 
         float UpdateRadius = 2500;
         float DrawRadius = 5000;
@@ -25,8 +23,8 @@ namespace Aquarium.Sim
         public Simulation()
         {
             Space = new SimSpace(gridSize: 500, foodSpaceGridSize: 500);
-            UpdateSet = new PartitionSphere<IAgent>(Space, GetUpdateSphere());
-            DrawSet = new PartitionSphere<IAgent>(Space, GetDrawSphere());
+            UpdateSet = new PartitionSphere<ISimObject>(Space, GetUpdateSphere());
+            DrawSet = new PartitionSphere<ISimObject>(Space, GetDrawSphere());
         }
 
         const int RefetchFrequency = 10000;

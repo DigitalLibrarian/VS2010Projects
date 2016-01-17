@@ -31,7 +31,6 @@ namespace Aquarium.Life.Bodies
         public void Render(RenderContext renderContext)
         {
             Parts.ForEach(part => part.Render(this, renderContext));
-
         }
 
         public bool WillFit(BodyPartSocket connectedSocket, BodyPartSocket foreignSocket)

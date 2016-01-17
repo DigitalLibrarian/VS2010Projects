@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Forever.Physics;
 
-namespace Aquarium
+namespace Aquarium.Life
 {
     public class MutableForceGenerator : IForceGenerator
     {

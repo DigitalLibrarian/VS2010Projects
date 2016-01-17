@@ -2,43 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.Life.Genomes;
-using Aquarium.Life.Phenotypes;
+using System.Threading;
+using System.Collections.Concurrent;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Forever.Physics;
+using Forever.Render;
+
 using Aquarium.Life;
 using Aquarium.Life.Codons;
-using Microsoft.Xna.Framework;
-using System.Collections.Concurrent;
-using Microsoft.Xna.Framework.Graphics;
-using Forever.Render;
-using Aquarium.UI.Targets;
-using System.Threading;
+using Aquarium.Life.Genomes;
+using Aquarium.Life.Phenotypes;
 
-namespace Aquarium.Sim.Agents
+using Aquarium.Sim;
+using Aquarium.Ui.Targets;
+
+
+namespace Aquarium.Agent
 {
-    public interface IOrganismAgentPool
+    public class SpawnerAgent : IAgent, IRayPickable, ITarget
     {
-        ICollection<OrganismAgent> OrganismAgents { get; }
-
-        void Birth(OrganismAgent agent);
-        void Death(OrganismAgent agent);
-    }
-
-    public class SpawnerAgent : IAgent,  IRayPickable, ITarget
-    {
-        Vector3 Position { get; set; }
+        Vector3 _position;
+        Vector3 Position { get { return _position; } set { _position = value; } }
         Random Random = new Random();
         GenomeSplicer Splicer = new GenomeSplicer();
 
-        IOrganismAgentPool Pool;
+        IOrganismAgentGroup Pool;
 
         public ConcurrentQueue<OrganismAgent> Births { get; private set; }
 
         BoundingBox Box { get; set; }
         Model Model { get; set; }
 
+        Vector3 ISimObject.Position { get { return _position; } }
+
         public Thread Thread { get; private set; }
 
-        public SpawnerAgent(Vector3 pos, IOrganismAgentPool pool, Model model, BoundingBox box)
+        public SpawnerAgent(Vector3 pos, IOrganismAgentGroup pool, Model model, BoundingBox box)
         {
             Position = pos;
             Pool = pool;
@@ -67,7 +69,7 @@ namespace Aquarium.Sim.Agents
         {
             Mutate(off);
 
-            var spawn = SpawnFromGenome(off);
+            var spawn = Organism.CreateFromGenome(off);
             if (spawn != null)
             {
                 spawn.Position = Position + ( Random.NextVector() * SpawnRange );
@@ -97,26 +99,7 @@ namespace Aquarium.Sim.Agents
         }
 
 
-        public Organism SpawnFromGenome(BodyGenome g)
-        {
-            PhenotypeReader gR = new PhenotypeReader();
-
-            var t = new RandomIntGenomeTemplate(Random);
-            var parser = new BodyCodonParser();
-
-            var pheno = parser.ParseBodyPhenotype(g, t);
-
-            if (pheno != null)
-            {
-                var body = gR.ProduceBody(pheno);
-                if (body != null)
-                {
-                    return new Organism(body);
-                }
-            }
-
-            return null;
-        }
+       
 
         private bool TryGenerateRandom()
         {

@@ -5,7 +5,7 @@ using System.Text;
 using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public class SliderWidgetGroup
     {

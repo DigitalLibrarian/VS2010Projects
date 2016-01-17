@@ -13,7 +13,7 @@ namespace Forever.Render
   {
 
     ICamera _camera;
-    public ICamera Camera { get { return _camera; } }
+    public ICamera Camera { get { return _camera; } set { _camera = value; } }
 
     BasicEffect basic_effect;
     public BasicEffect BasicEffect { get { return basic_effect; } }
@@ -37,19 +37,27 @@ namespace Forever.Render
 
     public void Set2DRenderStates()
     {
-        GraphicsDevice.BlendState = BlendState.AlphaBlend;
-        GraphicsDevice.DepthStencilState = DepthStencilState.None;
-        GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-        GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+        Set2DRenderStates(GraphicsDevice);
     }
     public void Set3DRenderStates()
     {
-        // Set suitable renderstates for drawing a 3D model
-        GraphicsDevice.BlendState = BlendState.Opaque;
-        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-        GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+        Set3DRenderStates(GraphicsDevice);
     }
 
+    public static void Set2DRenderStates(GraphicsDevice gd)
+    {
+        gd.BlendState = BlendState.AlphaBlend;
+        gd.DepthStencilState = DepthStencilState.None;
+        gd.RasterizerState = RasterizerState.CullCounterClockwise;
+        gd.SamplerStates[0] = SamplerState.LinearClamp;
+    }
+
+    public static void Set3DRenderStates(GraphicsDevice gd)
+    {
+        gd.BlendState = BlendState.Opaque;
+        gd.DepthStencilState = DepthStencilState.Default;
+        gd.SamplerStates[0] = SamplerState.LinearWrap;
+    }
 
   }
 }

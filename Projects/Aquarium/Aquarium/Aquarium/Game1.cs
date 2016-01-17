@@ -86,10 +86,8 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            SetupRenderContextAndCamera();
-
-
-            ScreenManager.AddScreen(new SimulationScreen(RenderContext));
+            //ScreenManager.AddScreen(new SimulationScreen());
+            ScreenManager.AddScreen(new OrganismScreen());
             Components.Add(ScreenManager);
            
 
@@ -97,13 +95,6 @@ namespace Aquarium
 
 
 
-        protected void SetupRenderContextAndCamera()
-        {
-            RenderContext = new RenderContext(
-                new EyeCamera(GraphicsDevice),
-                GraphicsDevice
-                );
-        }
 
 
         /// <summary>
@@ -132,11 +123,10 @@ namespace Aquarium
         {
             GraphicsDevice.Clear(Color.Black);
 
-
-            RenderContext.Set3DRenderStates();
+            RenderContext.Set3DRenderStates(GraphicsDevice);
             base.Draw(gameTime);
 
-            RenderContext.Set2DRenderStates();
+            RenderContext.Set2DRenderStates(GraphicsDevice);
             Terminal.CheckDraw(true);
 
         }

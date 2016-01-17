@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Forever.Screens;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
-    public interface IUIElement
+    public interface IUiElement
     {
         void HandleInput(InputState input);
 

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Aquarium.Life</RootNamespace>
+    <AssemblyName>Aquarium.Life</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Life\Bodies\Body.cs" />
+    <Compile Include="Life\Bodies\BodyPart.cs" />
+    <Compile Include="Life\Bodies\BodyPartSocket.cs" />
+    <Compile Include="Life\Bodies\NervousSystem.cs" />
+    <Compile Include="Life\BodyPartGenerator.cs" />
+    <Compile Include="Life\Codons\BodyCodonParser.cs" />
+    <Compile Include="Life\Codons\BodyCodons.cs" />
+    <Compile Include="Life\Codons\Codon.cs" />
+    <Compile Include="Life\Codons\CodonParser.cs" />
+    <Compile Include="Life\Environments\IEnvMember.cs" />
+    <Compile Include="Life\Environments\IFood.cs" />
+    <Compile Include="Life\Environments\ISurroundings.cs" />
+    <Compile Include="Life\Fuzzy.cs" />
+    <Compile Include="Life\Genomes\BodyGenome.cs" />
+    <Compile Include="Life\Genomes\Gene.cs" />
+    <Compile Include="Life\Genomes\Genome.cs" />
+    <Compile Include="Life\Genomes\GenomeSplicer.cs" />
+    <Compile Include="Life\Genomes\GenomeTemplate.cs" />
+    <Compile Include="Life\Headers\BodyPartHeader.cs" />
+    <Compile Include="Life\Headers\NeuralNetworkHeader.cs" />
+    <Compile Include="Life\Headers\OrganHeader.cs" />
+    <Compile Include="Life\LIfeForce.cs" />
+    <Compile Include="Life\Organism.cs" />
+    <Compile Include="Life\Organs\AbilityOrgan.cs" />
+    <Compile Include="Life\Organs\NeuralOrgan.cs" />
+    <Compile Include="Life\Organs\Organ.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\FoodBiterAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\QueryClosestFoodAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\QueryEnergyRemainingAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\QueryPositionAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\QueryVelocityAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\SpinnerAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbilities\ThrusterAbility.cs" />
+    <Compile Include="Life\Organs\OrganAbility.cs" />
+    <Compile Include="Life\Organs\OrganType.cs" />
+    <Compile Include="Life\Organs\TimerOrgan.cs" />
+    <Compile Include="Life\Phenotypes\BodyPartPhenotype.cs" />
+    <Compile Include="Life\Phenotypes\BodyPhenotype.cs" />
+    <Compile Include="Life\Phenotypes\IBodyPhenotype.cs" />
+    <Compile Include="Life\Phenotypes\NeuralNetworkPhenome.cs" />
+    <Compile Include="Life\Phenotypes\OrganPhenotype.cs" />
+    <Compile Include="Life\Phenotypes\PhenotypeReader.cs" />
+    <Compile Include="Life\Population\PopulationMember.cs" />
+    <Compile Include="Life\Signals\ChanneledSignal.cs" />
+    <Compile Include="Life\Signals\ChannelReader.cs" />
+    <Compile Include="Life\Signals\ChannelWriter.cs" />
+    <Compile Include="Life\Signals\SignalEncoding.cs" />
+    <Compile Include="Life\Signals\SignalNode.cs" />
+    <Compile Include="MathHelper.cs" />
+    <Compile Include="MutableForceGenerator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Forever.Neural\Forever.Neural\Forever.Neural.csproj">
+      <Project>{C5674BEB-FFF6-4FC8-A9BF-9B032520BD74}</Project>
+      <Name>Forever.Neural</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Forever.Physics\Forever.Physics.csproj">
+      <Project>{7B227227-3898-4ED6-B968-28543423E947}</Project>
+      <Name>Forever.Physics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Forever.Render\Forever.Render\Forever.Render.csproj">
+      <Project>{064DEE02-3F23-49B7-BB85-271DE9414A2A}</Project>
+      <Name>Forever.Render</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Forever.SpacePartitions\Forever.SpacePartitions.csproj">
+      <Project>{780CD23C-C486-4152-A13C-9BEDCF1AE569}</Project>
+      <Name>Forever.SpacePartitions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

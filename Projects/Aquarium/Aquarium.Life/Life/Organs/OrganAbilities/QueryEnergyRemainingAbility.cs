@@ -5,6 +5,8 @@ using System.Text;
 using Aquarium.Life.Signals;
 using Aquarium.Life.Bodies;
 
+using Forever.Physics;
+
 namespace Aquarium.Life.Organs.OrganAbilities
 {
     public class QueryEnergyRemainingAbility : OrganAbility

@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace Aquarium.Ui.Steering
+namespace Aquarium.Sim
 {
-    public interface ISteering
+    public interface IRayPickable
     {
-        Vector3 Force { get; }
-        Vector3 Torque { get; }
+        bool IsHit(Ray ray);
     }
 }

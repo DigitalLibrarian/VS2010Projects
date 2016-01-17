@@ -99,6 +99,7 @@
     <Compile Include="Collide\Primitive.cs" />
     <Compile Include="Collide\PrimitiveHelper.cs" />
     <Compile Include="Debug.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="ForceRegistry.cs" />
     <Compile Include="Geometry\AABBFactory.cs" />
     <Compile Include="Geometry\AABBHelper.cs" />
