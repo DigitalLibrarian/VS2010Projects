@@ -9,12 +9,26 @@ namespace Aquarium.Life.Genomes
 {
     public class GenomeSplicer
     {
-        Random Random = new Random();
+
+        List<Action<BodyGenome>> Mutators { get; set; }
+        Random Random { get; set; }
+
+        public GenomeSplicer()
+        {
+            Random = new Random();
+            Mutators = new List<Action<BodyGenome>>();
+
+            RegisterDefaultMutators();
+        }
+
         public void Mutate(BodyGenome off)
         {
+            Random.NextElement(Mutators)(off);
+            /*
             var index = Random.NextIndex(off.Data);
-            var wiggle = 100;
+            var wiggle = 2;
             off.Data[index] += Random.Next(wiggle) - (wiggle/2);
+             */
         }
 
         public IEnumerable<BodyGenome> Meiosis(BodyGenome parent1Gen, BodyGenome parent2Gen, int wiggleSize = 5)
@@ -40,5 +54,42 @@ namespace Aquarium.Life.Genomes
         {
             return new BodyGenome(g.Select(x => x).ToList());
         }
+
+        private void RegisterDefaultMutators()
+        {
+            var mutators = new List<Action<BodyGenome>>
+            {
+                (g) => {
+
+                    var geneIndex = Random.NextIndex(g.Data);
+                    var gene = g.Data[geneIndex];
+                    int b = 10;
+                    int place = Random.Next(5);
+                    int sign = Random.Next(1) == 0 ? 1 : -1;
+                    var mutation = (int)(Math.Pow(b, place) * sign);
+                    g.Data[geneIndex] = gene + mutation;
+                },
+                (g) => {
+                    var geneIndex = Random.NextIndex(g.Data);
+                    var gene = g.Data[geneIndex];
+                    int sign = 1;
+                    if (Random.Next(1) == 0) sign = -1;
+                    g.Data[geneIndex] += sign;
+                },
+                (g) => {
+                    var one = Random.NextElement(g.Data);
+                    g.Data.Add(one);
+                },
+                (g) => {
+                    var geneIndex = Random.NextIndex(g.Data);
+                    g.Data.RemoveAt(geneIndex);
+                }
+                
+            };
+
+            Mutators.AddRange(mutators);
+        }
     }
+
+
 }

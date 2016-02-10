@@ -83,7 +83,5 @@ namespace Aquarium.Ui
             Slider.Value = (vDiff) / diff;
 
         }
-
-
     }
 }

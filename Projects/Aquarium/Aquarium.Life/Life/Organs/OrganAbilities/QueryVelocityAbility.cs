@@ -32,7 +32,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             Vector3 vector = Vector3.Zero;
             if (num > 0.5)
             {
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.SensorFiringCost);
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.SensorFiringCost);
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 vector = rigidBody.Velocity;
             }

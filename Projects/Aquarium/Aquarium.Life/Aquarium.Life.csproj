@@ -83,6 +83,7 @@
     <Compile Include="Life\Signals\SignalEncoding.cs" />
     <Compile Include="Life\Signals\SignalNode.cs" />
     <Compile Include="Life\Spec\BodyPartSpec.cs" />
+    <Compile Include="Life\LifeForceData.cs" />
     <Compile Include="Life\Spec\NeuralNetworkSpec.cs" />
     <Compile Include="Life\Spec\OrganismSpec.cs" />
     <Compile Include="Life\Spec\OrganSpec.cs" />

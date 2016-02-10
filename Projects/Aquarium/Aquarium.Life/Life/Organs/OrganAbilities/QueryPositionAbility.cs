@@ -24,7 +24,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             Vector3 vector = Vector3.Zero;
             if (signal.Value[0] > 0.5f)
             {
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.SensorFiringCost);
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.SensorFiringCost);
                 vector = nervousSystem.Organism.Body.Position;
                 vector = vector.Round(3);
 

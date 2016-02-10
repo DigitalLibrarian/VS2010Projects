@@ -23,6 +23,7 @@ namespace Aquarium.Life.Bodies
         public List<BodyPartSocket> Sockets { get; set; }
         public List<Organ> Organs { get; set; }
         public Color Color { get; set; }
+        public Vector3 Scale { get; set; }
 
         public ChanneledSignal ChanneledSignal { get; set; }
         

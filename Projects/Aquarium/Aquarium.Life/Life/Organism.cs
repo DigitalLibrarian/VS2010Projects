@@ -168,7 +168,7 @@ namespace Aquarium.Life
 
         public void Consume(IFood food)
         {
-            var BiteSize = 75;
+            var BiteSize = 5;
             float energyEfficiency = .65f;
 
             LifeForce.AddEnergy(food.BeConsumed(BiteSize) * energyEfficiency);

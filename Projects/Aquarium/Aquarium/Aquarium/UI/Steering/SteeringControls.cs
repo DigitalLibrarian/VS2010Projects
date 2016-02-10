@@ -64,8 +64,6 @@ namespace Aquarium.Ui.Steering
         {
             get { 
                 double r = Math.Abs(Mouse.CurrentThrust) / Mouse.MaxThruster;
-
-
                 r = Math.Min(1, r);
                 return (float)Math.Max(0, r);
             }

@@ -23,19 +23,19 @@ namespace Aquarium.Ui.Targets
         public bool HasTarget { get { return Target != null; } }
 
         public SpriteFont SpriteFont { get; private set; }
-        Func<Ray, ITarget> Source { get; set; }
+        Func<Ray, ITarget> TargetFinder { get; set; }
 
         SimulationScreen Screen { get; set;}
 
         SpawnerEditor SpawnerEditor;
 
         public TargetWindow(
-            Func<Ray, ITarget> source, RenderContext renderContext, Vector2 offset, SpriteFont font, 
+            Func<Ray, ITarget> targetFinder, RenderContext renderContext, Vector2 offset, SpriteFont font, 
             SimulationScreen screen,
             SpawnerEditor spawnerAgentEditor
             )
         {
-            Source = source;
+            TargetFinder = targetFinder;
             RenderContext = renderContext;
             Offset = offset;
             SpriteFont = font;
@@ -56,7 +56,7 @@ namespace Aquarium.Ui.Targets
                 //todo - limit to targeting area
                 var ray = GetMouseRay(mousePoint);
 
-                Target = Source(ray);
+                Target = TargetFinder(ray);
                 OnNewTarget();
             }
         }

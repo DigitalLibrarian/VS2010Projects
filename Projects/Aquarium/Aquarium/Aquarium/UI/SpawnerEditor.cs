@@ -93,13 +93,40 @@ namespace Aquarium.Ui
             var pickerHeight = 30;
             int pickers = 0;
             int start = 35;
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 200, "Max Pop", () => { return Agent.MaxPopSize; }, (v) => { Agent.MaxPopSize = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 200, "Range", () => { return Agent.SpawnRange; }, (v) => { Agent.SpawnRange = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 50, "MaxQueue", () => { return Agent.MaxBirthQueueSize; }, (v) => { Agent.MaxBirthQueueSize = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Parts", () => { return Agent.DefaultParts; }, (v) => { Agent.DefaultParts = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Organs", () => { return Agent.DefaultOrgans; }, (v) => { Agent.DefaultOrgans = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, "# Networks", () => { return Agent.DefaultNN; }, (v) => { Agent.DefaultNN = v; }));
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 100000, "Max Genome", () => { return Agent.GeneCap; }, (v) => { Agent.GeneCap = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 2000, 
+                "Max Pop", 
+                () => { return Agent.MaxPopSize; }, 
+                (v) => { Agent.MaxPopSize = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 500, 
+                "Range", 
+                () => { return Agent.SpawnRange; }, 
+                (v) => { Agent.SpawnRange = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 50, 
+                "MaxQueue", 
+                () => { return Agent.MaxBirthQueueSize; }, 
+                (v) => { Agent.MaxBirthQueueSize = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
+                "# Parts", 
+                () => { return Agent.DefaultParts; }, 
+                (v) => { Agent.DefaultParts = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
+                "# Organs", 
+                () => { return Agent.DefaultOrgans; }, 
+                (v) => { Agent.DefaultOrgans = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
+                "# Networks", 
+                () => { return Agent.DefaultNN; },
+                (v) => { Agent.DefaultNN = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 100000, 
+                "Max Genome", 
+                () => { return Agent.GeneCap; }, 
+                (v) => { Agent.GeneCap = v; }));
 
 
             foreach (var pickerGroup in Sliders)

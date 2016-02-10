@@ -92,7 +92,7 @@ namespace Aquarium.Agent
 
         private void Mutate(BodyGenome off)
         {
-            if (Random.Next(4) == 0)
+            if (Random.Next(100) == 0)
             {
                 Splicer.Mutate(off);
             }
@@ -122,17 +122,21 @@ namespace Aquarium.Agent
         {
             if (!UseMeiosis) return 0;
             int count = 0;
-            List<BodyGenome> genomes = GetNewParents();
-            if (genomes.Any())
+            try
             {
-                var p1 = Random.NextElement(genomes);
-                var p2 = Random.NextElement(genomes);
-
-                foreach (var offspring in Splicer.Meiosis(p1, p2))
+                List<BodyGenome> genomes = GetNewParents();
+                if (genomes.Any())
                 {
-                    if (TryEnqueue(offspring)) count++;
+                    var p1 = Random.NextElement(genomes);
+                    var p2 = Random.NextElement(genomes);
+
+                    foreach (var offspring in Splicer.Meiosis(p1, p2))
+                    {
+                        if (TryEnqueue(offspring)) count++;
+                    }
                 }
             }
+            catch (IndexOutOfRangeException e) { }
 
             return count;
         }
@@ -143,11 +147,11 @@ namespace Aquarium.Agent
             {
                 return new List<BodyGenome>();
             }
-
+            var agents = Pool.OrganismAgents.ToList();
             return new List<BodyGenome>
             {
-                Random.NextElement(Pool.OrganismAgents).Genome,
-                Random.NextElement(Pool.OrganismAgents).Genome
+                Random.NextElement(agents).Genome,
+                Random.NextElement(agents).Genome
             };
         }
 

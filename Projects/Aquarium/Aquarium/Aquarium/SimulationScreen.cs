@@ -63,7 +63,6 @@ namespace Aquarium
 
         public override void UnloadContent()
         {
-
             foreach (var agent in spawners)
             {
                 agent.Thread.Abort();
@@ -121,6 +120,23 @@ namespace Aquarium
             spawners.Add(agent);
         }
 
+        private void KillOrganism(TargetWindow targetWindow)
+        {
+            var target = targetWindow.Target;
+
+            if (target != null && target is OrganismAgent)
+            {
+                var orgAgent = target as OrganismAgent;
+
+                orgAgent.Organism.BeConsumed(orgAgent.Organism.ConsumableEnergy);
+            }
+        }
+
+        private void LifeForceEditor(TargetWindow targetWindow)
+        {
+            var target = targetWindow.Target;
+        }
+
         List<SpawnerAgent> spawners = new List<SpawnerAgent>();
 
         ControlledCraft CreateControlledCraft()
@@ -148,15 +164,13 @@ namespace Aquarium
         {
             var spriteFont = ScreenManager.Font;
             var actionBarSlotHeight = 40;
-            var actionBar = new ActionBar(RenderContext, 50, actionBarSlotHeight, spriteFont);
-            actionBar.Slots[0].Action = new ActionBarAction(AddNewSpawnerAgent);
+            var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
             var hud = new ControlledCraftHUD(User, RenderContext);
             hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
 
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
-
-
+            
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
@@ -166,22 +180,13 @@ namespace Aquarium
                 this,
                 SpawnerEditor);
 
-            actionBar.Slots[1].Action = new ActionBarAction(() =>
-            {
-                var target = targetWindow.Target;
-
-                if (target != null && target is OrganismAgent)
-                {
-                    var orgAgent = target as OrganismAgent;
-
-                    orgAgent.Organism.BeConsumed(orgAgent.Organism.ConsumableEnergy);
-                }
-            });
-            actionBar.Slots[1].TotalCoolDown = 200;
+            horizontalActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
+            horizontalActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism(targetWindow));
+            horizontalActionBar.Slots[1].TotalCoolDown = 200;
             
             return new List<IUiElement>
             {
-                actionBar,
+                horizontalActionBar,
                 hud, 
                 odometer, 
                 targetWindow, 

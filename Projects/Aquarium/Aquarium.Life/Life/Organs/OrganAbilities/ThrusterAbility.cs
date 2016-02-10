@@ -36,7 +36,6 @@ namespace Aquarium.Life.Organs.OrganAbilities
             if (num > 0.5)
             {
 
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.ThrusterFiringCost);
                 if (num > 1) num = 1;
                 var rigidBody = nervousSystem.Organism.RigidBody;
                 var socket = Fuzzy.CircleIndex(parent.Part.Sockets, SocketId);
@@ -45,6 +44,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
                 dir = Vector3.Transform(dir, rigidBody.Orientation);
 
                 var mag = 0.000001f * ((float) num) * nervousSystem.Organism.RigidBody.Mass;
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.ThrusterFiringCost * mag);
                 var veloCap = 0.01f;
                 var bodyPressurePoint = Vector3.Transform(parent.Part.LocalPosition + socket.LocalPosition, rigidBody.World);
 

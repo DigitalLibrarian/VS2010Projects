@@ -39,7 +39,7 @@ namespace Aquarium.Life.Phenotypes
                  var part = BodyGenerator.NewPartFromIndex(partGenome.BodyPartGeometryIndex);
                  part.UCTransform = Matrix.CreateScale(partGenome.Scale) * part.UCTransform;
                 part.Color = partGenome.Color;
-
+                part.Scale = partGenome.Scale;
                 part.ChanneledSignal = new ChanneledSignal(new List<double>());
                 return part;
             }).ToList();

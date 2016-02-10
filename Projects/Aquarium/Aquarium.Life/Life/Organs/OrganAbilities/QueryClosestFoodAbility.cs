@@ -34,7 +34,7 @@ namespace Aquarium.Life.Organs.OrganAbilities
             var env = nervousSystem.Organism.Surroundings;
             if (env != null)
             {
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.SensorFiringCost);
+                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.SensorFiringCost);
                 //find food
                 var foods = env.ClosestFoods(nervousSystem.Organism.Position, SearchRadius);
                 if (foods.Any())
