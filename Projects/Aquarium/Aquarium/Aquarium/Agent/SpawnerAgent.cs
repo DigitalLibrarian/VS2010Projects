@@ -12,7 +12,6 @@ using Forever.Physics;
 using Forever.Render;
 
 using Aquarium.Life;
-using Aquarium.Life.Codons;
 using Aquarium.Life.Genomes;
 using Aquarium.Life.Phenotypes;
 
@@ -27,6 +26,7 @@ namespace Aquarium.Agent
         Vector3 _position;
         Vector3 Position { get { return _position; } set { _position = value; } }
         Random Random = new Random();
+
         GenomeSplicer Splicer = new GenomeSplicer();
 
         IOrganismAgentGroup Pool;
@@ -104,6 +104,7 @@ namespace Aquarium.Agent
         private bool TryGenerateRandom()
         {
             if (!UseRandom) return false;
+            /*
             var genome = BodyGenome.Random(
                 Random,
                 numParts: DefaultParts,
@@ -111,7 +112,9 @@ namespace Aquarium.Agent
                 numNN: DefaultNN,
                 sizeJunk: DefaultJunk
                 );
+            */
 
+            BodyGenome genome = new BodyGenome(Enumerable.Range(0, 100).Select(x => Random.Next()).ToList());
             return TryEnqueue(genome);
         }
 
@@ -120,7 +123,6 @@ namespace Aquarium.Agent
             if (!UseMeiosis) return 0;
             int count = 0;
             List<BodyGenome> genomes = GetNewParents();
-
             if (genomes.Any())
             {
                 var p1 = Random.NextElement(genomes);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Aquarium.Life.Headers;
+using Aquarium.Life.Spec;
 
 namespace Aquarium.Life.Phenotypes
 {
@@ -17,15 +17,13 @@ namespace Aquarium.Life.Phenotypes
         public IInstancePointer AnchorPart { get; set; }
         public IInstancePointer PlacementPartSocket { get; set; }
 
-        public BodyPartPhenotype(BodyPartHeader header)
+        public BodyPartPhenotype(BodyPartSpec header)
         {
-            Scale = new Vector3(1f, 1f, 1f);
-
             Color = header.Color;
-            BodyPartGeometryIndex = header.GeomIndex;
-            AnchorPart = new InstancePointer(header.AnchorInstance);
-            PlacementPartSocket = new InstancePointer(header.PlacementSocket);
-            Scale = header.Scale;
+            BodyPartGeometryIndex = header.Type;
+            AnchorPart = new InstancePointer(header.AnchorNodeId);
+            PlacementPartSocket = new InstancePointer(header.PlacementPartSocket);
+            Scale = new Vector3(header.ScaleX, header.ScaleY, header.ScaleZ);
         }
 
         public Vector3 Scale

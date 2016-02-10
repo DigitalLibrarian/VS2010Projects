@@ -19,8 +19,6 @@ using Aquarium.Life.Organs;
 using Aquarium.Life.Signals;
 using Aquarium.Life.Genomes;
 using Aquarium.Life.Phenotypes;
-using Aquarium.Life.Headers;
-using Aquarium.Life.Codons;
 using Aquarium.Life.Bodies;
 
 using Ruminate.GUI.Framework;
@@ -86,11 +84,9 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            //ScreenManager.AddScreen(new SimulationScreen());
-            ScreenManager.AddScreen(new OrganismScreen());
+            var startScreen = new SimulationScreen();
+            ScreenManager.AddScreen(startScreen);
             Components.Add(ScreenManager);
-           
-
         }
 
 

@@ -6,7 +6,7 @@ using System.Text;
 using Aquarium.Life.Genomes;
 using Aquarium.Life.Bodies;
 using Microsoft.Xna.Framework;
-using Aquarium.Life.Headers;
+using Aquarium.Life.Spec;
 
 namespace Aquarium.Life.Phenotypes
 {
@@ -53,6 +53,13 @@ namespace Aquarium.Life.Phenotypes
             BodyPartPhenos = new List<IBodyPartPhenotype>();
             OrganPhenos = new List<IOrganPhenotype>();
             NeuralNetworkPhenos = new List<INeuralNetworkPhenotype>();
+        }
+
+        public BodyPhenotype(OrganismSpec spec)
+        {
+            BodyPartPhenos = spec.BodyParts.Index.Collection.Select(x => new BodyPartPhenotype(x)).Cast<IBodyPartPhenotype>().ToList();
+            OrganPhenos = spec.Organs.Index.Collection.Select(x => new OrganPhenotype(x)).Cast<IOrganPhenotype>().ToList();
+            NeuralNetworkPhenos = spec.NeuralNetworks.Index.Collection.Select(x => new NeuralNetworkPhenotype(x)).Cast<INeuralNetworkPhenotype>().ToList();
         }
 
         public int NumBodyParts

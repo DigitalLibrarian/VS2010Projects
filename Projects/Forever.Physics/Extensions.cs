@@ -37,11 +37,15 @@ namespace Forever.Physics
 
         public static T NextElement<T>(this Random me, List<T> list)
         {
-            return list[me.Next(list.Count)];
+            return list[me.NextIndex(list)];
+        }
+        public static int NextIndex<T>(this Random me, ICollection<T> list)
+        {
+            return me.Next(list.Count);
         }
         public static T NextElement<T>(this Random me, ICollection<T> list)
         {
-            return list.ElementAt(me.Next(list.Count()));
+            return list.ElementAt(me.NextIndex(list));
         }
 
         public static Vector3 NextVector(this Random me)

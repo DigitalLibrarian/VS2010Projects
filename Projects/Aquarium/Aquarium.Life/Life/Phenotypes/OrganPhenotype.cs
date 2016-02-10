@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Aquarium.Life.Headers;
+using Aquarium.Life.Spec;
 
 namespace Aquarium.Life.Phenotypes
 {
@@ -18,10 +18,10 @@ namespace Aquarium.Life.Phenotypes
         public IInstancePointer AbilityParam0 { get; set; }
         public IInstancePointer AbilityParam1 { get; set; }
 
-        public OrganPhenotype(OrganHeader header)
+        public OrganPhenotype(OrganSpec header)
         {
             OrganType = new InstancePointer(header.OrganType);
-            BodyPartPointer = new InstancePointer(header.BodyPart);
+            BodyPartPointer = new InstancePointer(header.BodyPartId);
             InputSignal = new InstancePointer(header.InputSignal);
             OutputSignal = new InstancePointer(header.OutputSignal);
             ForeignId = new InstancePointer(header.AbilityId);

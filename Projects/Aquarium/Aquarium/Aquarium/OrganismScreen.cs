@@ -19,7 +19,7 @@ namespace Aquarium
     {
         int DefaultParts = 20;
 
-        int DefaultOrgans = 20;
+        int DefaultOrgans = 1;
 
         int DefaultNN = 1;
 
@@ -40,7 +40,7 @@ namespace Aquarium
 
             var gd = ScreenManager.GraphicsDevice;
             var cam = new EyeCamera(gd);
-            cam.Position = Vector3.Backward * 20;
+            cam.Position = Vector3.Backward * 200;
             RenderContext = new RenderContext(
                     cam,
                     gd
@@ -59,6 +59,7 @@ namespace Aquarium
             Organism o = null;
             while (o == null)
             {
+                /*
                 var genome = BodyGenome.Random(
                     r,
                     numParts: DefaultParts,
@@ -66,10 +67,22 @@ namespace Aquarium
                     numNN: DefaultNN,
                     sizeJunk: DefaultJunk
                     );
+                */
+                
+                var n = 2000;
+                //var genome = new BodyGenome(Enumerable.Range(0, n).Select(x => new Gene<int> { Name = x, Value = -10000 + r.Next(10000) }).ToList()); ;
+                
+                //o = Organism.CreateFromGenome(genome);
+
+                BodyGenome genome = new BodyGenome(Enumerable.Range(0, 100).Select(x => r.Next()).ToList());
 
                 o = Organism.CreateFromGenome(genome);
-                o.RigidBody.calculateDerivedData();
-                o.Body.World = OrgWorld;
+
+                if (o != null)
+                {
+                    o.RigidBody.calculateDerivedData();
+                    o.Body.World = OrgWorld;
+                }
             }
             return o;
         }

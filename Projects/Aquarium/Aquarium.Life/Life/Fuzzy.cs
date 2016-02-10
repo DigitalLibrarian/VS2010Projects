@@ -120,8 +120,6 @@ namespace Aquarium.Life
                 );
         }
 
-
-
         public static Vector3 ToScaleVector(int x, int y, int z)
         {
 
@@ -130,6 +128,20 @@ namespace Aquarium.Life
                 .5f + ToFractionalFloat(y),
                 .5f + ToFractionalFloat(z)
                 );
+        }
+
+        public static float CircleClamp(float n, float low, float high)
+        {
+            float range = high - low;
+            var comp = (((float)Math.Cos(n)) * range);
+            if (comp < 0) comp *= -1f;
+            return low + comp;
+        }
+
+        public static int CircleClamp(int n, int low, int high)
+        {
+            if (n < low || n > high) return low + (n % (high - low));
+            return n;
         }
     }
 }
