@@ -19,17 +19,17 @@ namespace Aquarium.Ui
         public Slider Slider { get; private set; }
         public Label ValueLabel { get; private set; }
 
-        Func<int> Getter { get; set; }
-        Action<int> Setter { get; set; }
+        Func<float> Getter { get; set; }
+        Action<float> Setter { get; set; }
 
-        public SliderWidgetGroup(int x, int y, int min, int max, string labelText, Func<int> getter, Action<int> setter)
+        public SliderWidgetGroup(int x, int y, int min, int max, string labelText, Func<float> getter, Action<float> setter)
         {
             Max = max;
             Min = min;
             Getter = getter;
             Setter = setter;
 
-            var labelWidth = 150;
+            var labelWidth = 250;
             var pad = 5;
 
             var sliderWidth = 200;
@@ -41,11 +41,12 @@ namespace Aquarium.Ui
                 var diff = max - min;
                 var dist = diff * rawValue;
 
-                int newValue = min + (int)dist;
+                var newValue = min + dist;
                 sliderLabel.Value = newValue.ToString();
 
                 Setter(newValue);
             });
+           
             Slider = slider;
             ValueLabel = sliderLabel;
 

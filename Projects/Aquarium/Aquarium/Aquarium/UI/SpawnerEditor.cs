@@ -15,6 +15,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Aquarium.Ui.Targets;
 using Forever.Screens;
+using Aquarium.Life;
 
 namespace Aquarium.Ui
 {
@@ -86,7 +87,7 @@ namespace Aquarium.Ui
 
             QueueSizeLabel = new Label(35, 5, "");
             
-            var panel = new Panel(5, 20, 500, 300);
+            var panel = new Panel(5, 20, 600, 850);
             panel.AddWidget(closeButton);
             panel.AddWidget(QueueSizeLabel);
 
@@ -96,37 +97,120 @@ namespace Aquarium.Ui
             Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 2000, 
                 "Max Pop", 
                 () => { return Agent.MaxPopSize; }, 
-                (v) => { Agent.MaxPopSize = v; }));
+                (v) => { Agent.MaxPopSize = (int) v; }));
 
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 500, 
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1000, 
                 "Range", 
-                () => { return Agent.SpawnRange; }, 
-                (v) => { Agent.SpawnRange = v; }));
+                () => { return Agent.SpawnRange; },
+                (v) => { Agent.SpawnRange = (int) v; }));
 
             Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 50, 
                 "MaxQueue", 
-                () => { return Agent.MaxBirthQueueSize; }, 
-                (v) => { Agent.MaxBirthQueueSize = v; }));
+                () => { return Agent.MaxBirthQueueSize; },
+                (v) => { Agent.MaxBirthQueueSize = (int)v; }));
 
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
-                "# Parts", 
-                () => { return Agent.DefaultParts; }, 
-                (v) => { Agent.DefaultParts = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10000,
+                "Max Energy",
+                () => { return LifeForce.Data.MaxEnergy; },
+                (v) => { LifeForce.Data.MaxEnergy = (int)v; }));
 
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
-                "# Organs", 
-                () => { return Agent.DefaultOrgans; }, 
-                (v) => { Agent.DefaultOrgans = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 2,
+                "Basal Cost",
+                () => { return LifeForce.Data.BasalEnergyCost; },
+                (v) => { LifeForce.Data.BasalEnergyCost = v; }));
 
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50, 
-                "# Networks", 
-                () => { return Agent.DefaultNN; },
-                (v) => { Agent.DefaultNN = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "Body Part Cost",
+                () => { return LifeForce.Data.BodyPartUnitCost; },
+                (v) => { LifeForce.Data.BodyPartUnitCost = v; }));
 
-            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 100000, 
-                "Max Genome", 
-                () => { return Agent.GeneCap; }, 
-                (v) => { Agent.GeneCap = v; }));
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "Volume Cost",
+                () => { return LifeForce.Data.BodyPartVolumeCost; },
+                (v) => { LifeForce.Data.BodyPartVolumeCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "Neural Cost",
+                () => { return LifeForce.Data.NeuralOrganCost; },
+                (v) => { LifeForce.Data.NeuralOrganCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "OrganUnitCost",
+                () => { return LifeForce.Data.OrganUnitCost; },
+                (v) => { LifeForce.Data.OrganUnitCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "AbilityOrganCost",
+                () => { return LifeForce.Data.AbilityOrganCost; },
+                (v) => { LifeForce.Data.AbilityOrganCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "TimerOrganCost",
+                () => { return LifeForce.Data.TimerOrganCost; },
+                (v) => { LifeForce.Data.TimerOrganCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10,
+                "AbilityFiringBaseCost",
+                () => { return LifeForce.Data.AbilityFiringBaseCost; },
+                (v) => { LifeForce.Data.AbilityFiringBaseCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10,
+                "ThrusterFiringCost",
+                () => { return LifeForce.Data.ThrusterFiringCost; },
+                (v) => { LifeForce.Data.ThrusterFiringCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10,
+                "SpinnerFiringCost",
+                () => { return LifeForce.Data.SpinnerFiringCost; },
+                (v) => { LifeForce.Data.SpinnerFiringCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10,
+                "SensorFiringCost",
+                () => { return LifeForce.Data.SensorFiringCost; },
+                (v) => { LifeForce.Data.SensorFiringCost = v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 10,
+                "BiterFiringCost",
+                () => { return LifeForce.Data.BiterFiringCost; },
+                (v) => { LifeForce.Data.BiterFiringCost = v; }));
+
+
+            var sp = Agent.SpecParser;
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 30,
+                "MinBodyParts",
+                () => { return (int)sp.MinBodyParts; },
+                (v) => { sp.MinBodyParts = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50,
+                "MaxBodyParts",
+                () => { return (int)sp.MaxBodyParts; },
+                (v) => { sp.MaxBodyParts = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 30,
+                "MinOrgans",
+                () => { return (int)sp.MinOrgans; },
+                (v) => { sp.MinOrgans = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50,
+                "MaxOrgans",
+                () => { return (int)sp.MaxOrgans; },
+                (v) => { sp.MaxOrgans = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 30,
+                "MinNeuralNetworks",
+                () => { return (int)sp.MinNeuralNetworks; },
+                (v) => { sp.MinNeuralNetworks = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 1, 50,
+                "MaxNeuralNetworks",
+                () => { return (int)sp.MaxNeuralNetworks; },
+                (v) => { sp.MaxNeuralNetworks = (int)v; }));
+
+            Sliders.Add(new SliderWidgetGroup(0, start + (pickerHeight * pickers++), 0, 1,
+                "Mutation %",
+                () => { return Agent.MutationChance; },
+                (v) => { Agent.MutationChance = v ; }));
+           
 
 
             foreach (var pickerGroup in Sliders)

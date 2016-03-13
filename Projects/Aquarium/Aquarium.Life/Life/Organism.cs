@@ -64,29 +64,8 @@ namespace Aquarium.Life
 
         public int TotalOrgans { get; private set; }
 
-        public static Organism CreateFromGenome(BodyGenome g)
+        public static Organism CreateFromGenome(BodyGenome g, OrganismSpecParser specParser)
         {
-            /*
-            PhenotypeReader gR = new PhenotypeReader();
-
-            var t = new RandomIntGenomeTemplate(new Random());
-            var parser = new BodyCodonParser();
-
-            var pheno = parser.ParseBodyPhenotype(g, t);
-
-            if (pheno != null)
-            {
-                var body = gR.ProduceBody(pheno);
-                if (body != null)
-                {
-                    return new Organism(body);
-                }
-            }
-
-            return null;
-             * */
-
-            var specParser = new OrganismSpecParser();
             var organismSpec = specParser.ReadOrganismSpec(g);
             var pheno = new BodyPhenotype(organismSpec);
 
@@ -129,7 +108,7 @@ namespace Aquarium.Life
                 UpdateBoundingGeometryToContain(part);
             }
 
-            LifeForce = new LifeForce(100, LifeForce.CalcBasal(this));
+            LifeForce = new LifeForce(LifeForce.Data.MaxEnergy);
         }
 
         private void UpdateBoundingGeometryToContain(BodyPart part)
@@ -150,7 +129,7 @@ namespace Aquarium.Life
         {
             if (!IsDead && ((Tick++ % 2) == 0))
             {
-                LifeForce.Update(duration);
+                LifeForce.Update(duration, this);
                 NervousSystem.Update(duration);
             }
 
@@ -163,17 +142,6 @@ namespace Aquarium.Life
         public float MaxEnergy { get { return LifeForce.MaxEnergy; } }
         public long Age { get { return LifeForce.Age; } }
        
-
-
-
-        public void Consume(IFood food)
-        {
-            var BiteSize = 5;
-            float energyEfficiency = .65f;
-
-            LifeForce.AddEnergy(food.BeConsumed(BiteSize) * energyEfficiency);
-        }
-
         List<IForceGenerator> OrganForces { get; set; }
         protected void UpdatePhysics(float duration)
         {
@@ -186,6 +154,15 @@ namespace Aquarium.Life
             Body.World = RigidBody.World;
         }
 
+        #region Food
+        public void Consume(IFood food)
+        {
+            var BiteSize = 75;
+            float energyEfficiency = .8f;
+
+            LifeForce.AddEnergy(food.BeConsumed(BiteSize) * energyEfficiency);
+        }
+
         public float ConsumableEnergy
         {
             get { return this.EdibleEnergy; }
@@ -193,16 +170,19 @@ namespace Aquarium.Life
 
         public float BeConsumed(float biteSize)
         {
-            if (LifeForce.PayEnergyCost(biteSize))
+            var energy = LifeForce.Energy;
+            var remaining = energy - biteSize;
+            LifeForce.PayEnergyCost(biteSize);
+            if(remaining >= 0)
             {
                 return biteSize;
             }
             else
             {
-                return 0f;
+                return biteSize - energy;
             }
-
         }
+        #endregion
 
     }
 

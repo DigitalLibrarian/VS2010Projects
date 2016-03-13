@@ -31,20 +31,26 @@ namespace Aquarium.Life.Organs.OrganAbilities
         {
             //TODO - change this sometime, for now we always bite
             double result = 0;
-            var env = nervousSystem.Organism.Surroundings;
-            if (env != null)
+
+            if (signal.Value[0] > 0.5f)
             {
-                nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.BiterFiringCost);
-                var searchRadius = 10;
-                //find food
-                var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
-                if (foods.Any())
+                var env = nervousSystem.Organism.Surroundings;
+                if (env != null)
                 {
-                    var food = foods.FirstOrDefault(f => f != nervousSystem.Organism);
-                    if (food != null)
+                    nervousSystem.Organism.LifeForce.PayEnergyCost(LifeForce.Data.BiterFiringCost);
+                    var bb = nervousSystem.Organism.LocalBB;
+
+                    var searchRadius = (bb.Max - bb.Min).Length() / 2f;
+                    //find food
+                    var foods = env.ClosestFoods(nervousSystem.Organism.Position, searchRadius);
+                    if (foods.Any())
                     {
-                        nervousSystem.Organism.Consume(food);
-                        result = 1;
+                        var food = foods.FirstOrDefault(f => f != nervousSystem.Organism);
+                        if (food != null)
+                        {
+                            nervousSystem.Organism.Consume(food);
+                            result = 1;
+                        }
                     }
                 }
             }

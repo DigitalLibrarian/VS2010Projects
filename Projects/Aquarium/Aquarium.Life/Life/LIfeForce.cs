@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Aquarium.Life.Spec;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium.Life
 {
     public class LifeForce
     {
         private const float EnergyFlatline = 1f;
-        public float BasalEnergyCost { get; private set; }
         public float MaxEnergy { get; private set; }
         public float Energy { get; private set; }
         public long Age { get; private set; }
@@ -21,11 +21,10 @@ namespace Aquarium.Life
             }
         }
 
-        public LifeForce(float maxEnergy, float basalEnergyCost)
+        public LifeForce(float maxEnergy)
         {
             Age = 0;
             MaxEnergy = maxEnergy;
-            BasalEnergyCost = basalEnergyCost;
             Energy = MaxEnergy;
         }
 
@@ -36,7 +35,6 @@ namespace Aquarium.Life
 
         public bool PayEnergyCost(float cost)
         {
-            //if (!CanPayEnergyCost(cost)) return false;
             Energy -= cost;
             return true;
         }
@@ -44,28 +42,33 @@ namespace Aquarium.Life
         public void AddEnergy(float energy)
         {
             Energy += energy;
+            if (Energy > MaxEnergy)
+            {
+                Energy = MaxEnergy;
+            }
         }
 
-        public void Update(float duration)
+        public void Update(float duration, Organism org)
         {
             if (!IsDead)
             {
-                PayEnergyCost(BasalEnergyCost);
+                PayEnergyCost(CalcLivingCost(org));
                 Age++;
             }
         }
 
         public static LifeForceData Data = new LifeForceData();
 
-        public static float CalcBasal(Organism org)
+        public static float CalcLivingCost(Organism org)
         {
-            float totalCost =
-                ((float)org.Body.Parts.Count) * Data.BodyPartUnitCost +
-                ((float)org.TotalOrgans) * Data.OrganUnitCost;
+            float totalCost = Data.BasalEnergyCost;
+            totalCost += ((float)org.Body.Parts.Count) * Data.BodyPartUnitCost;
+            totalCost += ((float)org.TotalOrgans) * Data.OrganUnitCost;
 
             foreach (var bodyPart in org.Body.Parts)
             {
-                totalCost += bodyPart.Scale.Length() * Data.BodyPartVolumeCost;
+                var scale = Vector3.Transform(bodyPart.Scale, bodyPart.BodyWorld);
+                totalCost += scale.Length() * Data.BodyPartVolumeCost;
                 foreach (var organ in bodyPart.Organs)
                 {
                     switch (organ.OrganType)

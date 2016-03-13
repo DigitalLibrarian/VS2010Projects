@@ -25,7 +25,6 @@ using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;
 using System.IO;
 
-
 namespace Aquarium
 {
     /// <summary>
@@ -36,7 +35,6 @@ namespace Aquarium
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
-        RenderContext RenderContext;
 
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
@@ -87,6 +85,7 @@ namespace Aquarium
             var startScreen = new SimulationScreen();
             ScreenManager.AddScreen(startScreen);
             Components.Add(ScreenManager);
+
         }
 
 

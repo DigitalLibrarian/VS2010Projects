@@ -17,6 +17,7 @@ using Aquarium.Life.Phenotypes;
 
 using Aquarium.Sim;
 using Aquarium.Ui.Targets;
+using Aquarium.Life.Spec;
 
 
 namespace Aquarium.Agent
@@ -29,7 +30,10 @@ namespace Aquarium.Agent
 
         GenomeSplicer Splicer = new GenomeSplicer();
 
+        public OrganismSpecParser SpecParser = new OrganismSpecParser();
+
         IOrganismAgentGroup Pool;
+        List<OrganismAgent> BreedingCandidates;
 
         public ConcurrentQueue<OrganismAgent> Births { get; private set; }
 
@@ -47,6 +51,7 @@ namespace Aquarium.Agent
             Model = model;
             Box = box;
             Births = new ConcurrentQueue<OrganismAgent>();
+            BreedingCandidates = new List<OrganismAgent>();
 
             Thread = new Thread(BackgroundThreadFunc);
         }
@@ -57,19 +62,16 @@ namespace Aquarium.Agent
         public int MaxPopSize = 10;
         public int SpawnRange = 25;
         public int GeneCap = 10000;
-        public int DefaultParts = 25;
-        public int DefaultOrgans = 30;
-        public int DefaultNN = 15;
-        public int DefaultJunk = 0;
         public bool UseMeiosis = false;
         public bool UseRandom = false;
+        public float MutationChance = 0.000001f;
         #region Generation Tools
 
         private bool TryEnqueue(BodyGenome off)
         {
             Mutate(off);
 
-            var spawn = Organism.CreateFromGenome(off);
+            var spawn = Organism.CreateFromGenome(off, SpecParser);
             if (spawn != null)
             {
                 spawn.Position = Position + ( Random.NextVector() * SpawnRange );
@@ -92,7 +94,7 @@ namespace Aquarium.Agent
 
         private void Mutate(BodyGenome off)
         {
-            if (Random.Next(100) == 0)
+            if (Random.NextDouble() < MutationChance)
             {
                 Splicer.Mutate(off);
             }
@@ -103,55 +105,41 @@ namespace Aquarium.Agent
 
         private bool TryGenerateRandom()
         {
-            if (!UseRandom) return false;
-            /*
-            var genome = BodyGenome.Random(
-                Random,
-                numParts: DefaultParts,
-                numOrgans: DefaultOrgans,
-                numNN: DefaultNN,
-                sizeJunk: DefaultJunk
-                );
-            */
+           // if (!UseRandom) return false;
 
-            BodyGenome genome = new BodyGenome(Enumerable.Range(0, 100).Select(x => Random.Next()).ToList());
+            BodyGenome genome = new BodyGenome(Enumerable.Range(0, GeneCap / 2).Select(x => Random.Next()).ToList());
             return TryEnqueue(genome);
         }
 
         private int TryMeiosis()
         {
-            if (!UseMeiosis) return 0;
+            //if (!UseMeiosis) return 0;
             int count = 0;
-            try
+            List<BodyGenome> genomes = GetNewParents();
+            if (genomes.Any())
             {
-                List<BodyGenome> genomes = GetNewParents();
-                if (genomes.Any())
-                {
-                    var p1 = Random.NextElement(genomes);
-                    var p2 = Random.NextElement(genomes);
+                var p1 = Random.NextElement(genomes);
+                var p2 = Random.NextElement(genomes);
 
-                    foreach (var offspring in Splicer.Meiosis(p1, p2))
-                    {
-                        if (TryEnqueue(offspring)) count++;
-                    }
+                foreach (var offspring in Splicer.Meiosis(p1, p2))
+                {
+                    if (TryEnqueue(offspring)) count++;
                 }
             }
-            catch (IndexOutOfRangeException e) { }
 
             return count;
         }
 
         private List<BodyGenome> GetNewParents()
         {
-            if (!Pool.OrganismAgents.Any())
+            if (!BreedingCandidates.Any())
             {
                 return new List<BodyGenome>();
             }
-            var agents = Pool.OrganismAgents.ToList();
             return new List<BodyGenome>
             {
-                Random.NextElement(agents).Genome,
-                Random.NextElement(agents).Genome
+                Random.NextElement(BreedingCandidates).Genome,
+                Random.NextElement(BreedingCandidates).Genome
             };
         }
 
@@ -189,6 +177,21 @@ namespace Aquarium.Agent
                 }
             }
 
+            var oldest = Pool.OrganismAgents.OrderByDescending(x => x.Organism.Age);
+            var newCandidates = new List<OrganismAgent>();
+
+            var oldestEnum = oldest.GetEnumerator();
+            foreach (var topTen in oldest)
+            {
+                if (newCandidates.Count > 10 || !oldestEnum.MoveNext())
+                {
+                    break;
+                }
+                newCandidates.Add(oldestEnum.Current);
+            }
+
+
+            BreedingCandidates = newCandidates;
         }
 
         public bool QueueFull
@@ -211,9 +214,12 @@ namespace Aquarium.Agent
 
                 while (!QueueFull && num < MaxPerSpawnPump)
                 {
-                    var mCount = TryMeiosis();
-                    num += mCount;
-                    if (mCount == 0 && TryGenerateRandom())
+                    if (UseMeiosis)
+                    {
+                        num += TryMeiosis();
+                    }
+
+                    if (UseRandom && TryGenerateRandom())
                     {
                         num++;
                     }

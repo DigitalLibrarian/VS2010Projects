@@ -7,6 +7,8 @@ namespace Aquarium.Life
 {
     public class LifeForceData
     {
+        public int MaxEnergy { get; set; }
+        public float BasalEnergyCost { get; set; }
         public float BodyPartUnitCost { get; set; }
         public float BodyPartVolumeCost { get; set; }
         public float NeuralOrganCost { get; set; }
@@ -21,17 +23,20 @@ namespace Aquarium.Life
 
         public LifeForceData()
         {
-            BodyPartUnitCost = 0.0001f;
-            BodyPartVolumeCost = 0.01f;
-            NeuralOrganCost = 0.001f;
-            AbilityOrganCost = 0.001f;
-            TimerOrganCost = 0.00001f;
-            OrganUnitCost = 0.0001f;
-            AbilityFiringBaseCost = 0.00001f;
-            ThrusterFiringCost = 0.0001f;
-            SpinnerFiringCost = 1f;
-            SensorFiringCost = 0.00001f;
-            BiterFiringCost = 0.001f;
+            var epsilon = 0.0001f;
+            MaxEnergy = 100;
+            BasalEnergyCost = epsilon;
+            BodyPartUnitCost = epsilon;
+            BodyPartVolumeCost = epsilon;
+            NeuralOrganCost = epsilon;
+            AbilityOrganCost = epsilon;
+            TimerOrganCost = epsilon;
+            OrganUnitCost = epsilon;
+            AbilityFiringBaseCost = epsilon;
+            ThrusterFiringCost = epsilon;
+            SpinnerFiringCost = epsilon;
+            SensorFiringCost = epsilon;
+            BiterFiringCost = epsilon;
         }
     }
 }

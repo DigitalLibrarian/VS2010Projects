@@ -12,6 +12,7 @@ using Aquarium.Life.Genomes;
 using Forever.Render.Cameras;
 using Microsoft.Xna.Framework;
 using System.Threading.Tasks;
+using Aquarium.Life.Spec;
 
 namespace Aquarium
 {
@@ -76,7 +77,8 @@ namespace Aquarium
 
                 BodyGenome genome = new BodyGenome(Enumerable.Range(0, 100).Select(x => r.Next()).ToList());
 
-                o = Organism.CreateFromGenome(genome);
+                var specParser = new OrganismSpecParser();
+                o = Organism.CreateFromGenome(genome, specParser);
 
                 if (o != null)
                 {

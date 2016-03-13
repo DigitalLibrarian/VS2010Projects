@@ -140,7 +140,8 @@ namespace Aquarium.Life
 
         public static int CircleClamp(int n, int low, int high)
         {
-            if (n < low || n > high) return low + (n % (high - low));
+            var denom = high - low;
+            if ((n < low || n > high) && denom != 0) return low + (n % denom);
             return n;
         }
     }

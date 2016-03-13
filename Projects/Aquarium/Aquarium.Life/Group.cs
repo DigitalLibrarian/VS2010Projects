@@ -35,6 +35,11 @@ namespace Aquarium.Life
             }
         }
 
+        public void Add(T g)
+        {
+            Index.Add(g);
+        }
+        
         protected T Create(IEnumerator<int> g)
         {
             return Factory(g);
