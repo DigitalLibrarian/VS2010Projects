@@ -46,7 +46,6 @@ namespace Forever.Render.Instancing
             gd.Indices = IndexBuffer;
 
             Effect.CurrentTechnique.Passes[0].Apply();
-
             gd.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 24, instanceCount);
         }
 

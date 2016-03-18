@@ -16,11 +16,13 @@ namespace Aquarium
         {
             base.LoadContent();
 
-            RenderContext.Camera.Position = Vector3.Backward * 15;
 
-            Chunk = new Chunk(10);
+            Chunk = new Chunk(16);
             Chunk.LoadContent(ScreenManager.Game.Content);
             Chunk.Initialize(RenderContext.GraphicsDevice);
+
+            var diff = Chunk.Box.Max - Chunk.Box.Min;
+            RenderContext.Camera.Position = Vector3.Backward * (diff.Length()/2f);
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)

@@ -75,7 +75,14 @@ namespace Forever.Voxel
                     for (int z = 0; z < ChunksPerDimension; z++)
                     {
                         Voxels[x][y][z].State = VoxelState.Active;
-                        Voxels[x][y][z].Material = new Material(Color.YellowGreen);
+
+                        // product color block
+                        var color = new Color(
+                            (float) x / (float) ChunksPerDimension,
+                            (float) y / (float) ChunksPerDimension,
+                            (float) z / (float) ChunksPerDimension
+                            );
+                        Voxels[x][y][z].Material = new Material(color);
                     }
                 }
             }
@@ -106,14 +113,15 @@ namespace Forever.Voxel
             var indexCount = 72;
             var indexBuffer = new IndexBuffer(device, typeof(int), indexCount, BufferUsage.WriteOnly);
 
-            var instanceVertexDeclaration = GenerateInstanceVertexDeclaration();
+            SetupInstanceVertexDeclaration();
             var instanceCount = this.Count;
-            var instanceBuffer = new VertexBuffer(device, instanceVertexDeclaration,
+            var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
-            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, instanceVertexDeclaration, Effect);
+            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, InstanceVertexDeclaration, Effect);
         }
-        private VertexDeclaration GenerateInstanceVertexDeclaration()
+        VertexDeclaration InstanceVertexDeclaration { get; set; }
+        private void SetupInstanceVertexDeclaration()
         {
             VertexElement[] instanceStreamElements = new VertexElement[2];
             int offset = 0;
@@ -123,11 +131,11 @@ namespace Forever.Voxel
             offset += sizeof(float) * 4;
 
             instanceStreamElements[1] =
-                    new VertexElement(offset, VertexElementFormat.Vector4,
+                    new VertexElement(offset, VertexElementFormat.Color,
                         VertexElementUsage.Color, 1);
-            offset += sizeof(float) * 4;
+            offset += sizeof(byte) * 4;
 
-            return new VertexDeclaration(instanceStreamElements);
+            InstanceVertexDeclaration = new VertexDeclaration(instanceStreamElements);
         }
 
         private void SetUpGeometry()
@@ -180,22 +188,24 @@ namespace Forever.Voxel
         {
             // TODO - make it so that you can only send the active blocks
             var instances = new List<Voxel.ViewState>();
-
             VisitCoords((x, y, z) =>
             {
+                //if (Random.Next(2) == 0) return;
                 var viewState = ExtractViewState(x, y, z);
                 instances.Add(viewState);
             });
 
             var instanceBufferData = instances.ToArray();
-            Instancing.InstanceBuffer.SetData(instanceBufferData);
             InstanceCount = instances.Count();
+            Instancing.InstanceBuffer.SetData(0, instanceBufferData, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
         }
+        Random Random = new Random();
 
         Voxel.ViewState ExtractViewState(Voxel voxel, int x, int y, int z)
         {
+            var color = voxel.Material != null ? voxel.Material.Color : Color.Red;
+           
             var c = ChunkVector(x, y, z);
-            Color color = voxel.Material != null ? voxel.Material.Color : Color.Red;
             var origin = Box.Min;
             float d = Unit/2f;
             var pos = origin + new Vector3(c.X + d, c.Y + d, c.Z + d);
@@ -250,8 +260,6 @@ namespace Forever.Voxel
         float rot = 0.0f;
         public void Draw(float duration, RenderContext renderContext)
         {
-            var instanceCount = this.Count; // TODO - make this track the updated set with state culling
-
             var world = Matrix.CreateRotationY(rot += 0.001f);
 
             var wvp = world
@@ -262,7 +270,7 @@ namespace Forever.Voxel
             effect.CurrentTechnique = effect.Techniques["Instancing"];
             effect.Parameters["WVP"].SetValue(wvp);
 
-            Instancing.Draw(duration, renderContext, instanceCount);
+            Instancing.Draw(duration, renderContext, InstanceCount);
 
             Renderer.Render(Box, renderContext.GraphicsDevice, world, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }

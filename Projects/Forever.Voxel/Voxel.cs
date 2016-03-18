@@ -10,9 +10,9 @@ namespace Forever.Voxel
     {
         public struct ViewState
         {
-            public Color Color;
             // Center of the voxel
             public Vector4 Position;
+            public Color Color;
         }
 
         public VoxelState State { get; set; }
