@@ -60,9 +60,6 @@ namespace Aquarium.Life.Bodies
             return list;
         }
 
-
-
-
         public virtual void Render(Body body, RenderContext renderContext)
         {
             var color = Color;

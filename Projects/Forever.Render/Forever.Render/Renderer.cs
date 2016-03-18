@@ -9,7 +9,6 @@ namespace Forever.Render
 {
   public class Renderer
   {
-
     public static void RenderModel(Model model, 
       Matrix world, RenderContext renderContext)
     {
@@ -85,8 +84,6 @@ namespace Forever.Render
 
     }
 
-
-
     #region Fields
 
     static VertexPositionColor[] verts = new VertexPositionColor[8];
@@ -148,6 +145,8 @@ namespace Forever.Render
         RenderUnitCubeTransform(renderContext.GraphicsDevice, unitCubeTransform, world, renderContext.Camera.View, renderContext.Camera.Projection, color, wireFrame, alpha);
     }
 
+    public static readonly int CubeVertices = 8;
+
     public static void RenderUnitCubeTransform(
         GraphicsDevice graphicsDevice,
         Matrix unitCubeTransform,
@@ -171,7 +170,7 @@ namespace Forever.Render
         Vector3[] corners = box.GetCorners();
 
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < CubeVertices; i++)
         {
             verts[i].Position = Vector3.Transform(corners[i], unitCubeTransform);
             verts[i].Color = color;
@@ -188,13 +187,11 @@ namespace Forever.Render
 
             if (wireFrame)
             {
-
-
                 graphicsDevice.DrawUserIndexedPrimitives(
                   PrimitiveType.LineList,
                    verts,
                     0,
-                    8,
+                    CubeVertices,
                     wireframeIndices,
                     0,
                     wireframeIndices.Length / 2);
@@ -206,7 +203,7 @@ namespace Forever.Render
                   PrimitiveType.TriangleList,
                    verts,
                     0,
-                    8,
+                    CubeVertices,
                     solidIndices,
                     0,
                     24);

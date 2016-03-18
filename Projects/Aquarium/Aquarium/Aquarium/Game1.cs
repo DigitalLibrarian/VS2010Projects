@@ -25,6 +25,7 @@ using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;
 using System.IO;
 
+
 namespace Aquarium
 {
     /// <summary>
@@ -49,8 +50,6 @@ namespace Aquarium
             ScreenManager = new ScreenManager(this);
 
         }
-
-       
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -82,15 +81,11 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            var startScreen = new SimulationScreen();
+            var startScreen = new VoxelScreen();
             ScreenManager.AddScreen(startScreen);
             Components.Add(ScreenManager);
 
         }
-
-
-
-
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -109,7 +104,6 @@ namespace Aquarium
             base.Update(gameTime);
         }
       
-
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -123,8 +117,6 @@ namespace Aquarium
 
             RenderContext.Set2DRenderStates(GraphicsDevice);
             Terminal.CheckDraw(true);
-
         }
-
     }
 }

@@ -34,40 +34,46 @@ namespace Aquarium.Life.Spec
             var organs = new Group<OrganSpec>(MinOrgans, MaxOrgans, OrganSpec.FromGenome);
             var nns = new Group<NeuralNetworkSpec>(MinNeuralNetworks, MaxNeuralNetworks, NeuralNetworkSpec.FromGenome);
 
+            var r = new Random();
+            var targetBodyParts = r.Next(MinBodyParts, MaxBodyParts);
+            var targetOrgans = r.Next(MinOrgans, MaxOrgans);
+            var targetNNs = r.Next(MinNeuralNetworks, MaxNeuralNetworks);
+            
             bool done = false;
             while (!done)
             {
                 var totalBodyParts = bodyParts.Index.Collection.Count;
                 var totalOrgans = organs.Index.Collection.Count;
                 var totalNNs = nns.Index.Collection.Count;
-
                 var parsers = new List<Action<IEnumerator<int>>>();
 
-                if (totalBodyParts < MinBodyParts || totalBodyParts < MaxBodyParts)
+                if (totalBodyParts < targetBodyParts)
                 {
                     parsers.Add((g) => bodyParts.Add((BodyPartSpec)BodyPartSpec.FromGenome(g)));
                 }
 
-                if (totalOrgans < MinOrgans || totalOrgans < MaxOrgans)
+                if (totalOrgans < targetOrgans)
                 {
                     parsers.Add((g) => organs.Add(OrganSpec.FromGenome(g)));
                 }
 
-                if(totalNNs < MinNeuralNetworks || totalNNs < MaxNeuralNetworks)
+                if(totalNNs < targetNNs)
                 {
                     parsers.Add((g) => nns.Add(NeuralNetworkSpec.FromGenome(g)));
                 }
 
-                if (!parsers.Any())
+                if (parsers.Any())
                 {
-                    break;
+                    genes.MoveNext();
+                    var parserIndex = genes.Current;
+                    var parser = Fuzzy.CircleIndex(parsers, parserIndex);
+
+                    parser(genes);
                 }
-
-                genes.MoveNext();
-                var parserIndex = genes.Current;
-                var parser = Fuzzy.CircleIndex(parsers, parserIndex);
-
-                parser(genes);
+                else
+                {
+                    done = true;
+                }
 
             }
 

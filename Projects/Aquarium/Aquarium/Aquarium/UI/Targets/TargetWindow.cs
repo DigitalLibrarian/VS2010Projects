@@ -73,8 +73,6 @@ namespace Aquarium.Ui.Targets
             }
         }
 
-
-
         public Ray GetMouseRay(Vector2 mousePosition)
         {
             var projection = RenderContext.Camera.Projection;
@@ -113,11 +111,7 @@ namespace Aquarium.Ui.Targets
             }
         }
 
-        public void Update(GameTime gameTime)
-        {
-          
-
-        }
+        public void Update(GameTime gameTime) { }
 
         private void LoadNewPopup(GameScreen screen)
         {

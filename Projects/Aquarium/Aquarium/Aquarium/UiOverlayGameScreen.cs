@@ -6,6 +6,7 @@ using Forever.Screens;
 using Aquarium.Ui;
 using Microsoft.Xna.Framework;
 using Forever.Render;
+using Forever.Render.Cameras;
 
 namespace Aquarium
 {
@@ -13,6 +14,21 @@ namespace Aquarium
     {
         protected UiOverlay Ui { get; set; }
         protected RenderContext RenderContext { get; set; }
+
+        public override void LoadContent()
+        {
+            base.LoadContent();
+
+            var gd = ScreenManager.GraphicsDevice;
+            RenderContext = new RenderContext(
+                    new EyeCamera(gd),
+                    gd
+                );
+            Ui = new UiOverlay(
+                ScreenManager,
+                RenderContext
+               );
+        }
         
         public override void HandleInput(InputState input)
         {
@@ -34,6 +50,5 @@ namespace Aquarium
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
-
     }
 }

@@ -17,7 +17,6 @@ namespace Aquarium
         public IRigidBody Body { get; private set; }
         public SteeringControls ControlForces { get; private set; }
 
-
         public ControlledCraft(IRigidBody body, SteeringControls controlForces)
         {
             ControlForces = controlForces;

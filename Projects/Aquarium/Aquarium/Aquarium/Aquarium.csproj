@@ -154,6 +154,7 @@
     <Compile Include="UI\Targets\TargetWindow.cs" />
     <Compile Include="UI\UiElement.cs" />
     <Compile Include="UI\UiGameScreen.cs" />
+    <Compile Include="VoxelScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
@@ -179,6 +180,10 @@
     <ProjectReference Include="..\..\..\Forever.SpacePartitions\Forever.SpacePartitions.csproj">
       <Project>{780CD23C-C486-4152-A13C-9BEDCF1AE569}</Project>
       <Name>Forever.SpacePartitions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Forever.Voxel\Forever.Voxel.csproj">
+      <Project>{39CE4ACB-4763-42F7-B43F-FEE4903A1EE0}</Project>
+      <Name>Forever.Voxel</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Aquarium.Life\Aquarium.Life.csproj">
       <Project>{34046263-6DCB-48B0-A5EE-3ABF21BAB7F1}</Project>

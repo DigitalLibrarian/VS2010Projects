@@ -39,16 +39,6 @@ namespace Aquarium
         {
             base.LoadContent();
 
-            var gd = ScreenManager.GraphicsDevice;
-            RenderContext = new RenderContext(
-                    new EyeCamera(gd),
-                    gd
-                );
-            Ui = new UiOverlay(
-                ScreenManager,
-                RenderContext
-               );
-
             Sim = new Simulation();
 
             User = CreateControlledCraft();

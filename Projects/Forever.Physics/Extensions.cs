@@ -56,6 +56,11 @@ namespace Forever.Physics
             return v;
         }
 
+        public static IEnumerable<int> NextIntegers(this Random me, int n)
+        {
+            return Enumerable.Range(0, n).Select(x => me.Next());
+        }
+
         public static Vector2 ToVector2(this Point p)
         {
             return new Vector2(p.X, p.Y);

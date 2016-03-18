@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Forever.Render;
-
+using Forever.Physics;
 using Aquarium.Life;
 using Aquarium.Ui;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,17 +18,11 @@ namespace Aquarium
 {
     class OrganismScreen : UiOverlayGameScreen
     {
-        int DefaultParts = 20;
-
-        int DefaultOrgans = 1;
-
-        int DefaultNN = 1;
-
-        int DefaultJunk = 0;
-
         Organism Organism { get; set; }
         Organism NextOrganism { get; set; }
         object _noLock = new object();
+
+        OrganismSpecParser SpecParser { get; set; }
 
         public void LoadOrganism(Organism organism)
         {
@@ -39,19 +33,13 @@ namespace Aquarium
         {
             base.LoadContent();
 
-            var gd = ScreenManager.GraphicsDevice;
-            var cam = new EyeCamera(gd);
-            cam.Position = Vector3.Backward * 200;
-            RenderContext = new RenderContext(
-                    cam,
-                    gd
-                );
-            Ui = new UiOverlay(
-                ScreenManager,
-                RenderContext
-               );
-
+            RenderContext.Camera.Position = Vector3.Backward * 200;
+            
             OrgWorld = Matrix.Identity;
+
+            SpecParser = new OrganismSpecParser();
+            SpecParser.MaxBodyParts = 100;
+            SpecParser.MinBodyParts = 75;
         }
 
         Organism RandomOrganism()
@@ -60,25 +48,9 @@ namespace Aquarium
             Organism o = null;
             while (o == null)
             {
-                /*
-                var genome = BodyGenome.Random(
-                    r,
-                    numParts: DefaultParts,
-                    numOrgans: DefaultOrgans,
-                    numNN: DefaultNN,
-                    sizeJunk: DefaultJunk
-                    );
-                */
-                
-                var n = 2000;
-                //var genome = new BodyGenome(Enumerable.Range(0, n).Select(x => new Gene<int> { Name = x, Value = -10000 + r.Next(10000) }).ToList()); ;
-                
-                //o = Organism.CreateFromGenome(genome);
+                var genome = new BodyGenome(r.NextIntegers(100));
 
-                BodyGenome genome = new BodyGenome(Enumerable.Range(0, 100).Select(x => r.Next()).ToList());
-
-                var specParser = new OrganismSpecParser();
-                o = Organism.CreateFromGenome(genome, specParser);
+                o = Organism.CreateFromGenome(genome, SpecParser);
 
                 if (o != null)
                 {

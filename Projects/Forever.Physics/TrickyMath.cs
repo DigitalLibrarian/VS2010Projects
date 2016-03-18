@@ -15,7 +15,6 @@ namespace Forever.Physics
     /// </summary>
     public  static class TrickyMath
     {
-
         public static Vector3 Project(Vector3 Source, Vector3 Target)
         {
             float dotProduct = 0.0f;
