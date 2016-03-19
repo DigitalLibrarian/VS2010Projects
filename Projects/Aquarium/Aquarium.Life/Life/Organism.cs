@@ -13,6 +13,8 @@ using Aquarium.Life.Phenotypes;
 using Aquarium.Life.Genomes;
 using Aquarium.Life.Spec;
 
+using Forever.Extensions;
+
 
 namespace Aquarium.Life
 {

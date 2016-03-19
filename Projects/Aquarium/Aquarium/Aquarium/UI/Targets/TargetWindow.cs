@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Forever.Physics;
 using Forever.Render;
 using Forever.Screens;
+using Forever.Extensions;
 
 using Aquarium.Agent;
 

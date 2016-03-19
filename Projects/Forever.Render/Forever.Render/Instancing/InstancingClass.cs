@@ -12,9 +12,8 @@ namespace Forever.Render.Instancing
     public class InstancingClass : IDisposable
     {
         public VertexBuffer GeometryBuffer { get; private set; }
-        public VertexBuffer InstanceBuffer { get; private set; }
+        public VertexBuffer InstanceBuffer { get; set; }
         public IndexBuffer IndexBuffer { get; private set; }
-        public VertexBufferBinding[] Bindings { get; private set; }
         public VertexDeclaration InstanceVertexDeclaration { get; private set; }
         public Effect Effect { get; private set; }
 
@@ -30,9 +29,6 @@ namespace Forever.Render.Instancing
             InstanceBuffer = instanceBuffer;
             IndexBuffer = indexBuffer;
 
-            Bindings = new VertexBufferBinding[2];
-            Bindings[0] = new VertexBufferBinding(GeometryBuffer);
-            Bindings[1] = new VertexBufferBinding(InstanceBuffer, 0, 1);
 
             InstanceVertexDeclaration = vertexDeclaration;
             Effect = effect;
@@ -41,8 +37,11 @@ namespace Forever.Render.Instancing
         public void Draw(float duration, RenderContext renderContext, int instanceCount)
         {
             var gd = renderContext.GraphicsDevice;
-            
-            gd.SetVertexBuffers(Bindings);
+
+            var bindings = new VertexBufferBinding[2];
+            bindings[0] = new VertexBufferBinding(GeometryBuffer);
+            bindings[1] = new VertexBufferBinding(InstanceBuffer, 0, 1);
+            gd.SetVertexBuffers(bindings);
             gd.Indices = IndexBuffer;
 
             Effect.CurrentTechnique.Passes[0].Apply();

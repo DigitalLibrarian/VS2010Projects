@@ -93,6 +93,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Forever.Extensions\Forever.Extensions.csproj">
+      <Project>{02CB5A4A-F65C-4E23-BA5E-8CE7CCF65318}</Project>
+      <Name>Forever.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Forever.Neural\Forever.Neural\Forever.Neural.csproj">
       <Project>{C5674BEB-FFF6-4FC8-A9BF-9B032520BD74}</Project>
       <Name>Forever.Neural</Name>

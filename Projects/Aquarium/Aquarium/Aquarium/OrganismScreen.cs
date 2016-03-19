@@ -13,6 +13,7 @@ using Forever.Render.Cameras;
 using Microsoft.Xna.Framework;
 using System.Threading.Tasks;
 using Aquarium.Life.Spec;
+using Forever.Extensions;
 
 namespace Aquarium
 {

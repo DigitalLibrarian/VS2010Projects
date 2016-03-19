@@ -10,6 +10,7 @@ using Aquarium.Life.Signals;
 using Microsoft.Xna.Framework;
 using Aquarium.Life.Phenotypes;
 using Aquarium.Life.Organs.OrganAbilities;
+using Forever.Extensions;
 
 namespace Aquarium.Life.Phenotypes
 {

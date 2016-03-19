@@ -22,5 +22,10 @@ namespace Forever.Voxel
         {
             return State == VoxelState.Active;
         }
+
+        public void Derez()
+        {
+            State = VoxelState.Inactive;
+        }
     }
 }

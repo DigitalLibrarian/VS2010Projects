@@ -18,6 +18,7 @@ using Aquarium.Life.Phenotypes;
 using Aquarium.Sim;
 using Aquarium.Ui.Targets;
 using Aquarium.Life.Spec;
+using Forever.Extensions;
 
 
 namespace Aquarium.Agent

@@ -12,6 +12,8 @@ namespace Forever.Voxel
 {
     public class Chunk
     {
+        
+
         private readonly int NumberOfDimensions = 3;
         private readonly float Unit = 1f;
 
@@ -19,19 +21,25 @@ namespace Forever.Voxel
         int ChunksPerDimension { get; set; }
 
         InstancingClass Instancing { get; set; }
+        public Vector3 Position { get; set; }
 
-        public int Count { get { return (int)Math.Pow(ChunksPerDimension, NumberOfDimensions); } }
+        public int Capacity { get { return (int)Math.Pow(ChunksPerDimension, NumberOfDimensions); } }
 
         public Chunk(int chunksPerDimension)
         {
             ChunksPerDimension = chunksPerDimension;
             CreateDefaultChunk();
+
+            World = Matrix.Identity;
+            Position = Vector3.Zero;
         }
 
-        public Chunk(Voxel[][][] voxels, int chunkSize)
+        public Chunk(Voxel[][][] voxels, int chunkSize, Vector3 position)
         {
             Voxels = voxels;
             ChunksPerDimension = chunkSize;
+            Position = position;
+            World = Matrix.CreateTranslation(Position);
         }
 
         bool InBound(int x, int y, int z)
@@ -45,6 +53,11 @@ namespace Forever.Voxel
         {
             if (!InBound(x, y, z)) return null;
             return Voxels[x][y][z];
+        }
+
+        public void Derez(int x, int y, int z)
+        {
+            Voxels[x][y][z].Derez();
         }
 
         #region Chunk Generation
@@ -82,6 +95,13 @@ namespace Forever.Voxel
                             (float) y / (float) ChunksPerDimension,
                             (float) z / (float) ChunksPerDimension
                             );
+                        /*
+                        color = new Color(
+                            (float) Random.NextDouble(),
+                            (float) Random.NextDouble(),
+                            (float) Random.NextDouble()
+                            );
+                         * */
                         Voxels[x][y][z].Material = new Material(color);
                     }
                 }
@@ -101,7 +121,7 @@ namespace Forever.Voxel
         {
             SetupInstancing(device);
             SetUpGeometry();
-            RebuildInstanceBuffer();
+            NeedRebuild = true;
         }
 
         private void SetupInstancing(GraphicsDevice device)
@@ -114,7 +134,7 @@ namespace Forever.Voxel
             var indexBuffer = new IndexBuffer(device, typeof(int), indexCount, BufferUsage.WriteOnly);
 
             SetupInstanceVertexDeclaration();
-            var instanceCount = this.Count;
+            var instanceCount = this.Capacity;
             var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
@@ -183,21 +203,28 @@ namespace Forever.Voxel
             Instancing.IndexBuffer.SetData(solidIndices);
         }
 
-        int InstanceCount { get; set; }
+        public int InstanceCount { get; private set; }
         private void RebuildInstanceBuffer()
         {
             // TODO - make it so that you can only send the active blocks
             var instances = new List<Voxel.ViewState>();
             VisitCoords((x, y, z) =>
             {
-                //if (Random.Next(2) == 0) return;
-                var viewState = ExtractViewState(x, y, z);
-                instances.Add(viewState);
+                var voxel = Get(x, y, z).Value;
+                if (voxel.ShouldRender())
+                {
+                    var viewState = ExtractViewState(voxel, x, y, z);
+                    instances.Add(viewState);
+                }
             });
 
             var instanceBufferData = instances.ToArray();
-            InstanceCount = instances.Count();
-            Instancing.InstanceBuffer.SetData(0, instanceBufferData, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
+            InstanceCount = instanceBufferData.Count();
+            if (InstanceCount > 0)
+            {
+                Instancing.InstanceBuffer.SetData(0, instanceBufferData, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
+            }
+            NeedRebuild = false;
         }
         Random Random = new Random();
 
@@ -205,27 +232,20 @@ namespace Forever.Voxel
         {
             var color = voxel.Material != null ? voxel.Material.Color : Color.Red;
            
-            var c = ChunkVector(x, y, z);
-            var origin = Box.Min;
-            float d = Unit/2f;
-            var pos = origin + new Vector3(c.X + d, c.Y + d, c.Z + d);
+            var c = ArrayVector(x, y, z);
+            var pos = ArrayToChunk(c) + BlockOffset();
             return new Voxel.ViewState
             {
                 Color = color,
-                Position = new Vector4(pos.X, pos.Y, pos.Z, 1)
+                Position = new Vector4(pos.X, pos.Y, pos.Z, 0)
             };
         }
-        Voxel.ViewState ExtractViewState(int x, int y, int z)
-        {
-            var voxel = Get(x, y, z);
-            return ExtractViewState(voxel.Value, x, y, z);
-        }
-
+      
         public BoundingBox Box
         {
             get
             {
-                var center = Vector3.Zero;
+                var center = Position;
                 var totalSideLength = ChunksPerDimension;
                 var halfSide = totalSideLength / 2f;
                 var min = center + new Vector3(-halfSide, -halfSide, -halfSide);
@@ -237,32 +257,99 @@ namespace Forever.Voxel
         #endregion
 
         #region Space Conversions
-        Vector3 ChunkVector(int x, int y, int z)
+        Vector3 ArrayVector(int x, int y, int z)
         {
             return new Vector3(x, y, z);
         }
         Vector3 ChunkToWorld(Vector3 chunkCoord)
         {
-            return chunkCoord;
+            return Vector3.Transform(chunkCoord, World);
         }
         Vector3 WorldToChunk(Vector3 worldCoord)
         {
-            return worldCoord;
+            return Vector3.Transform(worldCoord, Matrix.Invert(World));
+        }
+        Vector3 BlockOffset()
+        {
+            float d = Unit / 2f;
+            return new Vector3(d, d, d);
+        }
+        Vector3 ChunkToArray(Vector3 chunkCoord)
+        {
+            return (chunkCoord) - Box.Min;
+        }
+        Vector3 ArrayToChunk(Vector3 arrayCoord)
+        {
+            return Box.Min + new Vector3(arrayCoord.X, arrayCoord.Y, arrayCoord.Z);
         }
         #endregion
+
+        #region Queries
+        public bool DerezRay(Ray ray)
+        {
+            var chunkBox = Box;
+            float? test = ray.Intersects(chunkBox);
+            if (!test.HasValue) return false;
+
+            float penetration = test.Value;
+            var pointOfIntersection = ray.Position + (penetration * ray.Direction); 
+
+            // Getting this far means that the ray is pointing at our box
+
+            // rayPos is the camera position in array coordinates as vector3
+            var rayPos = WorldToChunk(pointOfIntersection);
+            rayPos = ChunkToArray(rayPos);
+            // rayDirect is a normalized vector indicating the direction the mouse "click" was from the 
+            // user's POV
+            var rayDirect = WorldToChunk(ray.Direction);
+
+            // testPos will be a vector "index" into the Voxels array, pointing at the 
+            // first voxel we would like to check.  We would like to project it onto the outside (or inside of the array);
+
+            var chunkRay = new Ray(rayPos, rayDirect);
+            Vector3 testPos = rayPos;
+
+            int x = (int)testPos.X;
+            int y = (int)testPos.Y;
+            int z = (int)testPos.Z;
+           
+            int maxTests = ChunksPerDimension;
+            int numTests = 0;
+            do
+            {
+                var voxel = Get(x, y, z);
+                if (voxel.HasValue && voxel.Value.ShouldRender())
+                {
+                    // TODO - this is nasty cheat
+                    Voxels[x][y][z].Derez();
+                    Invalidate();
+                    return true;
+                }
+
+                testPos += rayDirect;
+                x = (int)testPos.X;
+                y = (int)testPos.Y;
+                z = (int)testPos.Z;
+                numTests++;
+            } while (numTests < maxTests);
+
+            return false;
+        }
 
         public IEnumerable<Voxel> GetVoxels()
         {
             return Voxels.SelectMany<Voxel[][], Voxel[]>(x => x).SelectMany(x => x);
         }
-
+        #endregion
         
-        float rot = 0.0f;
         public void Draw(float duration, RenderContext renderContext)
         {
-            var world = Matrix.CreateRotationY(rot += 0.001f);
+            if (NeedRebuild)
+            {
+                RebuildInstanceBuffer();
+            }
 
-            var wvp = world
+            var wvp = World
                 * renderContext.Camera.View
                 * renderContext.Camera.Projection;
 
@@ -272,7 +359,25 @@ namespace Forever.Voxel
 
             Instancing.Draw(duration, renderContext, InstanceCount);
 
-            Renderer.Render(Box, renderContext.GraphicsDevice, world, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
+            Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }
+
+        Matrix World;
+        public void Update(float duration)
+        {
+            var rot = 0.001f;
+            rot = 0;
+            World = World * Matrix.CreateRotationY(rot);
+        }
+
+
+        #region Voxel State
+        bool NeedRebuild = false;
+        public void Invalidate()
+        {
+            NeedRebuild = true;
+        }
+        #endregion
+
     }
 }

@@ -6,6 +6,7 @@ using Aquarium.Life.Signals;
 using Aquarium.Life.Bodies;
 
 using Forever.Physics;
+using Forever.Extensions;
 
 namespace Aquarium.Life.Organs.OrganAbilities
 {

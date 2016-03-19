@@ -15,6 +15,7 @@ using Aquarium.Life.Population;
 using Aquarium.Ui.Targets;
 
 using Aquarium.Sim;
+using Forever.Extensions;
 
 namespace Aquarium.Agent
 {

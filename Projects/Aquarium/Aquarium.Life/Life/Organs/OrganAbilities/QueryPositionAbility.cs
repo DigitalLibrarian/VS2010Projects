@@ -7,6 +7,7 @@ using Aquarium.Life.Signals;
 using Microsoft.Xna.Framework;
 
 using Forever.Physics;
+using Forever.Extensions;
 
 namespace Aquarium.Life.Organs.OrganAbilities
 {

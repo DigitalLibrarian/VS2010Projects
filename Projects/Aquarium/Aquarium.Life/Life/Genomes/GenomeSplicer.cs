@@ -5,6 +5,7 @@ using System.Text;
 
 using Forever.Physics;
 
+using Forever.Extensions;
 namespace Aquarium.Life.Genomes
 {
     public class GenomeSplicer

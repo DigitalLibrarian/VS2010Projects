@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Forever.Render;
 using Forever.SpacePartitions;
 using Forever.Physics;
+using Forever.Extensions;
 
 using Aquarium.Agent;
 
