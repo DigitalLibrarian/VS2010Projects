@@ -59,6 +59,8 @@ namespace Aquarium
             base.LoadContent();
 
             User = CreateControlledCraft();
+            User.Body.AngularDamping = 0.67f;
+            User.Body.LinearDamping = 0.5f;
             
             Chunk = new Chunk(64);
             Chunk.LoadContent(ScreenManager.Game.Content);
@@ -94,11 +96,18 @@ namespace Aquarium
         {
             User.HandleInput(input);
 
+            if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                var mousePoint = input.CurrentMousePoint.ToVector2();
+                var ray = GetMouseRay(mousePoint);
+                Chunk.ToolRay(ray, ChunkRayTool.Derez);
+            }
+
             if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                Chunk.DerezRay(ray);
+                Chunk.ToolRay(ray, ChunkRayTool.Rez);
             }
 
             base.HandleInput(input);
@@ -121,7 +130,6 @@ namespace Aquarium
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            RenderContext.GraphicsDevice.Clear(Color.SkyBlue);
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
             Chunk.Draw(duration, RenderContext);
             

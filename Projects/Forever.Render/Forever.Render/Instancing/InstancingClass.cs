@@ -36,6 +36,7 @@ namespace Forever.Render.Instancing
 
         public void Draw(float duration, RenderContext renderContext, int instanceCount)
         {
+            if (instanceCount <= 0) return;
             var gd = renderContext.GraphicsDevice;
 
             var bindings = new VertexBufferBinding[2];

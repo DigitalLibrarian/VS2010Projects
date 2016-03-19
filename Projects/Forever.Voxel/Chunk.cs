@@ -10,10 +10,14 @@ using Microsoft.Xna.Framework;
 
 namespace Forever.Voxel
 {
+
+    public enum ChunkRayTool
+    {
+        Derez,
+        Rez
+    }
     public class Chunk
     {
-        
-
         private readonly int NumberOfDimensions = 3;
         private readonly float Unit = 1f;
 
@@ -53,6 +57,11 @@ namespace Forever.Voxel
         {
             if (!InBound(x, y, z)) return null;
             return Voxels[x][y][z];
+        }
+
+        Voxel? Get(Vector3 arrayVector)
+        {
+            return Get((int)arrayVector.X, (int)arrayVector.Y, (int)arrayVector.Z);
         }
 
         public void Derez(int x, int y, int z)
@@ -95,13 +104,14 @@ namespace Forever.Voxel
                             (float) y / (float) ChunksPerDimension,
                             (float) z / (float) ChunksPerDimension
                             );
-                        /*
+                        
                         color = new Color(
                             (float) Random.NextDouble(),
                             (float) Random.NextDouble(),
                             (float) Random.NextDouble()
                             );
-                         * */
+                        
+                         
                         Voxels[x][y][z].Material = new Material(color);
                     }
                 }
@@ -282,10 +292,18 @@ namespace Forever.Voxel
         {
             return Box.Min + new Vector3(arrayCoord.X, arrayCoord.Y, arrayCoord.Z);
         }
+
+        BoundingBox VoxelBoundingBoxChunkSpace(int x, int y, int z)
+        {
+            var chunkMin = Box.Min;
+            var voxelMin = chunkMin + new Vector3(x, y, z);
+            var voxelMax = voxelMin + new Vector3(1, 1, 1);
+            return new BoundingBox(voxelMin, voxelMax);
+        }
         #endregion
 
         #region Queries
-        public bool DerezRay(Ray ray)
+        public bool ToolRay(Ray ray, ChunkRayTool tool)
         {
             var chunkBox = Box;
             float? test = ray.Intersects(chunkBox);
@@ -318,22 +336,118 @@ namespace Forever.Voxel
             do
             {
                 var voxel = Get(x, y, z);
-                if (voxel.HasValue && voxel.Value.ShouldRender())
+                if (voxel.HasValue)
                 {
-                    // TODO - this is nasty cheat
-                    Voxels[x][y][z].Derez();
-                    Invalidate();
-                    return true;
+                    switch (tool)
+                    {
+                        case ChunkRayTool.Derez:
+                            if (voxel.Value.ShouldRender())
+                            {
+                                // TODO - this is nasty cheat
+                                Voxels[x][y][z].Derez();
+                                Invalidate();
+                                return true;
+                            }
+                            break;
+                        case ChunkRayTool.Rez:
+                            bool fire = false;
+
+                            if (!voxel.Value.ShouldRender())
+                            {
+                                var nextPos = testPos + rayDirect;
+                                var nextVoxel = Get(nextPos);
+                                if (nextVoxel.HasValue)
+                                {
+                                    if(nextVoxel.Value.ShouldRender())
+                                    {
+                                        // find the face normal and move in that direction in the array
+                                        // from nextPos 
+
+                                        int tX, tY, tZ;
+                                        Indices(nextPos, out tX, out tY, out tZ);
+
+                                        var faceNormal = ComputeClosestFaceNormal(testPos, rayDirect, tX, tY, tZ);
+                                        int dX, dY, dZ;
+                                        Indices(faceNormal, out dX, out dY, out dZ);
+
+                                        var targetVoxel = Get(tX + dX, tY + dY, tZ + dZ);
+                                        // TODO - Emulate 7 days block placement rules
+                                        if (false && targetVoxel.HasValue && !targetVoxel.Value.ShouldRender())
+                                        {
+                                            Voxels[tX + dX][tY + dY][tZ + dZ].Rez();
+                                            Invalidate();
+                                            return true;
+                                            //fire = true;
+                                        }
+                                        else
+                                        {
+                                            fire = true;
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    fire = true;
+                                }
+                            }
+
+                            if (fire)
+                            {
+                                Voxels[x][y][z].Rez();
+                                Invalidate();
+                                return true;
+                            }
+                            break;
+                    }
+
                 }
 
                 testPos += rayDirect;
-                x = (int)testPos.X;
-                y = (int)testPos.Y;
-                z = (int)testPos.Z;
+                Indices(testPos, out x, out y, out z);
                 numTests++;
             } while (numTests < maxTests);
 
             return false;
+        }
+
+        Vector3 ComputeClosestFaceNormal(Vector3 v, Vector3 delta, int x, int y, int z)
+        {
+            var normals = new Vector3[]
+            {
+                Vector3.UnitX,
+                Vector3.UnitY,
+                Vector3.UnitZ,
+                -Vector3.UnitX,
+                -Vector3.UnitY,
+                -Vector3.UnitZ,
+            };
+            
+            Vector3 winner = Vector3.UnitX;
+            var center = ArrayVector(x, y, z);
+            float closest = float.MaxValue;
+            foreach (var normal in normals)
+            {
+                //var dist = (delta - normal).LengthSquared();
+                var dist = ((center + normal) - v).LengthSquared();
+
+                if (dist < closest)
+                {
+                    closest = dist;
+                    winner = normal;
+                }
+            }
+
+            return winner;
+        }
+
+       
+
+        void Indices(Vector3 arrayVector, out int x, out int y, out int z)
+        {
+            x = (int)arrayVector.X;
+            y = (int)arrayVector.Y;
+            z = (int)arrayVector.Z;
         }
 
         public IEnumerable<Voxel> GetVoxels()
