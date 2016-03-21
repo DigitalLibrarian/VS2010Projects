@@ -10,47 +10,15 @@ using Aquarium.Ui;
 using Forever.Screens;
 using Forever.Extensions;
 using Microsoft.Xna.Framework.Graphics;
+using Aquarium.UI;
 
 namespace Aquarium
 {
-    class InstanceCountUiElement : IUiElement
-    {
-
-        RenderContext RenderContext { get; set; }
-        SpriteFont Font { get; set; }
-        Chunk Chunk { get; set; }
-        public InstanceCountUiElement(RenderContext rc, Chunk chunk, SpriteFont font)
-        {
-            RenderContext = rc;
-            Chunk = chunk;
-            Font = font;
-        }
-
-
-        public void HandleInput(InputState input)
-        {
-        }
-
-        public void Draw(GameTime gameTime, SpriteBatch batch)
-        {
-            var count = Chunk.InstanceCount;
-            var capacity = Chunk.Capacity;
-            var label = string.Format("Instances : {0} / {1}", count, capacity); 
-            var bounds = RenderContext.GraphicsDevice.Viewport.Bounds;
-            var position = new Vector2(bounds.Left, bounds.Top);
-            var offset = Vector2.Zero;
-            position += offset;
-            batch.DrawString(Font, label, position, Color.Yellow);
-        }
-
-        public void Update(GameTime gameTime)
-        {
-
-        }
-    }
     class VoxelScreen : UiOverlayGameScreen
     {
-        Chunk Chunk { get; set; }
+        const int ChunksPerDimension = 16;
+
+        ChunkSpace ChunkSpace { get; set; }
 
         ControlledCraft User { get; set; }
 
@@ -61,17 +29,38 @@ namespace Aquarium
             User = CreateControlledCraft();
             User.Body.AngularDamping = 0.67f;
             User.Body.LinearDamping = 0.5f;
-            
-            Chunk = new Chunk(64);
-            Chunk.LoadContent(ScreenManager.Game.Content);
-            Chunk.Initialize(RenderContext.GraphicsDevice);
+            User.Body.Mass = 50f;
 
-            var diff = Chunk.Box.Max - Chunk.Box.Min;
+            ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
+
+            int numChunks = 5;
+            for (int x = -numChunks; x < numChunks; x++)
+            {
+                for (int y = -numChunks; y < numChunks; y++)
+                {
+                    for (int z = -numChunks; z < numChunks; z++)
+                    {
+                        ChunkSpace.GetOrCreate(new Vector3(x * ChunksPerDimension, y * ChunksPerDimension, z * ChunksPerDimension));
+                    }
+                }
+            }
+
+            var Box = ChunkSpace.GetBoundingBox();
+            var diff = Box.Max - Box.Min;
             var startPos = Vector3.Backward * (diff.Length()/2f);
             RenderContext.Camera.Position = startPos;
             User.Body.Position = startPos;
 
+            //ChunkSpace.GetOrCreate(User.Body.Position);
             Ui.Elements.AddRange(CreateUILayout());
+        }
+
+        Chunk ChunkFactory(BoundingBox bb)
+        {
+            var chunk = new Chunk(bb, ChunksPerDimension);
+            chunk.LoadContent(ScreenManager.Game.Content);
+            chunk.Initialize(RenderContext.GraphicsDevice);
+            return chunk;
         }
 
         List<IUiElement> CreateUILayout()
@@ -85,7 +74,7 @@ namespace Aquarium
 
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
-            var counter = new InstanceCountUiElement(RenderContext, Chunk, spriteFont);
+            var counter = new InstanceCountUiElement(RenderContext, ChunkSpace, spriteFont);
 
             return new List<IUiElement>{
                 hud, odometer, counter
@@ -95,22 +84,46 @@ namespace Aquarium
         public override void HandleInput(InputState input)
         {
             User.HandleInput(input);
+            
 
             if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                Chunk.ToolRay(ray, ChunkRayTool.Derez);
+                ShootChunks(ray, ChunkRayTool.Derez);
             }
 
             if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                Chunk.ToolRay(ray, ChunkRayTool.Rez);
+                ShootChunks(ray, ChunkRayTool.Rez);
+            }
+
+            if (input.CurrentMouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                var pos = User.Body.Position;
+                ChunkSpace.GetOrCreate(pos);
             }
 
             base.HandleInput(input);
+        }
+
+        public void ShootChunks(Ray ray, ChunkRayTool tool)
+        {
+
+            var rayHits = ChunkSpace.Query((coord, chunk) =>
+            {
+                return chunk.Box.Intersects(ray).HasValue;
+            }).OrderBy(x => (x.Position - ray.Position).LengthSquared());
+
+            foreach (var chunk in rayHits)
+            {
+                if(chunk.ToolRay(ray, tool))
+                {
+                    return;
+                }
+            }
         }
 
         public Ray GetMouseRay(Vector2 mousePosition)
@@ -131,7 +144,13 @@ namespace Aquarium
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-            Chunk.Draw(duration, RenderContext);
+
+            foreach (var partition in ChunkSpace.Partitions)
+            {
+                var chunk = (partition as ChunkSpacePartition).Chunk;
+
+                chunk.Draw(duration, RenderContext);
+            }
             
             base.Draw(gameTime);
         }
@@ -140,11 +159,18 @@ namespace Aquarium
         {
             User.Update(gameTime);
 
+
             RenderContext.Camera.Position = User.Body.Position;
             RenderContext.Camera.Rotation = User.Body.Orientation;
 
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-            Chunk.Update(duration);
+
+            foreach (var partition in ChunkSpace.Partitions)
+            {
+                var chunk = (partition as ChunkSpacePartition).Chunk;
+                chunk.Update(duration);
+            }
+            
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
     }

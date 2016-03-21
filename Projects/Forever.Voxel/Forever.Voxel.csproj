@@ -92,6 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChunkSpace.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Voxel.cs" />
     <Compile Include="VoxelState.cs" />
@@ -102,6 +103,10 @@
     <ProjectReference Include="..\Forever.Render\Forever.Render\Forever.Render.csproj">
       <Project>{064DEE02-3F23-49B7-BB85-271DE9414A2A}</Project>
       <Name>Forever.Render</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Forever.SpacePartitions\Forever.SpacePartitions.csproj">
+      <Project>{780CD23C-C486-4152-A13C-9BEDCF1AE569}</Project>
+      <Name>Forever.SpacePartitions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

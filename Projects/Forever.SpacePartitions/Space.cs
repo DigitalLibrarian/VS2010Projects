@@ -84,6 +84,7 @@ namespace Forever.SpacePartitions
         {
             
                 Vector3 center = CoordToVector(coord, boxHalfSize);
+            /*
                 var min = new Vector3(
                     coord.X == 0 ? -boxHalfSize * 2 : center.X - boxHalfSize,
                     coord.Y == 0 ? -boxHalfSize * 2 : center.Y - boxHalfSize,
@@ -93,7 +94,17 @@ namespace Forever.SpacePartitions
                     coord.X == 0 ? +boxHalfSize * 2 : center.X + boxHalfSize,
                     coord.Y == 0 ? +boxHalfSize * 2 : center.Y + boxHalfSize,
                     coord.Z == 0 ? +boxHalfSize * 2 : center.Z + boxHalfSize);
+            */
 
+                var min = new Vector3(
+                    center.X - boxHalfSize,
+                    center.Y - boxHalfSize,
+                    center.Z - boxHalfSize);
+
+                var max = new Vector3(
+                    center.X + boxHalfSize,
+                    center.Y + boxHalfSize,
+                    center.Z + boxHalfSize);
                 return new BoundingBox(min, max);
             
         }
@@ -223,10 +234,14 @@ namespace Forever.SpacePartitions
             return list;
         }
 
-       
+        public IEnumerable<T> QueryLocalSpace(Vector3 pos, float radius)
+        {
+            return QueryLocalSpace(pos, radius, (c, o) => true);
+        }
 
         public IEnumerable<T> QueryLocalSpace(Vector3 pos, float radius, Func<SpaceCoord, T, bool> test)
         {
+            // TODO - yield return
             var list = new List<T>();
 
             int cellRadius = (int)(radius / GridSize);
