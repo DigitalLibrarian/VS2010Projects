@@ -94,11 +94,12 @@ namespace Aquarium
                 ShootChunks(ray, ChunkRayTool.Derez);
             }
 
-            if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
+                && input.LastMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                ShootChunks(ray, ChunkRayTool.Rez);
+                ShootChunks(ray, ChunkRayTool.Rez, false);
             }
 
             if (input.CurrentMouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
@@ -110,13 +111,22 @@ namespace Aquarium
             base.HandleInput(input);
         }
 
-        public void ShootChunks(Ray ray, ChunkRayTool tool)
+        public void ShootChunks(Ray ray, ChunkRayTool tool, bool closestFirst = true)
         {
 
             var rayHits = ChunkSpace.Query((coord, chunk) =>
             {
                 return chunk.Box.Intersects(ray).HasValue;
-            }).OrderBy(x => (x.Position - ray.Position).LengthSquared());
+            });
+
+            if (closestFirst)
+            {
+                rayHits = rayHits.OrderBy(x => (x.Position - ray.Position).LengthSquared());
+            }
+            else
+            {
+                rayHits.OrderByDescending(x => (x.Position - ray.Position).LengthSquared());
+            }
 
             foreach (var chunk in rayHits)
             {
