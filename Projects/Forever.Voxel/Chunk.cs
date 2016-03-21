@@ -123,14 +123,14 @@ namespace Forever.Voxel
                             (float) y / (float) ChunksPerDimension,
                             (float) z / (float) ChunksPerDimension
                             );
-                        
+                        /*
                         color = new Color(
                             (float) Random.NextDouble(),
                             (float) Random.NextDouble(),
                             (float) Random.NextDouble()
                             );
                         
-                         
+                         */
                         Voxels[x][y][z].Material = new Material(color);
                     }
                 }
@@ -280,20 +280,6 @@ namespace Forever.Voxel
             float x = v.X;
             float y = v.Y;
             float z = v.Z;
-            /*
-            float tip = 0.5f;
-            float high = 1f;
-
-            if(v.X < -tip) x = -high;
-            if (v.X > tip) x = high;
-
-            if (v.Y < -tip) y = -high;
-            if (v.Y > tip) y = high;
-
-            if (v.Z < -tip) z = -high;
-            if (v.Z > tip) z = high;
-            */
-
             return new Vector3(x, y, z) * 1.6f;
         }
 
@@ -522,7 +508,7 @@ namespace Forever.Voxel
 
             Instancing.Draw(duration, renderContext, InstanceCount);
 
-            Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
+            //Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }
 
         Matrix World;

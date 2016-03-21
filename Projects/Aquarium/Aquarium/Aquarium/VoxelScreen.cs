@@ -30,6 +30,7 @@ namespace Aquarium
             User.Body.AngularDamping = 0.67f;
             User.Body.LinearDamping = 0.5f;
             User.Body.Mass = 50f;
+            User.ControlForces.Mouse.ThrustIncrement = 0.0000001f;
 
             ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
 
