@@ -22,6 +22,10 @@ namespace Aquarium
 
         ControlledCraft User { get; set; }
 
+        LabelUiElement TotalInstancesLabel { get; set; }
+        LabelUiElement FrustumCullingLabel { get; set; }
+        LabelUiElement FPSLabel { get; set; }
+
         public override void LoadContent()
         {
             base.LoadContent();
@@ -75,10 +79,19 @@ namespace Aquarium
 
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
-            var counter = new InstanceCountUiElement(RenderContext, ChunkSpace, spriteFont);
+
+            Vector2 offset = Vector2.Zero;
+            Vector2 delta = Vector2.UnitY * 30;
+
+            TotalInstancesLabel = new LabelUiElement(RenderContext, spriteFont, offset);
+            FrustumCullingLabel = new LabelUiElement(RenderContext, spriteFont, offset += delta);
+            FPSLabel = new LabelUiElement(RenderContext, spriteFont, offset += delta);
 
             return new List<IUiElement>{
-                hud, odometer, counter
+                hud, odometer, 
+                TotalInstancesLabel, 
+                FrustumCullingLabel, 
+                FPSLabel
             };
         }
 
@@ -152,17 +165,39 @@ namespace Aquarium
             return new Ray(RenderContext.Camera.Position, Vector3.Normalize(far - near));
         }
 
+        int InViewCount = 0;
+        int OutOfViewCount = 0;
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
+            InViewCount = OutOfViewCount = 0;
+
+            int count = 0;
+            int capacity = 0;
 
             foreach (var partition in ChunkSpace.Partitions)
             {
                 var chunk = (partition as ChunkSpacePartition).Chunk;
 
-                chunk.Draw(duration, RenderContext);
+                count += chunk.InstanceCount;
+                capacity += chunk.Capacity;
+
+                if (RenderContext.InView(chunk.Box))
+                {
+                    chunk.Draw(duration, RenderContext);
+                    InViewCount++;
+                }
+                else
+                {
+                    OutOfViewCount++;
+                }
             }
-            
+
+            TotalInstancesLabel.Label = string.Format("Instances : {0} / {1}", count, capacity);
+            int totalChunks = InViewCount + OutOfViewCount;
+            FrustumCullingLabel.Label = string.Format("In View: {0} / {1}", InViewCount, totalChunks);
+            float fps = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
+            FPSLabel.Label = string.Format("FPS: {0}", (int)fps);
             base.Draw(gameTime);
         }
 

@@ -101,7 +101,6 @@ namespace Forever.Voxel
         void CreateDefaultChunk()
         {
             Voxels = new Voxel[ChunksPerDimension][][];
-
             for (int x = 0; x < ChunksPerDimension; x++)
             {
                 Voxels[x] = new Voxel[ChunksPerDimension][];

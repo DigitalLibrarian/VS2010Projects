@@ -59,5 +59,20 @@ namespace Forever.Render
         gd.SamplerStates[0] = SamplerState.LinearWrap;
     }
 
+
+
+    public BoundingFrustum GetViewFrustum()
+    {
+        return new BoundingFrustum(Camera.View * Camera.Projection);
+    }
+
+    public bool InView(BoundingBox box)
+    {
+        return GetViewFrustum().Intersects(box);
+    }
+    public bool InView(BoundingSphere sphere)
+    {
+        return GetViewFrustum().Intersects(sphere);
+    }
   }
 }
