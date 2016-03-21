@@ -381,7 +381,7 @@ namespace Forever.Voxel
                 Indices(testPos, out x, out y, out z);
             }
             */
-            int maxTests = ChunksPerDimension;
+            int maxTests = ChunksPerDimension+1;
             int numTests = 0;
             do
             {
