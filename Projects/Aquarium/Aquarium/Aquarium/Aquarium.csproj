@@ -139,7 +139,6 @@
     <Compile Include="UI\ActionBar\ActionBar.cs" />
     <Compile Include="UI\Button.cs" />
     <Compile Include="UI\ControlledCraftHUD.cs" />
-    <Compile Include="UI\InstanceCountUiElement.cs" />
     <Compile Include="UI\LabelUiElement.cs" />
     <Compile Include="UI\Odometer.cs" />
     <Compile Include="UI\RuminateGuiGameScreen.cs" />

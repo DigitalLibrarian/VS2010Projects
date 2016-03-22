@@ -390,36 +390,16 @@ namespace Forever.Voxel
 
                             if (!voxel.Value.ShouldRender())
                             {
+                                // can only place by butting up against another block
+                                // (or the edge of a chunk);
                                 var nextPos = testPos + rayDirect;
                                 var nextVoxel = Get(nextPos);
                                 if (nextVoxel.HasValue)
                                 {
                                     if(nextVoxel.Value.ShouldRender())
                                     {
-                                        // find the face normal and move in that direction in the array
-                                        // from nextPos 
-
-                                        int tX, tY, tZ;
-                                        Indices(nextPos, out tX, out tY, out tZ);
-
-                                        var faceNormal = ComputeClosestFaceNormal(testPos, rayDirect, tX, tY, tZ);
-                                        int dX, dY, dZ;
-                                        Indices(faceNormal, out dX, out dY, out dZ);
-
-                                        var targetVoxel = Get(tX + dX, tY + dY, tZ + dZ);
                                         // TODO - Emulate 7 days block placement rules
-                                        if (false && targetVoxel.HasValue && !targetVoxel.Value.ShouldRender())
-                                        {
-                                            Voxels[tX + dX][tY + dY][tZ + dZ].Rez();
-                                            Invalidate();
-                                            return true;
-                                            //fire = true;
-                                        }
-                                        else
-                                        {
-                                            fire = true;
-                                        }
-
+                                        fire = true;
                                     }
                                 }
                                 else
