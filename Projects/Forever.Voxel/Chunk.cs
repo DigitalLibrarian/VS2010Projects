@@ -388,7 +388,6 @@ namespace Forever.Voxel
                         case ChunkRayTool.Derez:
                             if (voxel.Value.ShouldRender())
                             {
-                                // TODO - this is nasty cheat
                                 Voxels[x][y][z].Derez();
                                 Invalidate();
                                 return true;

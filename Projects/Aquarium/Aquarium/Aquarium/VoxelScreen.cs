@@ -195,8 +195,14 @@ namespace Aquarium
 
         int InViewCount = 0;
         int OutOfViewCount = 0;
+
+        long DrawCounter = 0;
         public override void Draw(GameTime gameTime)
         {
+            if (DrawCounter++ % 1000 == 0)
+            {
+                GC.Collect();
+            }
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
             InViewCount = OutOfViewCount = 0;
 
@@ -209,11 +215,7 @@ namespace Aquarium
             var renderSet = ChunkSpace.Query((coord, chunk) =>
             {
                return sphere.Intersects(chunk.Box);
-               // return chunk.Box.Intersects(RenderContext.GetCameraRay()).HasValue;
             });
-
-
-            //var renderSet = ChunkSpace.Partitions.Select(x => (x as ChunkSpacePartition).Chunk);
 
             foreach(var chunk in renderSet)
             {
@@ -243,6 +245,7 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+           
             User.Update(gameTime);
 
             RenderContext.Camera.Position = User.Body.Position;
