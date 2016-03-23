@@ -308,7 +308,7 @@ namespace Forever.Voxel
             float x = v.X;
             float y = v.Y;
             float z = v.Z;
-            return new Vector3(x, y, z) * 1.6f;
+            return new Vector3(x, y, z);
         }
 
         public Vector3 ArrayVector(int x, int y, int z)
