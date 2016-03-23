@@ -199,7 +199,13 @@
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Effects\VoxelEffect.fx">
+      <Name>VoxelEffect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\TurboSquid\Low poly starfighter\wasphunter_texture.jpg">
       <Name>wasphunter_texture</Name>

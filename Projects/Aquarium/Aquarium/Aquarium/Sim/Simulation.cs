@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Forever.SpacePartitions;
+
 using Microsoft.Xna.Framework;
+
 using Forever.Render;
-using Aquarium.Sim.Agents;
+using Forever.SpacePartitions;
+using Forever.Physics;
+using Forever.Extensions;
+
+using Aquarium.Agent;
 
 namespace Aquarium.Sim
 {

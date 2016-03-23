@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Forever.Render;
 using Forever.Screens;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     //public class Button
     //{

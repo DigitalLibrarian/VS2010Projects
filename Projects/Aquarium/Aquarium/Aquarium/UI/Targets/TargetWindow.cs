@@ -2,23 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Microsoft.Xna.Framework;
-using Aquarium.Sim.Agents;
 using Microsoft.Xna.Framework.Graphics;
+
+using Forever.Physics;
 using Forever.Render;
 using Forever.Screens;
+using Forever.Extensions;
 
-namespace Aquarium.UI.Targets
+using Aquarium.Agent;
+
+namespace Aquarium.Ui.Targets
 {
-    public interface ITarget
-    {
-        string Label { get; }
-        IAgent Agent { get; }
-        BoundingBox TargetBB { get; }
-    }
-
-
-    class TargetWindow : IUIElement
+    class TargetWindow : IUiElement
     {
         RenderContext RenderContext { get; set; }
         Vector2 Offset { get; set; }
@@ -27,19 +24,19 @@ namespace Aquarium.UI.Targets
         public bool HasTarget { get { return Target != null; } }
 
         public SpriteFont SpriteFont { get; private set; }
-        Func<Ray, ITarget> Source { get; set; }
+        Func<Ray, ITarget> TargetFinder { get; set; }
 
         SimulationScreen Screen { get; set;}
 
         SpawnerEditor SpawnerEditor;
 
         public TargetWindow(
-            Func<Ray, ITarget> source, RenderContext renderContext, Vector2 offset, SpriteFont font, 
+            Func<Ray, ITarget> targetFinder, RenderContext renderContext, Vector2 offset, SpriteFont font, 
             SimulationScreen screen,
             SpawnerEditor spawnerAgentEditor
             )
         {
-            Source = source;
+            TargetFinder = targetFinder;
             RenderContext = renderContext;
             Offset = offset;
             SpriteFont = font;
@@ -60,7 +57,7 @@ namespace Aquarium.UI.Targets
                 //todo - limit to targeting area
                 var ray = GetMouseRay(mousePoint);
 
-                Target = Source(ray);
+                Target = TargetFinder(ray);
                 OnNewTarget();
             }
         }
@@ -76,8 +73,6 @@ namespace Aquarium.UI.Targets
                 }
             }
         }
-
-
 
         public Ray GetMouseRay(Vector2 mousePosition)
         {
@@ -117,11 +112,7 @@ namespace Aquarium.UI.Targets
             }
         }
 
-        public void Update(GameTime gameTime)
-        {
-          
-
-        }
+        public void Update(GameTime gameTime) { }
 
         private void LoadNewPopup(GameScreen screen)
         {

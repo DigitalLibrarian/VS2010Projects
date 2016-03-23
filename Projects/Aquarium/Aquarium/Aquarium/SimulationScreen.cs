@@ -1,39 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using System.Threading;
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Forever.Physics;
 using Forever.Render;
 using Forever.Screens;
-using Microsoft.Xna.Framework;
+
+using Aquarium.Agent;
 using Aquarium.Sim;
-using Aquarium.UI;
-using Aquarium.Sim.Agents;
-using System.Threading;
-using Forever.Physics;
-using Aquarium.UI.Steering;
-using Aquarium.UI.Targets;
-using Microsoft.Xna.Framework.Graphics;
+using Aquarium.Ui;
+using Aquarium.Ui.Steering;
+using Aquarium.Ui.Targets;
+using Forever.Render.Cameras;
 
 
 namespace Aquarium
 {
-    class SimulationScreen : UIGameScreen
+    class SimulationScreen : UiOverlayGameScreen
     {
         Simulation Sim { get; set; }
 
         ControlledCraft User { get; set; }
 
-
-        public SimulationScreen(RenderContext renderContext) : base(renderContext)
-        {
-        }
-
-
         public override void HandleInput(InputState input)
         {
-            base.HandleInput(input);
-
             User.HandleInput(input);
+            
+            base.HandleInput(input);
         }
 
         public override void LoadContent()
@@ -44,32 +43,16 @@ namespace Aquarium
 
             User = CreateControlledCraft();
 
-            UIElements.AddRange(CreateUILayout());
-            /*
-            SpawnerAgentThread = new Thread(new ThreadStart(UpdateSpawnerAgentsThreadFunc));
-            SpawnerAgentThread.IsBackground = true;
-            SpawnerAgentThread.Start();
-            */
+            Ui.Elements.AddRange(CreateUILayout());
+
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
         }
 
         Model SpawnerModel { get; set; }
 
-        //Thread SpawnerAgentThread;
-
         public override void UnloadContent()
         {
-            /*
-            SpawnerAgentThread.Abort();
-            System.Threading.SpinWait.SpinUntil(() =>
-            {
-                System.Threading.Thread.Sleep(100);
-                return !SpawnerAgentThread.IsAlive;
-            }
-                );
-            */
-
             foreach (var agent in spawners)
             {
                 agent.Thread.Abort();
@@ -93,7 +76,6 @@ namespace Aquarium
         public override void Draw(GameTime gameTime)
         {
             Sim.Draw(gameTime, RenderContext);
-
 
             base.Draw(gameTime);
         }
@@ -120,7 +102,7 @@ namespace Aquarium
             //TODO - need better box.  i'm sure i have somethign to extract from model
             var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 5f));
 
-            var agent = new SpawnerAgent(pos, principle as IOrganismAgentPool, SpawnerModel, box);
+            var agent = new SpawnerAgent(pos, principle as IOrganismAgentGroup, SpawnerModel, box);
             Sim.Space.Register(agent, pos);
             agent.Thread.Start();
 
@@ -128,55 +110,36 @@ namespace Aquarium
             spawners.Add(agent);
         }
 
-        List<SpawnerAgent> spawners = new List<SpawnerAgent>();
-        /*
-        private void UpdateSpawnerAgentsThreadFunc()
+        private void KillOrganism(TargetWindow targetWindow)
         {
-            while (true)
-            {
-                System.Threading.Thread.Sleep(500);
-                foreach (var spawner in spawners.ToList())
-                {
-                    spawner.BackgroundThreadFunc();
-                }
+            var target = targetWindow.Target;
 
+            if (target != null && target is OrganismAgent)
+            {
+                var orgAgent = target as OrganismAgent;
+
+                orgAgent.Organism.BeConsumed(orgAgent.Organism.ConsumableEnergy);
             }
         }
-        */
-        ControlledCraft CreateControlledCraft()
+
+        private void LifeForceEditor(TargetWindow targetWindow)
         {
-            var cam = this.RenderContext.Camera;
-            var PlayerRigidBody = new RigidBody(cam.Position);
-            PlayerRigidBody.Awake = true;
-            PlayerRigidBody.CanSleep = false;
-            PlayerRigidBody.LinearDamping = 0.9f;
-            PlayerRigidBody.AngularDamping = 0.7f;
-            PlayerRigidBody.Mass = 0.1f;
-            PlayerRigidBody.InertiaTensor = InertiaTensorFactory.Sphere(PlayerRigidBody.Mass, 1f);
-            var mouseSteering = new MouseSteering(RenderContext.GraphicsDevice, PlayerRigidBody, 0.000000001f);
-            var analogSteering = new AnalogSteering(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f, PlayerRigidBody);
-
-            var controlForces = new SteeringControls(mouseSteering, analogSteering);
-            controlForces.MaxAngular = 0.025f;
-            controlForces.MaxLinear = 0.1f;
-
-
-            return new ControlledCraft(PlayerRigidBody, controlForces);
+            var target = targetWindow.Target;
         }
 
-        List<IUIElement> CreateUILayout()
+        List<SpawnerAgent> spawners = new List<SpawnerAgent>();
+
+        List<IUiElement> CreateUILayout()
         {
             var spriteFont = ScreenManager.Font;
             var actionBarSlotHeight = 40;
-            var actionBar = new ActionBar(RenderContext, 50, actionBarSlotHeight, spriteFont);
-            actionBar.Slots[0].Action = new ActionBarAction(AddNewSpawnerAgent);
+            var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
             var hud = new ControlledCraftHUD(User, RenderContext);
             hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
 
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
-
-
+            
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
@@ -186,22 +149,13 @@ namespace Aquarium
                 this,
                 SpawnerEditor);
 
-            actionBar.Slots[1].Action = new ActionBarAction(() =>
-            {
-                var target = targetWindow.Target;
-
-                if (target != null && target is OrganismAgent)
-                {
-                    var orgAgent = target as OrganismAgent;
-
-                    orgAgent.Organism.BeConsumed(orgAgent.Organism.ConsumableEnergy);
-                }
-            });
-            actionBar.Slots[1].TotalCoolDown = 200;
+            horizontalActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
+            horizontalActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism(targetWindow));
+            horizontalActionBar.Slots[1].TotalCoolDown = 200;
             
-            return new List<IUIElement>
+            return new List<IUiElement>
             {
-                actionBar,
+                horizontalActionBar,
                 hud, 
                 odometer, 
                 targetWindow, 

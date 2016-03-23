@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace Aquarium.UI.Steering
+namespace Aquarium.Ui.Steering
 {
     public interface ISteering
     {

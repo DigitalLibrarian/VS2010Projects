@@ -19,8 +19,6 @@ using Aquarium.Life.Organs;
 using Aquarium.Life.Signals;
 using Aquarium.Life.Genomes;
 using Aquarium.Life.Phenotypes;
-using Aquarium.Life.Headers;
-using Aquarium.Life.Codons;
 using Aquarium.Life.Bodies;
 
 using Ruminate.GUI.Framework;
@@ -38,7 +36,6 @@ namespace Aquarium
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         SpriteFont spriteFont;
-        RenderContext RenderContext;
 
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
@@ -54,8 +51,6 @@ namespace Aquarium
 
         }
 
-       
-
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
         /// This is where it can query for any required services and load any non-graphic
@@ -69,6 +64,7 @@ namespace Aquarium
             base.Initialize();
 
             ScreenManager.Initialize();
+
         }
 
 
@@ -86,25 +82,11 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            SetupRenderContextAndCamera();
-
-
-            ScreenManager.AddScreen(new SimulationScreen(RenderContext));
+            var startScreen = new VoxelScreen();
+            ScreenManager.AddScreen(startScreen);
             Components.Add(ScreenManager);
-           
 
         }
-
-
-
-        protected void SetupRenderContextAndCamera()
-        {
-            RenderContext = new RenderContext(
-                new EyeCamera(GraphicsDevice),
-                GraphicsDevice
-                );
-        }
-
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -123,7 +105,6 @@ namespace Aquarium
             base.Update(gameTime);
         }
       
-
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -132,14 +113,11 @@ namespace Aquarium
         {
             GraphicsDevice.Clear(Color.Black);
 
-
-            RenderContext.Set3DRenderStates();
+            RenderContext.Set3DRenderStates(GraphicsDevice);
             base.Draw(gameTime);
 
-            RenderContext.Set2DRenderStates();
+            RenderContext.Set2DRenderStates(GraphicsDevice);
             Terminal.CheckDraw(true);
-
         }
-
     }
 }

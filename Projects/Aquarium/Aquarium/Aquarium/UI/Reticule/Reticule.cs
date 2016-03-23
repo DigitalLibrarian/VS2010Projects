@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Forever.Render;
 using Microsoft.Xna.Framework;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public class Reticule
     {

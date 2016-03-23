@@ -6,9 +6,10 @@ using System.Text;
 using Forever.Physics;
 using Microsoft.Xna.Framework;
 using Forever.Screens;
-using Aquarium.UI.Steering;
-using Aquarium.UI;
+using Aquarium.Ui.Steering;
+using Aquarium.Ui;
 
+using Forever.Extensions;
 
 namespace Aquarium
 {
@@ -16,7 +17,6 @@ namespace Aquarium
     {
         public IRigidBody Body { get; private set; }
         public SteeringControls ControlForces { get; private set; }
-
 
         public ControlledCraft(IRigidBody body, SteeringControls controlForces)
         {

@@ -9,9 +9,9 @@ using Forever.Screens;
 using Microsoft.Xna.Framework.Input;
 using Forever.Render;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
-    public class ActionBar : IUIElement
+    public class ActionBar : IUiElement
     {
         public int SlotWidth { get; private set; }
         public int SlotHeight { get; private set; }

@@ -10,7 +10,7 @@ namespace Forever.SpacePartitions
     {
         BoundingBox Box { get; set; }
         IEnumerable<T> Objects { get; }
-        void Assign(T obj);
-        void UnAssign(T obj);
+        bool Assign(T obj);
+        bool UnAssign(T obj);
     }
 }

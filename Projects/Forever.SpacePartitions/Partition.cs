@@ -18,14 +18,19 @@ namespace Forever.SpacePartitions
             Box = box;
         }
 
-        public virtual void Assign(T obj) 
+        public virtual bool Assign(T obj) 
         {
-            contents.Add(obj);
+            if (!contents.Contains(obj))
+            {
+                contents.Add(obj);
+                return true;
+            }
+            return false;
         }
 
-        public virtual void UnAssign(T obj)
+        public virtual bool UnAssign(T obj)
         {
-            contents.Remove(obj);
+            return contents.Remove(obj);
         }
     }
 }

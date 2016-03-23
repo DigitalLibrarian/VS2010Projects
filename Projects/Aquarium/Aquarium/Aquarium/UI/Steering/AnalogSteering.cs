@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Forever.Screens;
 using Forever.Physics;
 
-namespace Aquarium.UI.Steering
+namespace Aquarium.Ui.Steering
 {
     public enum AnalogKeys
     {

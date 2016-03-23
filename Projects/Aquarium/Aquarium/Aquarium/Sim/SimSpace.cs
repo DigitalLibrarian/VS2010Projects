@@ -1,10 +1,11 @@
 ﻿
-using Aquarium.Sim.Agents;
 using Forever.SpacePartitions;
 using Microsoft.Xna.Framework;
 using Forever.Render;
 using System.Collections.Generic;
 using Aquarium.Life.Environments;
+
+using Aquarium.Agent;
 
 namespace Aquarium.Sim
 {
@@ -24,23 +25,22 @@ namespace Aquarium.Sim
         }
     }
 
-    public class SimSpacePartition : Partition<IAgent>, IOrganismAgentPool, ISurroundings
+    public class SimSpacePartition : Partition<IAgent>, IOrganismAgentGroup, ISurroundings
     {
         SimSpace Space;
 
-        
         public Space<IFood> FoodSpace { get; private set; }
 
         public SimSpacePartition(SimSpace space, BoundingBox box, int gridSize) : base(box) 
         {
             Space = space;
             Organisms = new Dictionary<IAgent, OrganismAgent>();
-            RayPickers = new TypedSubList<IRayPickable>();
+            RayPickers = new TypeFilterList<IRayPickable>();
             FoodSpace = new Space<IFood>(gridSize);
         }
 
         Dictionary<IAgent, OrganismAgent> Organisms { get; set; }
-        TypedSubList<IRayPickable> RayPickers { get; set; }
+        TypeFilterList<IRayPickable> RayPickers { get; set; }
 
          public ICollection<OrganismAgent> OrganismAgents
          {
@@ -50,38 +50,46 @@ namespace Aquarium.Sim
              }
          }
 
-        public override void Assign(IAgent obj)
+        public override bool Assign(IAgent obj)
         {
-            base.Assign(obj);
-
-            if (obj is OrganismAgent)
+            if (base.Assign(obj))
             {
-                if (!Organisms.ContainsKey(obj))
+
+                if (obj is OrganismAgent)
                 {
-                    var orgAgent = (OrganismAgent)obj;
-                    Organisms.Add(obj, orgAgent);
+                    if (!Organisms.ContainsKey(obj))
+                    {
+                        var orgAgent = (OrganismAgent)obj;
+                        Organisms.Add(obj, orgAgent);
 
-                    FoodSpace.Register(orgAgent.Organism, orgAgent.Organism.Position);
-                    orgAgent.Organism.Surroundings = this;
+                        FoodSpace.Register(orgAgent.Organism, orgAgent.Organism.Position);
+                        orgAgent.Organism.Surroundings = this;
+                    }
                 }
-            }
 
-            RayPickers.CheckAdd(obj);
+                RayPickers.CheckAdd(obj);
+                return true;
+            }
+            return false;
 
         }
 
-        public override void UnAssign(IAgent obj)
+        public override bool UnAssign(IAgent obj)
         {
-            base.UnAssign(obj);
-            if (Organisms.ContainsKey(obj))
+            if (base.UnAssign(obj))
             {
-                Organisms.Remove(obj);
-                var orgAgent = ((OrganismAgent) obj);
-                FoodSpace.UnRegister(orgAgent.Organism);
-                orgAgent.Organism.Surroundings = null;
-            }
+                if (Organisms.ContainsKey(obj))
+                {
+                    Organisms.Remove(obj);
+                    var orgAgent = ((OrganismAgent)obj);
+                    FoodSpace.UnRegister(orgAgent.Organism);
+                    orgAgent.Organism.Surroundings = null;
+                }
 
-            RayPickers.CheckRemove(obj);
+                RayPickers.CheckRemove(obj);
+                return true;
+            }
+            return false;
         }
 
 
@@ -102,14 +110,14 @@ namespace Aquarium.Sim
             return FoodSpace.QueryLocalSpace(pos, radius, (c, f) => Vector3.Distance(f.Position, pos) < radius);
         }
 
-        public List<IAgent> FindAll(Ray ray)
+        public List<IRayPickable> FindAll(Ray ray)
         {
             //TODO
-            var list = RayPickers.FindAll(picker => picker.IsHit(ray));
-            return list.ConvertAll<IAgent>(new System.Converter<IRayPickable, IAgent>((target) => (IAgent) target));
+            return  RayPickers.FindAll(picker => picker.IsHit(ray));
+            //return list.ConvertAll<IAgent>(new System.Converter<IRayPickable, IAgent>((target) => (IAgent) target));
         }
     }
-    public class TypedSubList<T> : List<T>
+    public class TypeFilterList<T> : List<T>
     {
         public bool CheckAdd(object item)
         {

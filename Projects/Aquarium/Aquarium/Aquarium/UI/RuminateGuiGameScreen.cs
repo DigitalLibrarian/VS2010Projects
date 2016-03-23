@@ -6,7 +6,7 @@ using Forever.Screens;
 using Microsoft.Xna.Framework;
 using Ruminate.GUI.Framework;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     public abstract class RuminateGuiGameScreen : GameScreen
     {

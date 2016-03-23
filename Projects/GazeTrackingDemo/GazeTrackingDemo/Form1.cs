@@ -31,7 +31,7 @@ namespace GazeTrackingDemo
             
             detectedPen = new Pen(Color.Red);
             nadaPen = new Pen(Color.Red);
-            var files = from file in Directory.GetFiles(@"C:\Users\Valued Customer\Pictures\eye-pics\")
+            var files = from file in Directory.GetFiles(@"C:\Users\Valued Customer\Pictures\research-data\eye-pics")
                         where file.EndsWith(".jpg")
                         select file;
 

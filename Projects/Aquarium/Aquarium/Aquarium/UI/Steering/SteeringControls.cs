@@ -5,7 +5,7 @@ using System.Text;
 using Forever.Physics;
 using Forever.Screens;
 
-namespace Aquarium.UI.Steering
+namespace Aquarium.Ui.Steering
 {
     public class SteeringControls
     {
@@ -64,8 +64,6 @@ namespace Aquarium.UI.Steering
         {
             get { 
                 double r = Math.Abs(Mouse.CurrentThrust) / Mouse.MaxThruster;
-
-
                 r = Math.Min(1, r);
                 return (float)Math.Max(0, r);
             }

@@ -11,21 +11,14 @@ namespace Forever.Render.Cameras
     /// <summary>
     /// Basic Camera with iCamera handles.  You are the EYE
     /// </summary>
-    public class EyeCamera : ICamera
+    public class EyeCamera : BasicCamera
     {
         protected float FOV = MathHelper.Pi / 4;
         public float AspectRatio { get { return _graphics.Viewport.AspectRatio; } }
         protected float nearClip =  0.01f;
         protected float farClip = 10000.0f;
      
-     
-        protected Vector3 cameraPosition;
-
-        public Quaternion Rotation { get; set; }
-     
-        public Vector3 Position { get { return this.cameraPosition; }  set { this.cameraPosition = value; } }
-     
-        public Matrix Projection
+        public override Matrix Projection
         {
             get
             {
@@ -35,7 +28,7 @@ namespace Forever.Render.Cameras
 
         
      
-        public Matrix View
+        public override Matrix View
         {
             get
             {
@@ -50,8 +43,7 @@ namespace Forever.Render.Cameras
         public EyeCamera(GraphicsDevice graphicsDevice)
         {
             _graphics = graphicsDevice;
-           this.cameraPosition = Vector3.Zero;
-           this.Rotation = Quaternion.Identity;
+            Rotation = Quaternion.Identity;
         }
 
         /// <summary>
@@ -80,46 +72,8 @@ namespace Forever.Render.Cameras
         public void Translate(Vector3 distance)
         {
             Vector3 diff = Vector3.Transform(distance, this.Rotation);
-            this.cameraPosition += diff;
+            this.Position += diff;
 
         }
-
-
-        /// <summary>
-        /// Returns the vector representing the direction (in real world)
-        /// that is directly in front of the camera.
-        /// </summary>
-        public Vector3 Forward
-        {
-            get
-            {
-                return Vector3.Transform(Vector3.Forward, this.Rotation);
-            }
-        }
-        /// <summary>
-        /// Returns the vector representing the direction (in real world)
-        /// that is star board of the camera
-        /// </summary>
-        public Vector3 Right
-        {
-            get
-            {
-                return Vector3.Transform(Vector3.Right, this.Rotation);
-            }
-        }
-
-        /// <summary>
-        /// Returns the vector representing the direction (in real world)
-        /// that is up from the camera's perspective
-        /// </summary>
-        public Vector3 Up
-        {
-            get
-            {
-                return Vector3.Transform(Vector3.Up, this.Rotation);
-            }
-        }
-        
-        
     }
 }

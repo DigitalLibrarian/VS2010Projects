@@ -6,28 +6,30 @@ using Forever.Render;
 using Microsoft.Xna.Framework;
 using Forever.Screens;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
-    public abstract class UIGameScreen : GameScreen
+    public class UiOverlay
     {
-        public List<IUIElement> UIElements { get; private set; }
+        public List<IUiElement> Elements { get; private set; }
 
         public RenderContext RenderContext { get; private set; }
-        public UIGameScreen(RenderContext renderContext) : base()
+        public ScreenManager ScreenManager { get; private set; }
+        public UiOverlay(ScreenManager screenManager, RenderContext renderContext)
         {
+            ScreenManager = screenManager;
             RenderContext = renderContext;
-            UIElements = new List<IUIElement>();
+            Elements = new List<IUiElement>();
         }
 
-        private void Visit(Action<IUIElement> action)
+        private void Visit(Action<IUiElement> action)
         {
-            foreach (var ele in UIElements)
+            foreach (var ele in Elements)
             {
                 action(ele);
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        public void Draw(GameTime gameTime)
         {
             RenderContext.Set2DRenderStates();
             var batch = ScreenManager.SpriteBatch;
@@ -36,24 +38,19 @@ namespace Aquarium.UI
             batch.End();
             RenderContext.Set3DRenderStates();
 
-            base.Draw(gameTime);
         }
 
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        public void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             if (!otherScreenHasFocus)
             {
                 Visit((ele) => ele.Update(gameTime));
             }
-
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
 
-        public override void HandleInput(InputState input)
+        public void HandleInput(InputState input)
         {
-            base.HandleInput(input);
-
             Visit((ele) => ele.HandleInput(input));
         }
 

@@ -40,23 +40,12 @@ namespace Forever.Render
         /// </summary>
         //[EntityInspector("Camera.Right")]
         Vector3 Right { get; }
+
+        Vector3 Forward { get; }
         /// <summary>
         /// Real-world normalized vector representing forward from camera's perspective
         /// </summary>
         //[EntityInspector("Camera.Forward")]
-        Vector3 Forward { get; }
-        /// <summary>
-        /// Rotate on the local coordinate system standard axes by this yaw, pitch, and roll
-        /// </summary>
-        /// <param name="yaw">Rotation dun on the y axis</param>
-        /// <param name="pitch">Rotation dun on the x axis</param>
-        /// <param name="roll">Rotation dun on the z axis</param>
-        void Rotate(float yaw, float pitch, float roll);
-        /// <summary>
-        /// This is a Translation method for relative translations specified in the camera's local coordinate space
-        /// </summary>
-        /// <param name="distance">A vector representing the amount of translation to be done from the camera's perspective</param>
-        void Translate(Vector3 translation);
 
         //TODO - think about a LookAt(Vector3 pos, Vector3 up)
     }

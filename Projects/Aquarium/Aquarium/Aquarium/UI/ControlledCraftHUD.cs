@@ -7,10 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Forever.Render;
 
-namespace Aquarium.UI
+namespace Aquarium.Ui
 {
     
-    public class ControlledCraftHUD : IUIElement
+    public class ControlledCraftHUD : IUiElement
     {
 
         public Reticule EmptyCircleReticule { get; private set; }
