@@ -40,6 +40,8 @@ namespace Forever.Render
         /// </summary>
         //[EntityInspector("Camera.Right")]
         Vector3 Right { get; }
+
+        Vector3 Forward { get; }
         /// <summary>
         /// Real-world normalized vector representing forward from camera's perspective
         /// </summary>

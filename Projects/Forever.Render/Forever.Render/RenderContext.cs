@@ -74,5 +74,10 @@ namespace Forever.Render
     {
         return GetViewFrustum().Intersects(sphere);
     }
+
+    public Ray GetCameraRay()
+    {
+        return new Ray(Camera.Position, Camera.Forward);
+    }
   }
 }

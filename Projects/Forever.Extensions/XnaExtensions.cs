@@ -74,5 +74,11 @@ namespace Forever.Extensions
         {
             return new BoundingBox(Vector3.Min(me.Min, box.Min), Vector3.Max(me.Max, box.Max));
         }
+
+        public static Vector3 GetCenter(this BoundingBox bb)
+        {
+            var diff = (bb.Max - bb.Min);
+            return bb.Min + (diff * 0.5f);
+        }
     }
 }

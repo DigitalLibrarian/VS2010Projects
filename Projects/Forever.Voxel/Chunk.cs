@@ -21,7 +21,7 @@ namespace Forever.Voxel
         private readonly int NumberOfDimensions = 3;
         private readonly float Unit = 1f;
 
-        Voxel[][][] Voxels { get; set; }
+        public Voxel[][][] Voxels { get; set; }
         int ChunksPerDimension { get; set; }
 
         InstancingClass Instancing { get; set; }
@@ -33,7 +33,7 @@ namespace Forever.Voxel
         public Chunk(BoundingBox bb, int chunksPerDimension)
         {
             ChunksPerDimension = chunksPerDimension;
-            CreateDefaultChunk();
+            Allocate();
 
             Box = bb;
             var diff = (bb.Max - bb.Min);
@@ -48,7 +48,7 @@ namespace Forever.Voxel
         {
             VoxelScale = new Vector3(1f, 1f, 1f);
             ChunksPerDimension = chunksPerDimension;
-            CreateDefaultChunk();
+            Allocate();
 
             World = Matrix.Identity;
             Position = Vector3.Zero;
@@ -84,7 +84,7 @@ namespace Forever.Voxel
         }
 
         #region Chunk Generation
-        void VisitCoords(Action<int, int, int> visitor)
+        public void VisitCoords(Action<int, int, int> visitor)
         {
             for (int x = 0; x < ChunksPerDimension; x++)
             {
@@ -98,7 +98,7 @@ namespace Forever.Voxel
             }
         }
 
-        void CreateDefaultChunk()
+        void Allocate()
         {
             Voxels = new Voxel[ChunksPerDimension][][];
             for (int x = 0; x < ChunksPerDimension; x++)
@@ -107,31 +107,6 @@ namespace Forever.Voxel
                 for (int y = 0; y < ChunksPerDimension; y++)
                 {
                     Voxels[x][y] = new Voxel[ChunksPerDimension];
-                    for (int z = 0; z < ChunksPerDimension; z++)
-                    {
-                       // if (x == 0 || x == ChunksPerDimension - 1
-                       //     || y == 0 || y == ChunksPerDimension - 1
-                       //     || z == 0 || z == ChunksPerDimension - 1)
-                        {
-                            Voxels[x][y][z].State = VoxelState.Active;
-                        }
-
-                        // product color block
-                        var color = new Color(
-                            (float) x / (float) ChunksPerDimension,
-                            (float) y / (float) ChunksPerDimension,
-                            (float) z / (float) ChunksPerDimension
-                            );
-                        /*
-                        color = new Color(
-                            (float) Random.NextDouble(),
-                            (float) Random.NextDouble(),
-                            (float) Random.NextDouble()
-                            );
-                        
-                         */
-                        Voxels[x][y][z].Material = new Material(color);
-                    }
                 }
             }
         }
@@ -220,6 +195,7 @@ namespace Forever.Voxel
             };
             float unit =  (Unit / 2f);
             var box = new BoundingBox(new Vector3(-unit, -unit, -unit) * VoxelScale, new Vector3(unit, unit, unit) * VoxelScale);
+            // TODO - make a custom vertex class that is only a position
             var verts = box.GetCorners().Select(x => new VertexPositionColor
             {
                 Position = x,
@@ -232,20 +208,29 @@ namespace Forever.Voxel
         }
 
         public int InstanceCount { get; private set; }
-        private void RebuildInstanceBuffer()
+        public int TotalOcclusions { get; private set; }
+        private void RebuildInstanceBuffer(Ray cameraRay)
         {
-            // TODO - make it so that you can only send the active blocks
             var instances = new List<Voxel.ViewState>();
+            var occlusions = 0;
             VisitCoords((x, y, z) =>
             {
                 var voxel = Get(x, y, z).Value;
                 if (voxel.ShouldRender())
                 {
-                    var viewState = ExtractViewState(voxel, x, y, z);
-                    instances.Add(viewState);
+                    if (!IsOccluded(x, y, z, cameraRay))
+                    {
+                        var viewState = ExtractViewState(x, y, z);
+                        instances.Add(viewState);
+                    }
+                    else
+                    {
+                        occlusions++;
+                    }
                 }
             });
-
+            TotalOcclusions = occlusions;
+           
             var instanceBufferData = instances.ToArray();
             InstanceCount = instanceBufferData.Count();
             if (InstanceCount > 0)
@@ -255,16 +240,60 @@ namespace Forever.Voxel
             NeedRebuild = false;
         }
         Random Random = new Random();
+        Material DefaultMaterial = new Material(Color.AliceBlue);
 
-        Voxel.ViewState ExtractViewState(Voxel voxel, int x, int y, int z)
+        Vector3[] VoxelFaceNormals = {  
+                Vector3.UnitX,
+                Vector3.UnitY, 
+                Vector3.UnitZ,
+                -Vector3.UnitX,
+                -Vector3.UnitY, 
+                -Vector3.UnitZ
+                                     };
+
+        bool IsOccluded(int x, int y, int z, Ray cameraRay)
         {
-            var color = voxel.Material != null ? voxel.Material.Color : Color.Red;
-           
+            var camVector = cameraRay.Position + cameraRay.Direction;
+            foreach(var d in VoxelFaceNormals)
+            {
+                int dx, dy, dz;
+                Indices(d, out dx, out dy, out dz);
+                
+                int tx = x + dx, ty = y + dy, tz = z + dz;
+                // TODO - if it is a face voxel, then the direction 
+                // is one of the faces it participates in.  For such a voxel,
+                // it should only be drawn if one of the normals faces the camera
+                if (!InBound(tx, ty, tz))
+                {
+                    if (Vector3.Dot(d, camVector) > 0)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!Get(tx, ty, tz).Value.ShouldRender())
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        Voxel.ViewState ExtractViewState(int x, int y, int z)
+        {
+            if (Voxels[x][y][z].Material == null)
+            {
+                Voxels[x][y][z].Material = DefaultMaterial;
+            }
+
+            var material = Voxels[x][y][z].Material;
             var c = ArrayVector(x, y, z);
             var pos = ArrayToChunk(c) + BlockOffset();
             return new Voxel.ViewState
             {
-                Color = color,
+                Color = material.Color,
                 Position = new Vector4(pos.X, pos.Y, pos.Z, 0)
             };
         }
@@ -282,32 +311,32 @@ namespace Forever.Voxel
             return new Vector3(x, y, z) * 1.6f;
         }
 
-        Vector3 ArrayVector(int x, int y, int z)
+        public Vector3 ArrayVector(int x, int y, int z)
         {
             return new Vector3(x, y, z);
         }
-        Vector3 ArrayVector(Vector3 v)
+        public Vector3 ArrayVector(Vector3 v)
         {
             return new Vector3((int)v.X, (int)v.Y, (int)v.Z);
         }
-        Vector3 ChunkToWorld(Vector3 chunkCoord)
+        public Vector3 ChunkToWorld(Vector3 chunkCoord)
         {
             return Vector3.Transform(chunkCoord, World);
         }
-        Vector3 WorldToChunk(Vector3 worldCoord)
+        public Vector3 WorldToChunk(Vector3 worldCoord)
         {
             return Vector3.Transform(worldCoord, Matrix.Invert(World));
         }
-        Vector3 BlockOffset()
+        public Vector3 BlockOffset()
         {
             float d = Unit / 2f;
             return new Vector3(d, d, d) * VoxelScale;
         }
-        Vector3 ChunkToArray(Vector3 chunkCoord)
+        public Vector3 ChunkToArray(Vector3 chunkCoord)
         {
             return (chunkCoord / VoxelScale) - Box.Min;
         }
-        Vector3 ArrayToChunk(Vector3 arrayCoord)
+        public Vector3 ArrayToChunk(Vector3 arrayCoord)
         {
             return Box.Min + (new Vector3(arrayCoord.X, arrayCoord.Y, arrayCoord.Z) * VoxelScale);
         }
@@ -328,12 +357,10 @@ namespace Forever.Voxel
             var chunkBox = Box;
             float? test = ray.Intersects(chunkBox);
             if (!test.HasValue) return false;
-
-            float penetration = test.Value;
-            var pointOfIntersection = ray.Position + (penetration * ray.Direction); 
-
             // Getting this far means that the ray is pointing at our box
 
+            float penetration = test.Value;
+            var pointOfIntersection = ray.Position + (penetration * ray.Direction); // where did it touch you?
 
             // rayPos is the camera position in array coordinates as vector3
             var rayPos = WorldToChunk(pointOfIntersection + (Box.Min));
@@ -342,30 +369,12 @@ namespace Forever.Voxel
             // rayDirect is a normalized vector indicating the direction the mouse "click" was from the 
             // user's POV
             var rayDirect = WorldToChunk(ray.Direction);
-            //rayDirect = ChunkToArray(rayDirect);
-            //rayDirect.Normalize();
 
-            // we need to find the array vector of the Chunk.Position
-
-
-            // testPos will be a vector "index" into the Voxels array, pointing at the 
-            // first voxel we would like to check.  We would like to project it onto the outside (or inside of the array);
-
+            // testPos will be a vector "index" into the Voxels array
             Vector3 testPos = rayPos;
-
-
+            
             int x, y, z;
-            /*
-            Indices(testPos, out x, out y, out z);
-            float lastLength = float.MaxValue;
-            while (!InBound(x, y, z)
-                && testPos.LengthSquared() < lastLength)
-            {
-                lastLength = testPos.LengthSquared();
-                testPos += rayDirect;
-                Indices(testPos, out x, out y, out z);
-            }
-            */
+          
             int maxTests = ChunksPerDimension+1;
             int numTests = 0;
             do
@@ -426,6 +435,43 @@ namespace Forever.Voxel
             return false;
         }
 
+        public Vector3? ProjectToArray(Ray ray)
+        {
+            var chunkBox = Box;
+            float? test = ray.Intersects(chunkBox);
+            if (!test.HasValue) return null;
+
+            float penetration = test.Value;
+            var pointOfIntersection = ray.Position + (penetration * ray.Direction); // where did it touch you?
+            var rayPos = WorldToChunk(pointOfIntersection + (Box.Min));
+            rayPos = ChunkToArray(rayPos);
+            var rayDirect = WorldToChunk(ray.Direction);
+
+            return rayPos;
+        }
+
+        public void ArrayVisit(Vector3 start, Vector3 increment, Func<Vector3, bool> callback)
+        {
+            // testPos will be a vector "index" into the Voxels array
+            Vector3 testPos = start;
+
+            int maxTests = ChunksPerDimension + 1;
+            int numTests = 0;
+            int x, y, z;
+            do
+            {
+                Indices(testPos, out x, out y, out z);
+                if (InBound(x, y, z) && !callback(testPos))
+                {
+                    break;
+                }
+                
+                testPos += increment;
+                numTests++;
+            } while (numTests < maxTests);
+        }
+
+
         Vector3 ComputeClosestFaceNormal(Vector3 v, Vector3 delta, int x, int y, int z)
         {
             var normals = new Vector3[]
@@ -470,22 +516,22 @@ namespace Forever.Voxel
         }
         #endregion
         
-        public void Draw(float duration, RenderContext renderContext)
+        public void Draw(float duration, RenderContext rc)
         {
             if (NeedRebuild)
             {
-                RebuildInstanceBuffer();
+                RebuildInstanceBuffer(rc.GetCameraRay());
             }
 
             var wvp = World
-                * renderContext.Camera.View
-                * renderContext.Camera.Projection;
+                * rc.Camera.View
+                * rc.Camera.Projection;
 
             var effect = Instancing.Effect;
             effect.CurrentTechnique = effect.Techniques["Instancing"];
             effect.Parameters["WVP"].SetValue(wvp);
 
-            Instancing.Draw(duration, renderContext, InstanceCount);
+            Instancing.Draw(duration, rc, InstanceCount);
 
             //Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }
