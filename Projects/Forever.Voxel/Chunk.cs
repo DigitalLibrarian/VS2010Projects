@@ -474,20 +474,10 @@ namespace Forever.Voxel
 
         Vector3 ComputeClosestFaceNormal(Vector3 v, Vector3 delta, int x, int y, int z)
         {
-            var normals = new Vector3[]
-            {
-                Vector3.UnitX,
-                Vector3.UnitY,
-                Vector3.UnitZ,
-                -Vector3.UnitX,
-                -Vector3.UnitY,
-                -Vector3.UnitZ,
-            };
-            
             Vector3 winner = Vector3.UnitX;
             var center = ArrayVector(x, y, z);
             float closest = float.MaxValue;
-            foreach (var normal in normals)
+            foreach (var normal in VoxelFaceNormals)
             {
                 var dist = ((center + normal) - v).LengthSquared();
 
