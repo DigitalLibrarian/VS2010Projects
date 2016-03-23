@@ -195,14 +195,8 @@ namespace Aquarium
 
         int InViewCount = 0;
         int OutOfViewCount = 0;
-
-        long DrawCounter = 0;
         public override void Draw(GameTime gameTime)
         {
-            if (DrawCounter++ % 1000 == 0)
-            {
-                GC.Collect();
-            }
             var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
             InViewCount = OutOfViewCount = 0;
 

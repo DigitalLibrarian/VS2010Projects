@@ -16,7 +16,7 @@ namespace Forever.Voxel
         Derez,
         Rez
     }
-    public class Chunk
+    public class Chunk : IDisposable
     {
         private readonly int NumberOfDimensions = 3;
         private readonly float Unit = 1f;
@@ -42,6 +42,7 @@ namespace Forever.Voxel
             float hypotenuse = diff.LengthSquared();
 
             VoxelScale = diff / (float)chunksPerDimension;
+
         }
 
         public Chunk(int chunksPerDimension)
@@ -98,18 +99,7 @@ namespace Forever.Voxel
             }
         }
 
-        void Allocate()
-        {
-            Voxels = new Voxel[ChunksPerDimension][][];
-            for (int x = 0; x < ChunksPerDimension; x++)
-            {
-                Voxels[x] = new Voxel[ChunksPerDimension][];
-                for (int y = 0; y < ChunksPerDimension; y++)
-                {
-                    Voxels[x][y] = new Voxel[ChunksPerDimension];
-                }
-            }
-        }
+       
         #endregion
 
         #region Graphics Data
@@ -209,9 +199,10 @@ namespace Forever.Voxel
 
         public int InstanceCount { get; private set; }
         public int TotalOcclusions { get; private set; }
+        Voxel.ViewState[] InstanceBuffer { get; set; }
         private void RebuildInstanceBuffer(Ray cameraRay)
         {
-            var instances = new List<Voxel.ViewState>();
+            int next = 0;
             var occlusions = 0;
             VisitCoords((x, y, z) =>
             {
@@ -221,7 +212,8 @@ namespace Forever.Voxel
                     if (!IsOccluded(x, y, z, cameraRay))
                     {
                         var viewState = ExtractViewState(x, y, z);
-                        instances.Add(viewState);
+                        //instances.Add(viewState);
+                        InstanceBuffer[next++] = viewState;
                     }
                     else
                     {
@@ -231,11 +223,10 @@ namespace Forever.Voxel
             });
             TotalOcclusions = occlusions;
            
-            var instanceBufferData = instances.ToArray();
-            InstanceCount = instanceBufferData.Count();
+            InstanceCount = next;
             if (InstanceCount > 0)
             {
-                Instancing.InstanceBuffer.SetData(0, instanceBufferData, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
+                Instancing.InstanceBuffer.SetData(0, InstanceBuffer, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
             }
             NeedRebuild = false;
         }
@@ -539,5 +530,30 @@ namespace Forever.Voxel
         }
         #endregion
 
+        void Allocate()
+        {
+            Voxels = new Voxel[ChunksPerDimension][][];
+            for (int x = 0; x < ChunksPerDimension; x++)
+            {
+                Voxels[x] = new Voxel[ChunksPerDimension][];
+                for (int y = 0; y < ChunksPerDimension; y++)
+                {
+                    Voxels[x][y] = new Voxel[ChunksPerDimension];
+                }
+            }
+
+            InstanceBuffer = new Voxel.ViewState[ChunksPerDimension * ChunksPerDimension * ChunksPerDimension];
+        }
+
+        void Deallocate()
+        {
+            Voxels = null;
+            InstanceBuffer = null;
+        }
+        public void Dispose()
+        {
+            Deallocate();
+            // TODO - might wanna force GC.....probably not tho
+        }
     }
 }
