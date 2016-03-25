@@ -12,5 +12,6 @@ namespace Forever.SpacePartitions
         IEnumerable<T> Objects { get; }
         bool Assign(T obj);
         bool UnAssign(T obj);
+        void Clear();
     }
 }

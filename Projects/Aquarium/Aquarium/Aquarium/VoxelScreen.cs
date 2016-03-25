@@ -197,7 +197,7 @@ namespace Aquarium
         int OutOfViewCount = 0;
         public override void Draw(GameTime gameTime)
         {
-            var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
+            var duration = gameTime.GetDuration();
             InViewCount = OutOfViewCount = 0;
 
             int count = 0;
@@ -239,20 +239,12 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-           
             User.Update(gameTime);
 
             RenderContext.Camera.Position = User.Body.Position;
             RenderContext.Camera.Rotation = User.Body.Orientation;
 
-            var duration = (float)gameTime.ElapsedGameTime.Milliseconds;
-
-            foreach (var partition in ChunkSpace.Partitions)
-            {
-                var chunk = (partition as ChunkSpacePartition).Chunk;
-                chunk.Update(duration);
-            }
-
+            
             // fill out space around the player
             GenerateChunks(User.Body.Position, 5);
 

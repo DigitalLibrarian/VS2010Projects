@@ -131,6 +131,7 @@
     <Compile Include="Sim\IRayPickable.cs" />
     <Compile Include="Sim\ISimObject.cs" />
     <Compile Include="Sim\SimSpace.cs" />
+    <Compile Include="Sim\SimSpacePartition.cs" />
     <Compile Include="Sim\Simulation.cs" />
     <Compile Include="UiOverlayGameScreen.cs" />
     <Compile Include="UI\ActionBar\ActionBarAction.cs" />

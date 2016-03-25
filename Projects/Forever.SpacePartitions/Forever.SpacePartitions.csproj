@@ -92,6 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicSpace.cs" />
     <Compile Include="IPartition.cs" />
     <Compile Include="Partition.cs" />
     <Compile Include="PartitionRegion.cs" />

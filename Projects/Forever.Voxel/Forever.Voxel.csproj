@@ -92,6 +92,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ThrottledQueue.cs" />
+    <Compile Include="World\IWorldCellSpace.cs" />
+    <Compile Include="World\WorldCell.cs" />
+    <Compile Include="World\WorldCellSpace.cs" />
+    <Compile Include="World\WorldChunkManager.cs" />
     <Compile Include="ChunkSpace.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Voxel.cs" />
@@ -100,6 +105,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Forever.Extensions\Forever.Extensions.csproj">
+      <Project>{02CB5A4A-F65C-4E23-BA5E-8CE7CCF65318}</Project>
+      <Name>Forever.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Forever.Render\Forever.Render\Forever.Render.csproj">
       <Project>{064DEE02-3F23-49B7-BB85-271DE9414A2A}</Project>
       <Name>Forever.Render</Name>

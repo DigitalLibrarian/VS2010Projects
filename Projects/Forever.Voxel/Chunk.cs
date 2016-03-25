@@ -517,10 +517,6 @@ namespace Forever.Voxel
         }
 
         Matrix World;
-        public void Update(float duration)
-        {
-        }
-
 
         #region Voxel State
         bool NeedRebuild = false;
