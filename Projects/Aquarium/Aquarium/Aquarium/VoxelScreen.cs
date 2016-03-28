@@ -55,11 +55,10 @@ namespace Aquarium
             var chunk = new Chunk(bb, ChunksPerDimension);
             chunk.LoadContent(ScreenManager.Game.Content);
             chunk.Initialize(RenderContext.GraphicsDevice);
-            var offset = chunk.BlockOffset();
-            var pos = bb.Min;// +offset;
+            var pos = bb.Min;
             int maxHeight = 100 * ChunksPerDimension;
             float half = maxHeight / 2f;
-            var bottomLeft = new Vector3(-half, -half, -half);// +offset;
+            var bottomLeft = new Vector3(-half, -half, -half);;
             chunk.VisitCoords((x, y, z) => {
                 var world = chunk.ArrayToChunk(new Vector3(x, y, z));
                 float tX = (pos.X + (x * ChunksPerDimension));
@@ -75,8 +74,6 @@ namespace Aquarium
                         )
                     );
 
-                //if (n < 0) n = 0;
-                //var threshold = 0 + (n * ChunksPerDimension) + offset.Y;
                 var threshold = bottomLeft.Y + half + (n * half);
                 bool active = world.Y < threshold;
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
@@ -84,24 +81,17 @@ namespace Aquarium
 
             return chunk;
         }
-       
-        public float Noise(int x, int y)
+
+        Perlin Perlin = null;
+
+        void SetupPerlin()
         {
-            long n = x + (y * 57);
-            n = (long)((n << 13) ^ n);
-            return (float)(1.0 - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
-        }
-
-
-        public float SmoothNoise(float x, float y)
-        {
-
             NoiseQuality quality = NoiseQuality.Standard;
             int seed = 0;
             int octaves = 6;
             double frequency = 0.0005;
-            double lacunarity = 0.1;
-            double persistence = 0.05;
+            double lacunarity = 0.5;
+            double persistence = 1;
 
             var module = new Perlin();
             module.Frequency = frequency;
@@ -110,16 +100,15 @@ namespace Aquarium
             module.OctaveCount = octaves;
             module.Lacunarity = lacunarity;
             module.Persistence = persistence;
-            return (float) (module.GetValue((double)x, (double)y, 10));
-            //return (float) (module.GetValue((double)x, (double)y, 10) + 1) / 2.0f;
+            Perlin = module;
         }
 
-        public float SmoothNoiseOLD(float x, float y)
+        public float SmoothNoise(float x, float y)
         {
-            float corners = (Noise((int)(x - 1), (int)(y - 1)) + Noise((int)(x + 1), (int)(y - 1)) + Noise((int)(x - 1), (int)(y + 1)) + Noise((int)(x + 1), (int)(y + 1))) / 16;
-            float sides = (Noise((int)(x - 1), (int)y) + Noise((int)(x + 1), (int)y) + Noise((int)x, (int)(y - 1)) + Noise((int)x, (int)(y + 1))) / 8;
-            float center = Noise((int)x, (int)y) / 4;
-            return corners + sides + center;
+            if (Perlin == null) SetupPerlin();
+
+            return (float) (Perlin.GetValue((double)x, (double)y, 10));
+            //return (float) (module.GetValue((double)x, (double)y, 10) + 1) / 2.0f;
         }
 
         List<IUiElement> CreateUILayout()
@@ -233,7 +222,7 @@ namespace Aquarium
             int count = 0;
             int capacity = 0;
 
-            var numChunks = 20;
+            var numChunks = 100;
             var sphere = new BoundingSphere(RenderContext.Camera.Position, ChunksPerDimension * numChunks);
             
             var renderSet = ChunkSpace.Query((coord, chunk) =>
