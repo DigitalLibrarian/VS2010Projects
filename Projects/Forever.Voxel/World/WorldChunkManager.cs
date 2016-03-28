@@ -15,8 +15,6 @@ namespace Forever.Voxel.World
      *   - paging
      *   - throttles for rebuilding chunk instance buffers, disposing of chunks, getting new chunks from chunk source
      * */
-
-    
     public class WorldChunkManager
     {
         IWorldCellSource Source { get; set; }

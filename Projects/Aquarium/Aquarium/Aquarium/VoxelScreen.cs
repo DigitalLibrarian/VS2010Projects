@@ -12,6 +12,8 @@ using Forever.Extensions;
 using Microsoft.Xna.Framework.Graphics;
 using Aquarium.UI;
 
+using LibNoise;
+
 namespace Aquarium
 {
     class VoxelScreen : UiOverlayGameScreen
@@ -53,14 +55,18 @@ namespace Aquarium
             var chunk = new Chunk(bb, ChunksPerDimension);
             chunk.LoadContent(ScreenManager.Game.Content);
             chunk.Initialize(RenderContext.GraphicsDevice);
-            var pos = bb.Min + chunk.BlockOffset();
+            var offset = chunk.BlockOffset();
+            var pos = bb.Min;// +offset;
             int maxHeight = 100 * ChunksPerDimension;
+            float half = maxHeight / 2f;
+            var bottomLeft = new Vector3(-half, -half, -half);// +offset;
             chunk.VisitCoords((x, y, z) => {
+                var world = chunk.ArrayToChunk(new Vector3(x, y, z));
                 float tX = (pos.X + (x * ChunksPerDimension));
                 float tY = (pos.Y + (y * ChunksPerDimension));
                 float tZ = (pos.Z + (z * ChunksPerDimension));
                 
-                float n = SmoothNoise(tX, tZ);
+                float n = SmoothNoise(world.X, world.Z);
                 chunk.Voxels[x][y][z].Material = new Material(
                     new Color(
                        (float) x / ChunksPerDimension,
@@ -69,8 +75,10 @@ namespace Aquarium
                         )
                     );
 
-                var threshold = -maxHeight + (n * (maxHeight*2));
-                bool active = tY < threshold;
+                //if (n < 0) n = 0;
+                //var threshold = 0 + (n * ChunksPerDimension) + offset.Y;
+                var threshold = bottomLeft.Y + half + (n * half);
+                bool active = world.Y < threshold;
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
             });
 
@@ -84,7 +92,29 @@ namespace Aquarium
             return (float)(1.0 - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
         }
 
+
         public float SmoothNoise(float x, float y)
+        {
+
+            NoiseQuality quality = NoiseQuality.Standard;
+            int seed = 0;
+            int octaves = 6;
+            double frequency = 0.0005;
+            double lacunarity = 0.1;
+            double persistence = 0.05;
+
+            var module = new Perlin();
+            module.Frequency = frequency;
+            module.NoiseQuality = quality;
+            module.Seed = seed;
+            module.OctaveCount = octaves;
+            module.Lacunarity = lacunarity;
+            module.Persistence = persistence;
+            return (float) (module.GetValue((double)x, (double)y, 10));
+            //return (float) (module.GetValue((double)x, (double)y, 10) + 1) / 2.0f;
+        }
+
+        public float SmoothNoiseOLD(float x, float y)
         {
             float corners = (Noise((int)(x - 1), (int)(y - 1)) + Noise((int)(x + 1), (int)(y - 1)) + Noise((int)(x - 1), (int)(y + 1)) + Noise((int)(x + 1), (int)(y + 1))) / 16;
             float sides = (Noise((int)(x - 1), (int)y) + Noise((int)(x + 1), (int)y) + Noise((int)x, (int)(y - 1)) + Noise((int)x, (int)(y + 1))) / 8;
