@@ -22,17 +22,33 @@ namespace Forever.Voxel
         private readonly float Unit = 1f;
 
         public Voxel[][][] Voxels { get; set; }
-        int ChunksPerDimension { get; set; }
+        int VoxelsPerDimension { get; set; }
 
         InstancingClass Instancing { get; set; }
         public Vector3 Position { get; set; }
         public Vector3 VoxelScale { get; set; }
 
-        public int Capacity { get { return (int)Math.Pow(ChunksPerDimension, NumberOfDimensions); } }
+        public int Capacity { get { return (int)Math.Pow(VoxelsPerDimension, NumberOfDimensions); } }
 
-        public Chunk(BoundingBox bb, int chunksPerDimension)
+        public Chunk(Vector3 position, Vector3 voxelScale, int voxelsPerDimension)
         {
-            ChunksPerDimension = chunksPerDimension;
+            VoxelScale = voxelScale;
+            VoxelsPerDimension = voxelsPerDimension;
+            Allocate();
+
+            World = Matrix.Identity;
+            Position = position;
+
+            var totalSideLength = VoxelsPerDimension;
+            var halfSide = totalSideLength / 2f;
+            var min = Position + new Vector3(-halfSide, -halfSide, -halfSide);
+            var max = Position + new Vector3(halfSide, halfSide, halfSide);
+            Box = new BoundingBox(min, max);
+        }
+
+        public Chunk(BoundingBox bb, int voxelsPerDimension)
+        {
+            VoxelsPerDimension = voxelsPerDimension;
             Allocate();
 
             Box = bb;
@@ -41,20 +57,20 @@ namespace Forever.Voxel
             World = Matrix.Identity;
             float hypotenuse = diff.LengthSquared();
 
-            VoxelScale = diff / (float)chunksPerDimension;
+            VoxelScale = diff / (float)voxelsPerDimension;
 
         }
 
-        public Chunk(int chunksPerDimension)
+        public Chunk(int voxelsPerDimension)
         {
             VoxelScale = new Vector3(1f, 1f, 1f);
-            ChunksPerDimension = chunksPerDimension;
+            VoxelsPerDimension = voxelsPerDimension;
             Allocate();
 
             World = Matrix.Identity;
             Position = Vector3.Zero;
 
-            var totalSideLength = ChunksPerDimension;
+            var totalSideLength = VoxelsPerDimension;
             var halfSide = totalSideLength / 2f;
             var min = Position + new Vector3(-halfSide, -halfSide, -halfSide);
             var max = Position + new Vector3(halfSide, halfSide, halfSide);
@@ -63,9 +79,9 @@ namespace Forever.Voxel
 
         bool InBound(int x, int y, int z)
         {
-            return x >= 0 && x < ChunksPerDimension
-                && y >= 0 && y < ChunksPerDimension
-                && z >= 0 && z < ChunksPerDimension;
+            return x >= 0 && x < VoxelsPerDimension
+                && y >= 0 && y < VoxelsPerDimension
+                && z >= 0 && z < VoxelsPerDimension;
         }
 
         Voxel? Get(int x, int y, int z)
@@ -87,11 +103,11 @@ namespace Forever.Voxel
         #region Chunk Generation
         public void VisitCoords(Action<int, int, int> visitor)
         {
-            for (int x = 0; x < ChunksPerDimension; x++)
+            for (int x = 0; x < VoxelsPerDimension; x++)
             {
-                for (int y = 0; y < ChunksPerDimension; y++)
+                for (int y = 0; y < VoxelsPerDimension; y++)
                 {
-                    for (int z = 0; z < ChunksPerDimension; z++)
+                    for (int z = 0; z < VoxelsPerDimension; z++)
                     {
                         visitor(x, y, z);
                     }
@@ -112,6 +128,7 @@ namespace Forever.Voxel
 
         public void Initialize(GraphicsDevice device)
         {
+            Allocate();
             SetupInstancing(device);
             SetUpGeometry();
             NeedRebuild = true;
@@ -211,9 +228,7 @@ namespace Forever.Voxel
                 {
                     if (!IsOccluded(x, y, z, cameraRay))
                     {
-                        var viewState = ExtractViewState(x, y, z);
-                        //instances.Add(viewState);
-                        InstanceBuffer[next++] = viewState;
+                        InstanceBuffer[next++] = ExtractViewState(x, y, z);
                     }
                     else
                     {
@@ -366,7 +381,7 @@ namespace Forever.Voxel
             
             int x, y, z;
           
-            int maxTests = ChunksPerDimension+1;
+            int maxTests = VoxelsPerDimension+1;
             int numTests = 0;
             do
             {
@@ -445,7 +460,7 @@ namespace Forever.Voxel
             // testPos will be a vector "index" into the Voxels array
             Vector3 testPos = start;
 
-            int maxTests = ChunksPerDimension + 1;
+            int maxTests = VoxelsPerDimension + 1;
             int numTests = 0;
             int x, y, z;
             do
@@ -528,17 +543,21 @@ namespace Forever.Voxel
 
         void Allocate()
         {
-            Voxels = new Voxel[ChunksPerDimension][][];
-            for (int x = 0; x < ChunksPerDimension; x++)
+            if (Voxels != null)
             {
-                Voxels[x] = new Voxel[ChunksPerDimension][];
-                for (int y = 0; y < ChunksPerDimension; y++)
+                return;
+            }
+            Voxels = new Voxel[VoxelsPerDimension][][];
+            for (int x = 0; x < VoxelsPerDimension; x++)
+            {
+                Voxels[x] = new Voxel[VoxelsPerDimension][];
+                for (int y = 0; y < VoxelsPerDimension; y++)
                 {
-                    Voxels[x][y] = new Voxel[ChunksPerDimension];
+                    Voxels[x][y] = new Voxel[VoxelsPerDimension];
                 }
             }
 
-            InstanceBuffer = new Voxel.ViewState[ChunksPerDimension * ChunksPerDimension * ChunksPerDimension];
+            InstanceBuffer = new Voxel.ViewState[VoxelsPerDimension * VoxelsPerDimension * VoxelsPerDimension];
         }
 
         void Deallocate()

@@ -146,7 +146,7 @@ namespace Forever.SpacePartitions
 
         private SpaceCoord PositionToCoord(Vector3 pos, float boxHalfSize)
         {
-            
+            /*
             foreach (var c in TheMatrix.Keys)
             {
                 var p = TheMatrix[c];
@@ -155,7 +155,7 @@ namespace Forever.SpacePartitions
                     return c;
                 }
             }
-
+             * */
             return VectorToCoord(pos, boxHalfSize);
         }
 

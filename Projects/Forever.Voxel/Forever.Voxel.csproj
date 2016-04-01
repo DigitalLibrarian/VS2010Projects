@@ -96,7 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ThrottledQueue.cs" />
-    <Compile Include="World\IWorldCellSpace.cs" />
+    <Compile Include="World\Generation\NoiseWorldCellSource.cs" />
+    <Compile Include="World\IWorldCellSource.cs" />
     <Compile Include="World\WorldCell.cs" />
     <Compile Include="World\WorldCellSpace.cs" />
     <Compile Include="World\WorldChunkManager.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="VoxelState.cs" />
     <Compile Include="Chunk.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="World\WorldDimensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Forever.Extensions\Forever.Extensions.csproj">

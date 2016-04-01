@@ -8,12 +8,19 @@ namespace Forever.Voxel
     public class ThrottledQueue<T>
     {
         public int MaxPerPump { get; set; }
+        public int Capacity { get; set; }
         Queue<T> Queue { get; set; }
 
-        public ThrottledQueue(int maxPerPump)
+        public ThrottledQueue(int maxPerPump, int capacity)
         {
             MaxPerPump = maxPerPump;
-            Queue = new Queue<T>();
+            Capacity = capacity;
+            Queue = new Queue<T>(capacity);
+        }
+
+        public int Count()
+        {
+            return Queue.Count();
         }
 
         public void Enqueue(T t)
@@ -23,7 +30,12 @@ namespace Forever.Voxel
 
         public bool HasCapacity()
         {
-            return Queue.Count() < MaxPerPump;
+            return Queue.Count() < Capacity;
+        }
+
+        public bool Any()
+        {
+            return Queue.Any();
         }
 
         public bool Contains(T t)

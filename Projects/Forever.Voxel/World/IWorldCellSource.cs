@@ -9,6 +9,6 @@ namespace Forever.Voxel.World
 {
     public interface IWorldCellSource
     {
-        WorldCell Get(SpaceCoord box);
+        WorldCell Get(SpaceCoord coord);
     }
 }

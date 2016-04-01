@@ -13,14 +13,17 @@ using Microsoft.Xna.Framework.Graphics;
 using Aquarium.UI;
 
 using LibNoise;
+using Forever.Voxel.World;
+using Forever.Voxel.World.Generation;
 
 namespace Aquarium
 {
     class VoxelScreen : UiOverlayGameScreen
     {
-        const int ChunksPerDimension = 16;
+        const int VoxelsPerDimension = 16;
 
         ChunkSpace ChunkSpace { get; set; }
+        WorldChunkManager Manager { get; set; }
 
         ControlledCraft User { get; set; }
 
@@ -39,7 +42,13 @@ namespace Aquarium
             User.Body.Mass = 50f;
             User.ControlForces.Mouse.ThrustIncrement = 0.0000001f;
 
-            ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
+            var numChunks = 1000;
+            var dim = new WorldDimensions(VoxelsPerDimension);
+            SetupPerlin();
+            var source = new NoiseWorldCellSource(dim, Perlin);
+            Manager = new WorldChunkManager(RenderContext, dim, source, VoxelsPerDimension * numChunks, 10);
+
+            ChunkSpace = new ChunkSpace(VoxelsPerDimension, ChunkFactory);
 
             var Box = ChunkSpace.GetBoundingBox();
             var diff = Box.Max - Box.Min;
@@ -52,25 +61,25 @@ namespace Aquarium
 
         Chunk ChunkFactory(BoundingBox bb)
         {
-            var chunk = new Chunk(bb, ChunksPerDimension);
+            var chunk = new Chunk(bb, VoxelsPerDimension);
             chunk.LoadContent(ScreenManager.Game.Content);
             chunk.Initialize(RenderContext.GraphicsDevice);
             var pos = bb.Min;
-            int maxHeight = 100 * ChunksPerDimension;
+            int maxHeight = 100 * VoxelsPerDimension;
             float half = maxHeight / 2f;
             var bottomLeft = new Vector3(-half, -half, -half);;
             chunk.VisitCoords((x, y, z) => {
                 var world = chunk.ArrayToChunk(new Vector3(x, y, z));
-                float tX = (pos.X + (x * ChunksPerDimension));
-                float tY = (pos.Y + (y * ChunksPerDimension));
-                float tZ = (pos.Z + (z * ChunksPerDimension));
+                float tX = (pos.X + (x * VoxelsPerDimension));
+                float tY = (pos.Y + (y * VoxelsPerDimension));
+                float tZ = (pos.Z + (z * VoxelsPerDimension));
                 
                 float n = SmoothNoise(world.X, world.Z);
                 chunk.Voxels[x][y][z].Material = new Material(
                     new Color(
-                       (float) x / ChunksPerDimension,
-                       (float) y / ChunksPerDimension,
-                       (float) z / ChunksPerDimension
+                       (float) x / VoxelsPerDimension,
+                       (float) y / VoxelsPerDimension,
+                       (float) z / VoxelsPerDimension
                         )
                     );
 
@@ -106,9 +115,7 @@ namespace Aquarium
         public float SmoothNoise(float x, float y)
         {
             if (Perlin == null) SetupPerlin();
-
             return (float) (Perlin.GetValue((double)x, (double)y, 10));
-            //return (float) (module.GetValue((double)x, (double)y, 10) + 1) / 2.0f;
         }
 
         List<IUiElement> CreateUILayout()
@@ -146,29 +153,29 @@ namespace Aquarium
         public override void HandleInput(InputState input)
         {
             User.HandleInput(input);
-            
 
-            if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            if (false)
             {
-                var mousePoint = input.CurrentMousePoint.ToVector2();
-                var ray = GetMouseRay(mousePoint);
-                ShootChunks(ray, ChunkRayTool.Derez);
-            }
+                if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+                {
+                    var mousePoint = input.CurrentMousePoint.ToVector2();
+                    var ray = GetMouseRay(mousePoint);
+                    ShootChunks(ray, ChunkRayTool.Derez);
+                }
 
-            if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
-                && input.LastMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-            {
-                var mousePoint = input.CurrentMousePoint.ToVector2();
-                var ray = GetMouseRay(mousePoint);
-                ShootChunks(ray, ChunkRayTool.Rez, false);
-            }
+                if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
+                    && input.LastMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+                {
+                    var mousePoint = input.CurrentMousePoint.ToVector2();
+                    var ray = GetMouseRay(mousePoint);
+                    ShootChunks(ray, ChunkRayTool.Rez, false);
+                }
 
-            if (input.CurrentMouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-            {
-                var pos = User.Body.Position;
-                (ChunkSpace.GetOrCreate(pos) as ChunkSpacePartition).Chunk.Invalidate();
+                if (input.CurrentMouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+                {
+                    GenerateChunks(User.Body.Position, 5);
+                }
             }
-
             base.HandleInput(input);
         }
 
@@ -216,6 +223,9 @@ namespace Aquarium
         int OutOfViewCount = 0;
         public override void Draw(GameTime gameTime)
         {
+            Manager.Initialize(ScreenManager.Game.Content);
+            Manager.Draw(gameTime);
+            /*
             var duration = gameTime.GetDuration();
             InViewCount = OutOfViewCount = 0;
 
@@ -223,7 +233,7 @@ namespace Aquarium
             int capacity = 0;
 
             var numChunks = 100;
-            var sphere = new BoundingSphere(RenderContext.Camera.Position, ChunksPerDimension * numChunks);
+            var sphere = new BoundingSphere(RenderContext.Camera.Position, VoxelsPerDimension * numChunks);
             
             var renderSet = ChunkSpace.Query((coord, chunk) =>
             {
@@ -251,6 +261,16 @@ namespace Aquarium
             FrustumCullingLabel.Label = string.Format("Chunks In View: {0} / {1}", InViewCount, totalChunks);
             var part = ChunkSpace.GetOrCreate(User.Body.Position) as ChunkSpacePartition;
             OcclusionsLabel.Label = string.Format("Local Occlusions : {0}", part.Chunk.TotalOcclusions);
+
+            */
+
+            TotalInstancesLabel.Label = string.Format("SourceQueue : {0}", Manager.SourceQueue.Count());
+            /*
+            int totalChunks = InViewCount + OutOfViewCount;
+            FrustumCullingLabel.Label = string.Format("Chunks In View: {0} / {1}", InViewCount, totalChunks);
+            var part = ChunkSpace.GetOrCreate(User.Body.Position) as ChunkSpacePartition;
+            OcclusionsLabel.Label = string.Format("Local Occlusions : {0}", part.Chunk.TotalOcclusions);
+             * */
             float fps = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
             FPSLabel.Label = string.Format("FPS: {0}", (int)fps);
             base.Draw(gameTime);
@@ -262,10 +282,11 @@ namespace Aquarium
 
             RenderContext.Camera.Position = User.Body.Position;
             RenderContext.Camera.Rotation = User.Body.Orientation;
-
             
+            Manager.Update(gameTime);
+
             // fill out space around the player
-            GenerateChunks(User.Body.Position, 5);
+            //GenerateChunks(User.Body.Position, 2);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -278,7 +299,7 @@ namespace Aquarium
                 {
                     for (int z = -numChunks; z < numChunks; z++)
                     {
-                        ChunkSpace.GetOrCreate(pos + new Vector3(x, y, z) * ChunksPerDimension);
+                        ChunkSpace.GetOrCreate(pos + new Vector3(x, y, z) * VoxelsPerDimension);
                     }
                 }
             }
