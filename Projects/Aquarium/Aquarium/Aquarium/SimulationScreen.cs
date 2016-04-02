@@ -22,26 +22,15 @@ using Forever.Render.Cameras;
 
 namespace Aquarium
 {
-    class SimulationScreen : UiOverlayGameScreen
+    class SimulationScreen : FlyAroundGameScreen
     {
         Simulation Sim { get; set; }
-
-        ControlledCraft User { get; set; }
-
-        public override void HandleInput(InputState input)
-        {
-            User.HandleInput(input);
-            
-            base.HandleInput(input);
-        }
 
         public override void LoadContent()
         {
             base.LoadContent();
 
             Sim = new Simulation();
-
-            User = CreateControlledCraft();
 
             Ui.Elements.AddRange(CreateUILayout());
 
@@ -82,11 +71,6 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            User.Update(gameTime);
-
-            RenderContext.Camera.Position = User.Body.Position;
-            RenderContext.Camera.Rotation = User.Body.Orientation;
-
             Sim.Update(gameTime);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
@@ -135,16 +119,11 @@ namespace Aquarium
             var actionBarSlotHeight = 40;
             var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
-            var hud = new ControlledCraftHUD(User, RenderContext);
-            hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
-
-            var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
-            
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
                 RenderContext, 
-                new Vector2(0, 0), 
+                DebugLabelStrip(), 
                 ScreenManager.Font,
                 this,
                 SpawnerEditor);
@@ -156,8 +135,6 @@ namespace Aquarium
             return new List<IUiElement>
             {
                 horizontalActionBar,
-                hud, 
-                odometer, 
                 targetWindow, 
             };
         }

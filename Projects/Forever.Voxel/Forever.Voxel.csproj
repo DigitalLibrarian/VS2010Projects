@@ -95,6 +95,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SVO\NodePosition.cs" />
+    <Compile Include="SVO\OctTreeNode.cs" />
+    <Compile Include="SVO\RayCast.cs" />
+    <Compile Include="SVO\SparseVoxelOctTree.cs" />
     <Compile Include="ThrottledQueue.cs" />
     <Compile Include="World\IWorldCellSpace.cs" />
     <Compile Include="World\WorldCell.cs" />

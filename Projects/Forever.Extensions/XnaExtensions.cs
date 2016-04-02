@@ -59,6 +59,16 @@ namespace Forever.Extensions
             v *= 2f;
             return v;
         }
+        public static Vector3 NextVector(this Random me, BoundingBox b)
+        {
+            return new Vector3(me.Next(b.Min.X, b.Max.X), me.Next(b.Min.Y, b.Max.Y), me.Next(b.Min.Z, b.Max.Z));
+        }
+
+        public static float Next(this Random me, float min, float max)
+        {
+            var d = max - min;
+            return min + (float)me.NextDouble() * d;
+        }
 
         public static IEnumerable<int> NextIntegers(this Random me, int n)
         {

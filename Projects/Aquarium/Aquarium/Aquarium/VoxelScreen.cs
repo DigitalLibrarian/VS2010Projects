@@ -16,36 +16,28 @@ using LibNoise;
 
 namespace Aquarium
 {
-    class VoxelScreen : UiOverlayGameScreen
+    class VoxelScreen : FlyAroundGameScreen
     {
         const int ChunksPerDimension = 16;
 
         ChunkSpace ChunkSpace { get; set; }
 
-        ControlledCraft User { get; set; }
-
         LabelUiElement TotalInstancesLabel { get; set; }
         LabelUiElement FrustumCullingLabel { get; set; }
         LabelUiElement OcclusionsLabel { get; set; }
-        LabelUiElement FPSLabel { get; set; }
 
         public override void LoadContent()
         {
             base.LoadContent();
 
-            User = CreateControlledCraft();
-            User.Body.AngularDamping = 0.67f;
-            User.Body.LinearDamping = 0.5f;
-            User.Body.Mass = 50f;
-            User.ControlForces.Mouse.ThrustIncrement = 0.0000001f;
-
             ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
 
-            var Box = ChunkSpace.GetBoundingBox();
-            var diff = Box.Max - Box.Min;
+            var box = ChunkSpace.GetBoundingBox();
+            var diff = box.Max - box.Min;
             var startPos = Vector3.Backward * (diff.Length()/2f);
             RenderContext.Camera.Position = startPos;
             User.Body.Position = startPos;
+            User.Body.Mass = 50f;
 
             Ui.Elements.AddRange(CreateUILayout());
         }
@@ -108,7 +100,6 @@ namespace Aquarium
             if (Perlin == null) SetupPerlin();
 
             return (float) (Perlin.GetValue((double)x, (double)y, 10));
-            //return (float) (module.GetValue((double)x, (double)y, 10) + 1) / 2.0f;
         }
 
         List<IUiElement> CreateUILayout()
@@ -117,37 +108,20 @@ namespace Aquarium
             var actionBarSlotHeight = 40;
             var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
-            //horizontalActionBar.Slots[0].Action = new ActionBarAction(() => SomeFunc);
-
-            var hud = new ControlledCraftHUD(User, RenderContext);
-            hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
-
-            var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
-            
-            Vector2 offset = Vector2.Zero;
-            Vector2 delta = Vector2.UnitY * 30;
-
-            TotalInstancesLabel = new LabelUiElement(RenderContext, spriteFont, offset);
-            FrustumCullingLabel = new LabelUiElement(RenderContext, spriteFont, offset += delta);
-            OcclusionsLabel = new LabelUiElement(RenderContext, spriteFont, offset += delta);
-            FPSLabel = new LabelUiElement(RenderContext, spriteFont, offset += delta);
+            TotalInstancesLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
+            FrustumCullingLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
+            OcclusionsLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
 
             return new List<IUiElement>{
                 horizontalActionBar,
-                hud, 
-                odometer, 
                 TotalInstancesLabel, 
                 FrustumCullingLabel, 
-                OcclusionsLabel,
-                FPSLabel
+                OcclusionsLabel
             };
         }
 
         public override void HandleInput(InputState input)
         {
-            User.HandleInput(input);
-            
-
             if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
@@ -251,19 +225,11 @@ namespace Aquarium
             FrustumCullingLabel.Label = string.Format("Chunks In View: {0} / {1}", InViewCount, totalChunks);
             var part = ChunkSpace.GetOrCreate(User.Body.Position) as ChunkSpacePartition;
             OcclusionsLabel.Label = string.Format("Local Occlusions : {0}", part.Chunk.TotalOcclusions);
-            float fps = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
-            FPSLabel.Label = string.Format("FPS: {0}", (int)fps);
             base.Draw(gameTime);
         }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
-        {
-            User.Update(gameTime);
-
-            RenderContext.Camera.Position = User.Body.Position;
-            RenderContext.Camera.Rotation = User.Body.Orientation;
-
-            
+        {            
             // fill out space around the player
             GenerateChunks(User.Body.Position, 5);
 
