@@ -24,6 +24,7 @@ using Aquarium.Life.Bodies;
 using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;
 using System.IO;
+using System.Windows.Forms;
 
 
 namespace Aquarium
@@ -40,8 +41,6 @@ namespace Aquarium
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
 
-        Gui Gui { get; set; }
-        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -60,7 +59,12 @@ namespace Aquarium
         protected override void Initialize()
         {
             this.Window.AllowUserResizing = true;
+            this.Window.ClientSizeChanged += new EventHandler<EventArgs>(Window_ClientSizeChanged);
             this.IsMouseVisible = true;
+
+            var form = (Form)Form.FromHandle(Window.Handle);
+            form.WindowState = FormWindowState.Maximized;
+
             base.Initialize();
 
             ScreenManager.Initialize();
@@ -82,12 +86,12 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            ResetScreenManager();
+            Reset();
 
             Components.Add(ScreenManager);
         }
 
-        void ResetScreenManager()
+        void Reset()
         {
             var index = new List<GameScreen>
             {
@@ -109,15 +113,14 @@ namespace Aquarium
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == Microsoft.Xna.Framework.Input.ButtonState.Pressed
+                 || Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
                 this.Exit();
 
-            Terminal.CheckOpen(Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
+            Terminal.CheckOpen(Microsoft.Xna.Framework.Input.Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 
             base.Update(gameTime);
         }
-        int updateCount = 0;
       
         /// <summary>
         /// This is called when the game should draw itself.
@@ -132,6 +135,11 @@ namespace Aquarium
 
             RenderContext.Set2DRenderStates(GraphicsDevice);
             Terminal.CheckDraw(true);
+        }
+
+        void Window_ClientSizeChanged(object sender, EventArgs e)
+        {
+            // Make changes to handle the new window size.            
         }
     }
 }

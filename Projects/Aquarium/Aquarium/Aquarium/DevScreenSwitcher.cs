@@ -39,8 +39,11 @@ namespace Aquarium
                     screen.ExitScreen();
                 }
             }
+            else
+            {
+                GiveControl(Index[name]);
+            }
 
-            GiveControl(Index[name]);
         }
 
         IEnumerable<GameScreen> Others()
