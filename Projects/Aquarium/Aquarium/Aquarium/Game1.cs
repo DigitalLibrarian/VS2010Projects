@@ -82,10 +82,23 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            var startScreen = new VoxelScreen();
-            ScreenManager.AddScreen(startScreen);
-            Components.Add(ScreenManager);
+            ResetScreenManager();
 
+            Components.Add(ScreenManager);
+        }
+
+        void ResetScreenManager()
+        {
+            var index = new List<GameScreen>
+            {
+                new SparseVoxelOctTreeScreen(),
+                new VoxelScreen(),
+                new OrganismScreen(),
+                new SimulationScreen()
+            }.ToDictionary(x => x.GetType().ToString());
+
+            var startScreen = new DevScreenSwitcher("Debugging Screen Switcher", index);
+            ScreenManager.AddScreen(startScreen);
         }
 
         /// <summary>
@@ -104,6 +117,7 @@ namespace Aquarium
 
             base.Update(gameTime);
         }
+        int updateCount = 0;
       
         /// <summary>
         /// This is called when the game should draw itself.
