@@ -59,7 +59,6 @@ namespace Aquarium
         protected override void Initialize()
         {
             this.Window.AllowUserResizing = true;
-            this.Window.ClientSizeChanged += new EventHandler<EventArgs>(Window_ClientSizeChanged);
             this.IsMouseVisible = true;
 
             var form = (Form)Form.FromHandle(Window.Handle);
@@ -135,11 +134,6 @@ namespace Aquarium
 
             RenderContext.Set2DRenderStates(GraphicsDevice);
             Terminal.CheckDraw(true);
-        }
-
-        void Window_ClientSizeChanged(object sender, EventArgs e)
-        {
-            // Make changes to handle the new window size.            
         }
     }
 }

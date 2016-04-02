@@ -90,7 +90,7 @@ namespace Aquarium.Ui.Steering
             KeyMappings[Keys.RightAlt] = AnalogKeys.SecondaryFire;
 
         }
-
+        
 
         public void HandleInput(InputState inputState)
         {

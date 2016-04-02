@@ -34,13 +34,11 @@ namespace Aquarium
 
             if (name == "Close All")
             {
-                foreach (var screen in ScreenManager.GetScreens())
-                {
-                    screen.ExitScreen();
-                }
+                CloseAll();
             }
             else
             {
+                CloseAll();
                 GiveControl(Index[name]);
             }
 
@@ -49,6 +47,14 @@ namespace Aquarium
         IEnumerable<GameScreen> Others()
         {
             return ScreenManager.GetScreens().Where(x => x != this).ToList();
+        }
+
+        void CloseAll()
+        {
+            foreach (var screen in ScreenManager.GetScreens())
+            {
+                screen.ExitScreen();
+            }
         }
 
         void GiveControl(GameScreen screen)
