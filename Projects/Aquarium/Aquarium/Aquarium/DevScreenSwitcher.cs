@@ -34,7 +34,7 @@ namespace Aquarium
 
             if (name == "Close All")
             {
-                foreach (var screen in Others())
+                foreach (var screen in ScreenManager.GetScreens())
                 {
                     screen.ExitScreen();
                 }

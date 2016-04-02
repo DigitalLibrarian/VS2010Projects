@@ -14,6 +14,7 @@ namespace Aquarium
         protected ControlledCraft User { get; set; }
 
         LabelUiElement FPSLabel { get; set; }
+        LabelUiElement PositionLabel { get; set; }
 
 
         public override void LoadContent()
@@ -40,10 +41,12 @@ namespace Aquarium
             var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
 
             FPSLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
+            PositionLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
 
             return new List<IUiElement>{
                 hud, odometer,
-                FPSLabel
+                FPSLabel,
+                PositionLabel
             };
         }
 
@@ -77,6 +80,7 @@ namespace Aquarium
         {
             float fps = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
             FPSLabel.Label = string.Format("FPS: {0}", (int)fps);
+            PositionLabel.Label = string.Format("Pos: {0}", RenderContext.Camera.Position.ToString());
 
             base.Draw(gameTime);
         }
