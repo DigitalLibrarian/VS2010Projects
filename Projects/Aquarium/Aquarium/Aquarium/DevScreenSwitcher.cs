@@ -23,7 +23,7 @@ namespace Aquarium
                 MenuEntries.Add(new MenuEntry(name));
             }
 
-            MenuEntries.Add(new MenuEntry("Close All"));
+            //MenuEntries.Add(new MenuEntry("Close All"));
         }
 
         protected override void OnSelectEntry(int entryIndex)

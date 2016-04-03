@@ -42,6 +42,7 @@ namespace Aquarium
             var principle = Sim.Space.GetOrCreate(pos);
 
             User.Body.Position = principle.Box.GetCenter();
+            User.ControlForces.Analog.ForceShiftMag = 0.01f;
         }
 
         Model SpawnerModel { get; set; }
