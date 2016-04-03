@@ -14,5 +14,7 @@ namespace Aquarium.Agent
         void Death(OrganismAgent agent);
 
         BoundingBox Box { get; set; }
+
+        int TotalAssigned { get; set; }
     }
 }

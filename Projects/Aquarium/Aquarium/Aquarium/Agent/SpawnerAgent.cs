@@ -158,7 +158,7 @@ namespace Aquarium.Agent
         public void Update(float duration)
         {
 
-            if (Pool.OrganismAgents.Count() < MaxPopSize)
+            if (Pool.TotalAssigned < MaxPopSize)
             {
                 UpdateBirths();
             }

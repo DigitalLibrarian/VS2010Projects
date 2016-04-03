@@ -68,12 +68,18 @@ namespace Aquarium
         {
             Sim.Draw(gameTime, RenderContext);
 
+
+            var pos = RenderContext.Camera.Position;
+            var principle = Sim.Space.GetOrCreate(pos);
+
+            Renderer.Render(RenderContext, principle.Box, Color.White);
             base.Draw(gameTime);
         }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             Sim.Update(gameTime);
+
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
