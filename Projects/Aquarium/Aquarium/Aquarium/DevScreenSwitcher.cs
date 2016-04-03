@@ -22,7 +22,6 @@ namespace Aquarium
             {
                 MenuEntries.Add(new MenuEntry(name));
             }
-
         }
 
         protected override void OnSelectEntry(int entryIndex)
@@ -30,17 +29,8 @@ namespace Aquarium
             base.OnSelectEntry(entryIndex);
 
             var name = MenuEntries[entryIndex].Text;
-
-            if (name == "Close All")
-            {
-                CloseAll();
-            }
-            else
-            {
-                CloseAll();
-                GiveControl(Index[name]);
-            }
-
+            CloseAll();
+            GiveControl(Index[name]);
         }
 
         IEnumerable<GameScreen> Others()
@@ -59,7 +49,6 @@ namespace Aquarium
         void GiveControl(GameScreen screen)
         {
             ScreenManager.AddScreen(screen);
-            //ExitScreen();
         }
 
     }
