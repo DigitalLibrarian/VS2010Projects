@@ -310,7 +310,7 @@ namespace Aquarium
 
         #region Scene Loading Sequences
         IEnumerable<Chunk> CurrentSequence { get; set; }
-        IEnumerable<Chunk> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
+        IEnumerable<Vector3> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
         {
             for (int x = -numChunks; x < numChunks; x++)
             {
