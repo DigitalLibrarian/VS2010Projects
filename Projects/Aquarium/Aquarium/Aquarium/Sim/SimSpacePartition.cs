@@ -36,6 +36,7 @@ namespace Aquarium.Sim
             }
         }
 
+
         public override bool Assign(IAgent obj)
         {
             if (base.Assign(obj))
@@ -47,6 +48,7 @@ namespace Aquarium.Sim
                     {
                         var orgAgent = (OrganismAgent)obj;
                         Organisms.Add(obj, orgAgent);
+                        TotalAssigned++;
 
                         FoodSpace.Register(orgAgent.Organism, orgAgent.Organism.Position);
                         orgAgent.Organism.Surroundings = this;
@@ -57,8 +59,9 @@ namespace Aquarium.Sim
                 return true;
             }
             return false;
-
         }
+
+        public int TotalAssigned { get; set; }
 
         public override bool UnAssign(IAgent obj)
         {
@@ -67,6 +70,7 @@ namespace Aquarium.Sim
                 if (Organisms.ContainsKey(obj))
                 {
                     Organisms.Remove(obj);
+                    TotalAssigned--;
                     var orgAgent = ((OrganismAgent)obj);
                     FoodSpace.UnRegister(orgAgent.Organism);
                     orgAgent.Organism.Surroundings = null;

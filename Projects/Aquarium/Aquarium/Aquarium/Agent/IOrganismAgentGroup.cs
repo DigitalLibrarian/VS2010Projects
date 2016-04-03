@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium.Agent
 {
@@ -11,5 +12,9 @@ namespace Aquarium.Agent
 
         void Birth(OrganismAgent agent);
         void Death(OrganismAgent agent);
+
+        BoundingBox Box { get; set; }
+
+        int TotalAssigned { get; set; }
     }
 }
