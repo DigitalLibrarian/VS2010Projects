@@ -151,6 +151,8 @@ namespace Aquarium.Agent
 
             var world = Matrix.CreateTranslation(Position);
             Renderer.RenderModel(Model, world, renderContext);
+
+            Renderer.Render(renderContext, Pool.Box, Color.Red);
         }
 
         public void Update(float duration)

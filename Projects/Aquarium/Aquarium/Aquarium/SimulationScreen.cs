@@ -36,6 +36,8 @@ namespace Aquarium
 
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
+
+            User.Body.Position = new Vector3(100, 100, 100);
         }
 
         Model SpawnerModel { get; set; }
@@ -79,10 +81,8 @@ namespace Aquarium
 
         private void AddNewSpawnerAgent()
         {
-            var principle = Sim.UpdateSet.Principle;
-
             var pos = RenderContext.Camera.Position;
-
+            var principle = Sim.Space.GetOrCreate(pos);
             //TODO - need better box.  i'm sure i have somethign to extract from model
             var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 5f));
 
@@ -146,7 +146,11 @@ namespace Aquarium
         {
             if (Engaged)
             {
-                var space = Sim.UpdateSet.Principle as SimSpacePartition;
+                //var space = Sim.UpdateSet.Principle as SimSpacePartition;
+
+                var pos = RenderContext.Camera.Position;
+                var space = Sim.Space.GetOrCreate(pos) as SimSpacePartition;
+
                 var list = space.FindAll(ray);
 
                 if (list.Any())
