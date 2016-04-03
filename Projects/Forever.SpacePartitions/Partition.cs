@@ -28,6 +28,11 @@ namespace Forever.SpacePartitions
             return false;
         }
 
+        public virtual void Clear()
+        {
+            contents.Clear();
+        }
+
         public virtual bool UnAssign(T obj)
         {
             return contents.Remove(obj);

@@ -24,6 +24,7 @@ using Aquarium.Life.Bodies;
 using Ruminate.GUI.Framework;
 using Ruminate.GUI.Content;
 using System.IO;
+using System.Windows.Forms;
 
 
 namespace Aquarium
@@ -40,8 +41,6 @@ namespace Aquarium
         ScreenManager ScreenManager { get; set; }
         Random Random = new Random();
 
-        Gui Gui { get; set; }
-        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -61,6 +60,10 @@ namespace Aquarium
         {
             this.Window.AllowUserResizing = true;
             this.IsMouseVisible = true;
+
+            var form = (Form)Form.FromHandle(Window.Handle);
+            form.WindowState = FormWindowState.Maximized;
+
             base.Initialize();
 
             ScreenManager.Initialize();
@@ -82,10 +85,23 @@ namespace Aquarium
             Terminal.Init(this, spriteBatch, spriteFont, GraphicsDevice);
             Terminal.SetSkin(skin);
 
-            var startScreen = new VoxelScreen();
-            ScreenManager.AddScreen(startScreen);
-            Components.Add(ScreenManager);
+            Reset();
 
+            Components.Add(ScreenManager);
+        }
+
+        void Reset()
+        {
+            var index = new List<GameScreen>
+            {
+                new SparseVoxelOctTreeScreen(),
+                new VoxelScreen(),
+                new OrganismScreen(),
+                new SimulationScreen()
+            }.ToDictionary(x => x.GetType().ToString());
+
+            var startScreen = new DevScreenSwitcher("Debugging Screen Switcher", index);
+            ScreenManager.AddScreen(startScreen);
         }
 
         /// <summary>
@@ -96,11 +112,11 @@ namespace Aquarium
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
+
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
                 this.Exit();
 
-            Terminal.CheckOpen(Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
+            Terminal.CheckOpen(Microsoft.Xna.Framework.Input.Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 
             base.Update(gameTime);
         }

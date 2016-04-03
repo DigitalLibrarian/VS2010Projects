@@ -19,21 +19,13 @@ using Aquarium.Ui.Steering;
 using Aquarium.Ui.Targets;
 using Forever.Render.Cameras;
 
+using Forever.Extensions;
 
 namespace Aquarium
 {
-    class SimulationScreen : UiOverlayGameScreen
+    class SimulationScreen : FlyAroundGameScreen
     {
         Simulation Sim { get; set; }
-
-        ControlledCraft User { get; set; }
-
-        public override void HandleInput(InputState input)
-        {
-            User.HandleInput(input);
-            
-            base.HandleInput(input);
-        }
 
         public override void LoadContent()
         {
@@ -41,12 +33,16 @@ namespace Aquarium
 
             Sim = new Simulation();
 
-            User = CreateControlledCraft();
-
             Ui.Elements.AddRange(CreateUILayout());
 
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
+
+            var pos = RenderContext.Camera.Position;
+            var principle = Sim.Space.GetOrCreate(pos);
+
+            User.Body.Position = principle.Box.GetCenter();
+            User.ControlForces.Analog.ForceShiftMag = 0.01f;
         }
 
         Model SpawnerModel { get; set; }
@@ -77,17 +73,18 @@ namespace Aquarium
         {
             Sim.Draw(gameTime, RenderContext);
 
+
+            var pos = RenderContext.Camera.Position;
+            var principle = Sim.Space.GetOrCreate(pos);
+
+            Renderer.Render(RenderContext, principle.Box, Color.White);
             base.Draw(gameTime);
         }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            User.Update(gameTime);
-
-            RenderContext.Camera.Position = User.Body.Position;
-            RenderContext.Camera.Rotation = User.Body.Orientation;
-
             Sim.Update(gameTime);
+
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -95,10 +92,8 @@ namespace Aquarium
 
         private void AddNewSpawnerAgent()
         {
-            var principle = Sim.UpdateSet.Principle;
-
             var pos = RenderContext.Camera.Position;
-
+            var principle = Sim.Space.GetOrCreate(pos);
             //TODO - need better box.  i'm sure i have somethign to extract from model
             var box = BoundingBox.CreateFromSphere(new BoundingSphere(pos, 5f));
 
@@ -135,16 +130,11 @@ namespace Aquarium
             var actionBarSlotHeight = 40;
             var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
-            var hud = new ControlledCraftHUD(User, RenderContext);
-            hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
-
-            var odometer = new OdometerDashboard(User, ScreenManager.Game.GraphicsDevice, new Vector2(0, -actionBarSlotHeight + -15f), 300, 17);
-            
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
                 RenderContext, 
-                new Vector2(0, 0), 
+                DebugLabelStrip(), 
                 ScreenManager.Font,
                 this,
                 SpawnerEditor);
@@ -156,8 +146,6 @@ namespace Aquarium
             return new List<IUiElement>
             {
                 horizontalActionBar,
-                hud, 
-                odometer, 
                 targetWindow, 
             };
         }
@@ -169,7 +157,11 @@ namespace Aquarium
         {
             if (Engaged)
             {
-                var space = Sim.UpdateSet.Principle as SimSpacePartition;
+                //var space = Sim.UpdateSet.Principle as SimSpacePartition;
+
+                var pos = RenderContext.Camera.Position;
+                var space = Sim.Space.GetOrCreate(pos) as SimSpacePartition;
+
                 var list = space.FindAll(ray);
 
                 if (list.Any())

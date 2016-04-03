@@ -12,7 +12,7 @@ using Aquarium.Ui.Steering;
 
 namespace Aquarium
 {
-    abstract class UiOverlayGameScreen : GameScreen
+    abstract class UiOverlayGameScreen : DevScreen
     {
         protected UiOverlay Ui { get; set; }
         protected RenderContext RenderContext { get; set; }
