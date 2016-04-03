@@ -19,6 +19,7 @@ using Aquarium.Ui.Steering;
 using Aquarium.Ui.Targets;
 using Forever.Render.Cameras;
 
+using Forever.Extensions;
 
 namespace Aquarium
 {
@@ -37,7 +38,10 @@ namespace Aquarium
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
 
-            User.Body.Position = new Vector3(100, 100, 100);
+            var pos = RenderContext.Camera.Position;
+            var principle = Sim.Space.GetOrCreate(pos);
+
+            User.Body.Position = principle.Box.GetCenter();
         }
 
         Model SpawnerModel { get; set; }
