@@ -37,6 +37,7 @@ namespace Aquarium
             User.Body.Position = spawnPoint;
             Ui.Elements.AddRange(CreateUILayout());
             SceneLoad(spawnPoint);
+            ConsumeLoadSequence(1000);
         }
 
         Chunk ChunkFactory(BoundingBox bb)
@@ -261,16 +262,36 @@ namespace Aquarium
 
         void SceneLoad(Vector3 pos)
         {
-            int numChunks = 10;
-            var camHeight = pos.Y;
-
-            if(camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
+            if (LoadSequence == null || !LoadSequence.MoveNext())
             {
-                SceneLoad_CameraAboveGround(pos, numChunks);
+                int numChunks = 25;
+                var camHeight = pos.Y;
+
+                if (camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
+                {
+                    LoadSequence = SceneLoadSequence_CameraAboveGround(pos, numChunks).GetEnumerator();
+                }
+                else
+                {
+                    LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks / 2).GetEnumerator();
+                }
             }
             else
             {
-                SceneLoad_CameraBelowGround(pos, numChunks/2);
+                if (Random.NextDouble() < 0.01)
+                {
+                    ConsumeLoadSequence();
+                }
+            }
+        }
+
+        void ConsumeLoadSequence(int max = 5)
+        {
+            for (int i = 0; i < max; i++)
+            {
+                ChunkSpace.GetOrCreate(LoadSequence.Current);
+
+                if (!LoadSequence.MoveNext()) break;
             }
         }
 
@@ -309,7 +330,7 @@ namespace Aquarium
         }
 
         #region Scene Loading Sequences
-        IEnumerable<Chunk> CurrentSequence { get; set; }
+        IEnumerator<Vector3> LoadSequence { get; set; }
         IEnumerable<Vector3> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
         {
             for (int x = -numChunks; x < numChunks; x++)
