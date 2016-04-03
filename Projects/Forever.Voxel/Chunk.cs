@@ -512,11 +512,9 @@ namespace Forever.Voxel
             effect.Parameters["WVP"].SetValue(wvp);
 
             Instancing.Draw(duration, rc, InstanceCount);
-
-            //Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }
 
-        Matrix World;
+        public Matrix World;
 
         #region Voxel State
         bool NeedRebuild = false;

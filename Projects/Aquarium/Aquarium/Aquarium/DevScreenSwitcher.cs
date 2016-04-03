@@ -3,15 +3,70 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Forever.Screens;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 
 namespace Aquarium
 {
+    public class DevScreenSwitchLauncher : GameScreen
+    {
+        DevScreenSwitcher Switcher { get; set; }
+        public DevScreenSwitchLauncher()
+        {
+            var index = new List<GameScreen>
+            {
+                new SparseVoxelOctTreeScreen(),
+                new VoxelScreen(),
+                new SimulationScreen()
+            }.ToDictionary(x => x.GetType().ToString());;
+
+            Switcher = new DevScreenSwitcher(this, "Screen Switcher", index, ShouldClose);
+            KillCode = new Keys[]{
+                Keys.Escape,
+                Keys.OemTilde,
+                Keys.Tab
+            };
+        }
+
+        Keys[] KillCode { get; set;}
+        public override void HandleInput(InputState input)
+        {
+            if (KillCode.All(key => input.IsKeyDown(key, PlayerIndex.One)))
+            {
+                ScreenManager.Game.Exit();
+            } 
+            else if (input.IsNewKeyPress(Microsoft.Xna.Framework.Input.Keys.Escape))
+            {
+                BringUpSwitcherScreen();
+            }
+
+            base.HandleInput(input);
+        }
+
+        public void BringUpSwitcherScreen()
+        {
+            if (!ScreenManager.GetScreens().Any(x => x == Switcher))
+            {
+                ScreenManager.AddScreen(Switcher);
+            }
+        }
+
+        bool ShouldClose(GameScreen screen)
+        {
+            return screen != this;
+        }
+    }
+
     class DevScreenSwitcher : MenuScreen
     {
+        DevScreenSwitchLauncher Launcher { get; set; }
         Dictionary<string, GameScreen> Index { get; set; }
-        public DevScreenSwitcher(string menuName, Dictionary<string, GameScreen> index) : base(menuName)
+        Func<GameScreen, bool> ShouldClose { get; set; }
+        public DevScreenSwitcher(DevScreenSwitchLauncher launcher,  string menuName, Dictionary<string, GameScreen> index, Func<GameScreen, bool> shouldClose) : base(menuName)
         {
+            Launcher = launcher;
             Index = index;
+            ShouldClose = shouldClose;
         }
 
         public override void LoadContent()
@@ -24,6 +79,13 @@ namespace Aquarium
             }
         }
 
+        public override void UnloadContent()
+        {
+            MenuEntries.Clear();
+
+            base.UnloadContent();
+        }
+
         protected override void OnSelectEntry(int entryIndex)
         {
             base.OnSelectEntry(entryIndex);
@@ -33,14 +95,14 @@ namespace Aquarium
             GiveControl(Index[name]);
         }
 
-        IEnumerable<GameScreen> Others()
+        IEnumerable<GameScreen> FindSetToClose()
         {
-            return ScreenManager.GetScreens().Where(x => x != this).ToList();
+            return ScreenManager.GetScreens().Where(x => ShouldClose(x)).ToList();
         }
 
         void CloseAll()
         {
-            foreach (var screen in ScreenManager.GetScreens())
+            foreach (var screen in FindSetToClose())
             {
                 screen.ExitScreen();
             }
@@ -48,8 +110,7 @@ namespace Aquarium
 
         void GiveControl(GameScreen screen)
         {
-            ScreenManager.AddScreen(screen);
+            LoadingScreen.Load(ScreenManager, true, new [] { Launcher, screen });
         }
-
     }
 }

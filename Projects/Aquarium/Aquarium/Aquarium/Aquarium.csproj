@@ -129,7 +129,6 @@
     <Compile Include="DevScreen.cs" />
     <Compile Include="FlyAroundGameScreen.cs" />
     <Compile Include="MathHelper.cs" />
-    <Compile Include="OrganismScreen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />

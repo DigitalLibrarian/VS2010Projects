@@ -62,17 +62,20 @@ namespace Aquarium
 
         public override void HandleInput(InputState input)
         {
-            User.HandleInput(input);
             base.HandleInput(input);
+            User.HandleInput(input);
         }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            User.Update(gameTime);
+            if (!otherScreenHasFocus && !coveredByOtherScreen)
+            {
+                User.Update(gameTime);
 
-            RenderContext.Camera.Position = User.Body.Position;
-            RenderContext.Camera.Rotation = User.Body.Orientation;
+                RenderContext.Camera.Position = User.Body.Position;
+                RenderContext.Camera.Rotation = User.Body.Orientation;
 
+            }
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 

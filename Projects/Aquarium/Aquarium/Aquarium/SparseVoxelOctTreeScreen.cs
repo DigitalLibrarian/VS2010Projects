@@ -24,6 +24,7 @@ namespace Aquarium
 
         public override void LoadContent()
         {
+            PropagateInput = true;
             base.LoadContent();
 
             var n = 1024;
@@ -54,6 +55,7 @@ namespace Aquarium
 
         public override void HandleInput(InputState input)
         {
+            base.HandleInput(input);
             if(input.IsNewKeyPress(Keys.OemPlus))
             {
                 if(RenderDepth < MaxTreeDepth) RenderDepth++;
@@ -63,8 +65,6 @@ namespace Aquarium
             {
                 if(RenderDepth > 0) RenderDepth--;
             }
-
-            base.HandleInput(input);
         }
 
         public override void Draw(GameTime gameTime)

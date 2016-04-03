@@ -29,6 +29,7 @@ namespace Aquarium
 
         public override void LoadContent()
         {
+            PropagateInput = true;
             base.LoadContent();
 
             Sim = new Simulation();
@@ -83,8 +84,7 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            Sim.Update(gameTime);
-
+            if (!otherScreenHasFocus && !coveredByOtherScreen) Sim.Update(gameTime);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }

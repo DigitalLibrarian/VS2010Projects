@@ -32,14 +32,11 @@ namespace Aquarium
 
             ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
 
-            var box = ChunkSpace.GetBoundingBox();
-            var diff = box.Max - box.Min;
-            var startPos = Vector3.Backward * (diff.Length()/2f);
-            RenderContext.Camera.Position = startPos;
-            User.Body.Position = startPos;
-            User.Body.Mass = 50f;
-
+            var spawnHeightAboveGround = 5 * ChunksPerDimension;
+            var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
+            User.Body.Position = spawnPoint;
             Ui.Elements.AddRange(CreateUILayout());
+            SceneLoad(spawnPoint);
         }
 
         Chunk ChunkFactory(BoundingBox bb)
@@ -48,16 +45,12 @@ namespace Aquarium
             chunk.LoadContent(ScreenManager.Game.Content);
             chunk.Initialize(RenderContext.GraphicsDevice);
             var pos = bb.Min;
-            int maxHeight = 100 * ChunksPerDimension;
-            float half = maxHeight / 2f;
-            var bottomLeft = new Vector3(-half, -half, -half);;
             chunk.VisitCoords((x, y, z) => {
                 var world = chunk.ArrayToChunk(new Vector3(x, y, z));
                 float tX = (pos.X + (x * ChunksPerDimension));
                 float tY = (pos.Y + (y * ChunksPerDimension));
                 float tZ = (pos.Z + (z * ChunksPerDimension));
                 
-                float n = SmoothNoise(world.X, world.Z);
                 chunk.Voxels[x][y][z].Material = new Material(
                     new Color(
                        (float) x / ChunksPerDimension,
@@ -66,12 +59,23 @@ namespace Aquarium
                         )
                     );
 
-                var threshold = bottomLeft.Y + half + (n * half);
-                bool active = world.Y < threshold;
+                float height = GetHeight(world.X, world.Z);
+                bool active = world.Y < height;
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
             });
 
             return chunk;
+        }
+
+        float GetHeight(float x, float z)
+        {
+            int maxHeight = 100 * ChunksPerDimension;
+            float half = maxHeight / 2f;
+            var bottomLeft = new Vector3(-half, -half, -half); ;
+            var scale = 0.5f;
+            float n = SmoothNoise(x * scale, z * scale);
+            var threshold = bottomLeft.Y + half + (n * half);
+            return threshold;
         }
 
         Perlin Perlin = null;
@@ -81,9 +85,9 @@ namespace Aquarium
             NoiseQuality quality = NoiseQuality.Standard;
             int seed = 0;
             int octaves = 6;
-            double frequency = 0.0005;
+            double frequency = 0.005;
             double lacunarity = 0.5;
-            double persistence = 1;
+            double persistence = 0;
 
             var module = new Perlin();
             module.Frequency = frequency;
@@ -141,6 +145,11 @@ namespace Aquarium
             {
                 var pos = User.Body.Position;
                 (ChunkSpace.GetOrCreate(pos) as ChunkSpacePartition).Chunk.Invalidate();
+            }
+
+            if(input.IsNewKeyPress(Microsoft.Xna.Framework.Input.Keys.K))
+            {
+                ToggleDebug();
             }
 
             base.HandleInput(input);
@@ -212,6 +221,12 @@ namespace Aquarium
                 if (RenderContext.InView(chunk.Box))
                 {
                     chunk.Draw(duration, RenderContext);
+                    if (debug)
+                    {
+                        var rc = RenderContext;
+                        Renderer.Render(chunk.Box, rc.GraphicsDevice, chunk.World, rc.Camera.View, rc.Camera.Projection, Color.DarkSalmon);
+                    }
+
                     InViewCount++;
                 }
                 else
@@ -227,27 +242,106 @@ namespace Aquarium
             OcclusionsLabel.Label = string.Format("Local Occlusions : {0}", part.Chunk.TotalOcclusions);
             base.Draw(gameTime);
         }
+        bool debug;
+        void ToggleDebug()
+        {
+            debug = !debug;
+        }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
-        {            
-            // fill out space around the player
-            GenerateChunks(User.Body.Position, 5);
+        {
+            if (!otherScreenHasFocus && !coveredByOtherScreen)
+            {
+                // fill out space around the player
+                SceneLoad(User.Body.Position);
+            }
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
-        void GenerateChunks(Vector3 pos, int numChunks)
+        void SceneLoad(Vector3 pos)
+        {
+            int numChunks = 10;
+            var camHeight = pos.Y;
+
+            if(camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
+            {
+                SceneLoad_CameraAboveGround(pos, numChunks);
+            }
+            else
+            {
+                SceneLoad_CameraBelowGround(pos, numChunks/2);
+            }
+        }
+
+        private void SceneLoad_CameraBelowGround(Vector3 pos, int numChunks)
         {
             for (int x = -numChunks; x < numChunks; x++)
             {
-                for (int y = -numChunks; y < numChunks; y++)
+                for (int z = -numChunks; z < numChunks; z++)
                 {
-                    for (int z = -numChunks; z < numChunks; z++)
+                    for (int y = -numChunks; y < numChunks; y++)
                     {
                         ChunkSpace.GetOrCreate(pos + new Vector3(x, y, z) * ChunksPerDimension);
                     }
                 }
             }
         }
+
+        void SceneLoad_CameraAboveGround(Vector3 pos, int numChunks)
+        {
+            float worldX, worldY, worldZ;
+            float surfaceY;
+            for (int x = -numChunks; x < numChunks; x++)
+            {
+                worldX = pos.X + (x * ChunksPerDimension);
+                for (int z = -numChunks; z < numChunks; z++)
+                {
+                    worldZ = pos.Z + (z * ChunksPerDimension);
+                    surfaceY = GetHeight(worldX, worldZ);
+                    for (int y = -1; y < 2; y++)
+                    {
+                        worldY = surfaceY + ( y * ChunksPerDimension );
+                        ChunkSpace.GetOrCreate(new Vector3(worldX, worldY, worldZ));
+                    }
+                }
+            }
+        }
+
+        #region Scene Loading Sequences
+        IEnumerable<Chunk> CurrentSequence { get; set; }
+        IEnumerable<Chunk> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
+        {
+            for (int x = -numChunks; x < numChunks; x++)
+            {
+                for (int z = -numChunks; z < numChunks; z++)
+                {
+                    for (int y = -numChunks; y < numChunks; y++)
+                    {
+                        yield return pos + new Vector3(x, y, z) * ChunksPerDimension;
+                    }
+                }
+            }
+        }
+        IEnumerable<Vector3> SceneLoadSequence_CameraAboveGround(Vector3 pos, int numChunks)
+        {
+            float worldX, worldY, worldZ;
+            float surfaceY;
+            for (int x = -numChunks; x < numChunks; x++)
+            {
+                worldX = pos.X + (x * ChunksPerDimension);
+                for (int z = -numChunks; z < numChunks; z++)
+                {
+                    worldZ = pos.Z + (z * ChunksPerDimension);
+                    surfaceY = GetHeight(worldX, worldZ);
+                    for (int y = -1; y < 2; y++)
+                    {
+                        worldY = surfaceY + (y * ChunksPerDimension);
+                        yield return new Vector3(worldX, worldY, worldZ);
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

@@ -34,9 +34,9 @@ namespace Aquarium
         
         public override void HandleInput(InputState input)
         {
+            base.HandleInput(input);
             Ui.HandleInput(input);
 
-            base.HandleInput(input);
         }
 
         public override void Draw(GameTime gameTime)

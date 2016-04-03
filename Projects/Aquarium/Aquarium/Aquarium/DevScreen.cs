@@ -19,5 +19,12 @@ namespace Aquarium
             Random = new Random();
         }
 
+        public override void LoadContent()
+        {
+            PropagateInput = true;
+            PropagateDraw = true;
+            base.LoadContent();
+        }
+
     }
 }

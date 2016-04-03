@@ -250,6 +250,14 @@ namespace Forever.Screens
             screens.Add(screen);
         }
 
+        public void ExitAll()
+        {
+            foreach (var screen in GetScreens())
+            {
+                screen.ExitScreen();
+            }
+        }
+
 
         /// <summary>
         /// Removes a screen from the screen manager. You should normally
