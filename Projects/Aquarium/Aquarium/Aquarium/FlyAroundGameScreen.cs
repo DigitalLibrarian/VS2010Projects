@@ -29,8 +29,6 @@ namespace Aquarium
             Ui.Elements.AddRange(CreateUILayout());
         }
 
-
-
         #region UI
         List<IUiElement> CreateUILayout()
         {
