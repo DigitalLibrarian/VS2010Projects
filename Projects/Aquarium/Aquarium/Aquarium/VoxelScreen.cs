@@ -115,15 +115,11 @@ namespace Aquarium
         List<IUiElement> CreateUILayout()
         {
             var spriteFont = ScreenManager.Font;
-            var actionBarSlotHeight = 40;
-            var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
-
             TotalInstancesLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
             FrustumCullingLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
             OcclusionsLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
 
             return new List<IUiElement>{
-                horizontalActionBar,
                 TotalInstancesLabel, 
                 FrustumCullingLabel, 
                 OcclusionsLabel

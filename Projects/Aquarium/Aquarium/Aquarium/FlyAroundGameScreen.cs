@@ -12,6 +12,7 @@ namespace Aquarium
     class FlyAroundGameScreen : UiOverlayGameScreen
     {
         protected ControlledCraft User { get; set; }
+        protected ActionBar ActionBar { get; set; }
 
         LabelUiElement FPSLabel { get; set; }
         LabelUiElement PositionLabel { get; set; }
@@ -35,6 +36,9 @@ namespace Aquarium
         {
             var spriteFont = ScreenManager.Font;
             var actionBarSlotHeight = 40;
+
+            ActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
+
             var hud = new ControlledCraftHUD(User, RenderContext);
             hud.LoadContent(ScreenManager.Game.Content, ScreenManager.Game.GraphicsDevice);
 
@@ -44,6 +48,7 @@ namespace Aquarium
             PositionLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
 
             return new List<IUiElement>{
+                ActionBar,
                 hud, odometer,
                 FPSLabel,
                 PositionLabel
