@@ -47,8 +47,6 @@ namespace Aquarium
             var worldSize = 10000000000;
 
             Tree = new OctTree(new BoundingBox(new Vector3(-worldSize, -worldSize, -worldSize), new Vector3(worldSize, worldSize, worldSize)));
-            SceneLoad(spawnPoint);
-            ConsumeLoadSequence(1000);
         }
 
         Chunk ChunkFactory(BoundingBox bb)
@@ -267,32 +265,10 @@ namespace Aquarium
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
-        void SceneLoad(Vector3 pos)
-        {
-            if (LoadSequence == null || !LoadSequence.MoveNext())
-            {
-                var camHeight = pos.Y;
-
-                if (camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
-                {
-                    LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(pos, numChunks: 25).GetEnumerator();
-                }
-                else
-                {
-                    LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks: 5).GetEnumerator();
-                }
-            }
-            else
-            {
-                if (Random.NextDouble() < 0.2)
-                {
-                    ConsumeLoadSequence();
-                }
-            }
-        }
 
 
-        #region Scene Loading Sequences
+
+        #region Scene Loading
         IEnumerator<Vector3> LoadSequence { get; set; }
         IEnumerable<Vector3> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
         {
@@ -307,26 +283,6 @@ namespace Aquarium
                 }
             }
         }
-        IEnumerable<Vector3> SceneLoadSequence_CameraAboveGround(Vector3 pos, int numChunks)
-        {
-            float worldX, worldY, worldZ;
-            float surfaceY;
-            for (int x = -numChunks; x < numChunks; x++)
-            {
-                worldX = pos.X + (x * ChunksPerDimension);
-                for (int z = -numChunks; z < numChunks; z++)
-                {
-                    worldZ = pos.Z + (z * ChunksPerDimension);
-                    surfaceY = GetHeight(worldX, worldZ);
-                    for (int y = -1; y < 2; y++)
-                    {
-                        worldY = surfaceY + (y * ChunksPerDimension);
-                        yield return new Vector3(worldX, worldY, worldZ);
-                    }
-                }
-            }
-        }
-
         IEnumerable<Vector3> SceneLoadSequence_CameraAboveGround_SurfaceProjection(Vector3 pos, int numChunks)
         {
             int snakeLength = numChunks*numChunks;
@@ -389,12 +345,51 @@ namespace Aquarium
             }
         }
 
+        void SceneLoad(Vector3 pos)
+        {
+            if (Random.NextDouble() < 0.2)
+            {
+                if (!ConsumeLoadSequence())
+                {
+                    // get new sequence
+                    var camHeight = pos.Y;
+
+                    if (camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
+                    {
+                        LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(pos, numChunks: 25).GetEnumerator();
+                    }
+                    else
+                    {
+                        LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks: 5).GetEnumerator();
+                    }
+                }
+            }
+        }
+
         Vector3 ProjectToSurface(Vector3 p)
         {
             return new Vector3(p.X, GetHeight(p.X, p.Z), p.Z);
         }
 
-        void ConsumeLoadSequence(int max = 10)
+        bool ConsumeLoadSequence(int max = 10)
+        {
+            if (LoadSequence == null)
+            {
+                return false;
+            }
+            Vector3 v;
+            for (int i = 0; i < max; i++)
+            {
+                v = LoadSequence.Current;
+                ChunkSpace.GetOrCreate(v);
+                MarkInTree(v);
+                if (!LoadSequence.MoveNext()) return false;
+            }
+            return true;
+        }
+
+
+        bool ConsumeLoadSequence(IEnumerable<Vector3> seq, int max = 10)
         {
             Vector3 v;
             for (int i = 0; i < max; i++)
@@ -402,8 +397,9 @@ namespace Aquarium
                 v = LoadSequence.Current;
                 ChunkSpace.GetOrCreate(v);
                 MarkInTree(v);
-                if (!LoadSequence.MoveNext()) break;
+                if (!LoadSequence.MoveNext()) return false;
             }
+            return true;
         }
 
         void MarkInTree(Vector3 v)
