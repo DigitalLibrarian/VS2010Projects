@@ -162,7 +162,7 @@
     <Compile Include="UI\Targets\ITarget.cs" />
     <Compile Include="UI\Targets\TargetWindow.cs" />
     <Compile Include="UI\UiElement.cs" />
-    <Compile Include="UI\UiGameScreen.cs" />
+    <Compile Include="UI\UiOverlay.cs" />
     <Compile Include="VoxelScreen.cs" />
   </ItemGroup>
   <ItemGroup>

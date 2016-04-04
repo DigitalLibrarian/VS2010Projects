@@ -6,6 +6,8 @@ using Forever.Screens;
 using Microsoft.Xna.Framework;
 using Aquarium.Ui;
 using Aquarium.UI;
+using Forever.Physics;
+using Aquarium.Ui.Steering;
 
 namespace Aquarium
 {
@@ -17,14 +19,10 @@ namespace Aquarium
         LabelUiElement FPSLabel { get; set; }
         LabelUiElement PositionLabel { get; set; }
 
-
         public override void LoadContent()
         {
             base.LoadContent();
             User = CreateControlledCraft();
-            User.Body.AngularDamping = 0.67f;
-            User.Body.LinearDamping = 0.5f;
-            User.ControlForces.Mouse.ThrustIncrement = 0.0000001f;
 
             Ui.Elements.AddRange(CreateUILayout());
         }
@@ -62,6 +60,27 @@ namespace Aquarium
             return v;
         }
         #endregion
+
+        ControlledCraft CreateControlledCraft()
+        {
+            var cam = this.RenderContext.Camera;
+            var PlayerRigidBody = new RigidBody(cam.Position);
+            PlayerRigidBody.Awake = true;
+            PlayerRigidBody.CanSleep = false;
+            User.Body.AngularDamping = 0.67f;
+            User.Body.LinearDamping = 0.5f;
+            User.ControlForces.Mouse.ThrustIncrement = 0.0000001f;
+            PlayerRigidBody.Mass = 0.1f;
+            PlayerRigidBody.InertiaTensor = InertiaTensorFactory.Sphere(PlayerRigidBody.Mass, 1f);
+            var mouseSteering = new MouseSteering(RenderContext.GraphicsDevice, PlayerRigidBody, 0.000000001f);
+            var analogSteering = new AnalogSteering(PlayerIndex.One, 0.000015f, 0.0025f, 0.0003f, 0.001f, PlayerRigidBody);
+
+            var controlForces = new SteeringControls(mouseSteering, analogSteering);
+            controlForces.MaxAngular = 0.025f;
+            controlForces.MaxLinear = 0.1f;
+
+            return new ControlledCraft(PlayerRigidBody, controlForces);
+        }
 
         public override void HandleInput(InputState input)
         {
