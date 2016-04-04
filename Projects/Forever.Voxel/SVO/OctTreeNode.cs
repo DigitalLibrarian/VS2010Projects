@@ -55,5 +55,22 @@ namespace Forever.Voxel.SVO
         {
             return new BoundingBox(min, min + boxSize);
         }
+
+        public OctTreeNode FindLeaf(Vector3 v)
+        {
+            // TODO - optimize this
+            if(IsLeaf) return this;
+            if (Box.Contains(v) == ContainmentType.Contains) return this;
+
+            foreach (var child in Children)
+            {
+                var w = child.FindLeaf(v);
+                if (w != null)
+                {
+                    return w;
+                }
+            }
+            return null;
+        }
     }
 }

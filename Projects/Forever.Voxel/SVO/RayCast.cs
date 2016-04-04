@@ -13,7 +13,7 @@ namespace Forever.Voxel.SVO
 
     public static class RayCast
     {
-        public static uint GetFirstNode(Ray ray, SparseVoxelOctTree tree)
+        public static uint GetFirstNode(Ray ray, OctTree tree)
         {
             return 0;
            // return GetFirstNode(ray.

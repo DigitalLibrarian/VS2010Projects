@@ -8,17 +8,18 @@ using Forever.Extensions;
 
 namespace Forever.Voxel.SVO
 {
-    public class SparseVoxelOctTree
+    public class OctTree
     {
-        OctTreeNode Root { get; set; }
+        public OctTreeNode Root { get; private set; }
 
-        public static SparseVoxelOctTree CreatePreSubdivided(int depth, BoundingBox box)
+        public OctTree(BoundingBox box)
         {
-            var tree = new SparseVoxelOctTree()
-            {
-                Root = new OctTreeNode(box)
-            };
-            tree.Root = new OctTreeNode(box);
+            Root = new OctTreeNode(box);
+        }
+
+        public static OctTree CreatePreSubdivided(int depth, BoundingBox box)
+        {
+            var tree = new OctTree(box);
             Subdivide(tree.Root, depth);
             return tree;
         }
