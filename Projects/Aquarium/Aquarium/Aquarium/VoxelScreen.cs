@@ -13,6 +13,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Aquarium.UI;
 
 using LibNoise;
+using Forever.Voxel.SVO;
+using Forever.SpacePartitions;
 
 namespace Aquarium
 {
@@ -26,9 +28,14 @@ namespace Aquarium
         LabelUiElement FrustumCullingLabel { get; set; }
         LabelUiElement OcclusionsLabel { get; set; }
 
+        Perlin Perlin = null;
+
+        OctTree Tree { get; set; }
+
         public override void LoadContent()
         {
             base.LoadContent();
+            SetupPerlin();
 
             ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
 
@@ -36,6 +43,10 @@ namespace Aquarium
             var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
             User.Body.Position = spawnPoint;
             Ui.Elements.AddRange(CreateUILayout());
+
+            var worldSize = 10000000000;
+
+            Tree = new OctTree(new BoundingBox(new Vector3(-worldSize, -worldSize, -worldSize), new Vector3(worldSize, worldSize, worldSize)));
             SceneLoad(spawnPoint);
             ConsumeLoadSequence(1000);
         }
@@ -63,30 +74,17 @@ namespace Aquarium
                 float height = GetHeight(world.X, world.Z);
                 bool active = world.Y < height;
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
+                chunk.Invalidate();
             });
 
             return chunk;
         }
-
-        float GetHeight(float x, float z)
-        {
-            int maxHeight = 100 * ChunksPerDimension;
-            float half = maxHeight / 2f;
-            var bottomLeft = new Vector3(-half, -half, -half); ;
-            var scale = 0.5f;
-            float n = SmoothNoise(x * scale, z * scale);
-            var threshold = bottomLeft.Y + half + (n * half);
-            return threshold;
-        }
-
-        Perlin Perlin = null;
-
         void SetupPerlin()
         {
             NoiseQuality quality = NoiseQuality.Standard;
             int seed = 0;
             int octaves = 6;
-            double frequency = 0.005;
+            double frequency = 0.0005;
             double lacunarity = 0.5;
             double persistence = 0;
 
@@ -100,10 +98,19 @@ namespace Aquarium
             Perlin = module;
         }
 
+        float GetHeight(float x, float z)
+        {
+            int maxHeight = 100 * ChunksPerDimension;
+            float half = maxHeight / 2f;
+            var bottomLeft = new Vector3(-half, -half, -half); ;
+            var scale = 0.9f;
+            float n = SmoothNoise(x * scale, z * scale);
+            var threshold = bottomLeft.Y + half + (n * half);
+            return threshold;
+        }
+
         public float SmoothNoise(float x, float y)
         {
-            if (Perlin == null) SetupPerlin();
-
             return (float) (Perlin.GetValue((double)x, (double)y, 10));
         }
 
@@ -264,70 +271,26 @@ namespace Aquarium
         {
             if (LoadSequence == null || !LoadSequence.MoveNext())
             {
-                int numChunks = 25;
                 var camHeight = pos.Y;
 
                 if (camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
                 {
-                    LoadSequence = SceneLoadSequence_CameraAboveGround(pos, numChunks).GetEnumerator();
+                    LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(pos, numChunks: 25).GetEnumerator();
                 }
                 else
                 {
-                    LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks / 2).GetEnumerator();
+                    LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks: 5).GetEnumerator();
                 }
             }
             else
             {
-                if (Random.NextDouble() < 0.01)
+                if (Random.NextDouble() < 0.2)
                 {
                     ConsumeLoadSequence();
                 }
             }
         }
 
-        void ConsumeLoadSequence(int max = 5)
-        {
-            for (int i = 0; i < max; i++)
-            {
-                ChunkSpace.GetOrCreate(LoadSequence.Current);
-
-                if (!LoadSequence.MoveNext()) break;
-            }
-        }
-
-        private void SceneLoad_CameraBelowGround(Vector3 pos, int numChunks)
-        {
-            for (int x = -numChunks; x < numChunks; x++)
-            {
-                for (int z = -numChunks; z < numChunks; z++)
-                {
-                    for (int y = -numChunks; y < numChunks; y++)
-                    {
-                        ChunkSpace.GetOrCreate(pos + new Vector3(x, y, z) * ChunksPerDimension);
-                    }
-                }
-            }
-        }
-
-        void SceneLoad_CameraAboveGround(Vector3 pos, int numChunks)
-        {
-            float worldX, worldY, worldZ;
-            float surfaceY;
-            for (int x = -numChunks; x < numChunks; x++)
-            {
-                worldX = pos.X + (x * ChunksPerDimension);
-                for (int z = -numChunks; z < numChunks; z++)
-                {
-                    worldZ = pos.Z + (z * ChunksPerDimension);
-                    surfaceY = GetHeight(worldX, worldZ);
-                    for (int y = -1; y < 2; y++)
-                    {
-                        worldY = surfaceY + ( y * ChunksPerDimension );
-                        ChunkSpace.GetOrCreate(new Vector3(worldX, worldY, worldZ));
-                    }
-                }
-            }
-        }
 
         #region Scene Loading Sequences
         IEnumerator<Vector3> LoadSequence { get; set; }
@@ -363,6 +326,94 @@ namespace Aquarium
                 }
             }
         }
+
+        IEnumerable<Vector3> SceneLoadSequence_CameraAboveGround_SurfaceProjection(Vector3 pos, int numChunks)
+        {
+            int snakeLength = numChunks*numChunks;
+            
+            int state = 0;            
+            float dx, dz;
+            int stride = 0;
+            int leapSize = 0;
+            bool repeat = false;
+            for (int i = 0; i < snakeLength; i++)
+            {
+                pos = ProjectToSurface(pos);
+                yield return (pos);
+                yield return (pos + new Vector3(0, ChunksPerDimension, 0));
+                yield return (pos + new Vector3(0, -ChunksPerDimension, 0));
+                
+                yield return (pos + new Vector3(ChunksPerDimension, 0, 0));
+                yield return (pos + new Vector3(-ChunksPerDimension, 0, 0));
+
+                yield return (pos + new Vector3(0, 0, ChunksPerDimension));
+                yield return (pos + new Vector3(0, 0,-ChunksPerDimension));
+                
+                switch (state)
+                {
+                    case 0:
+                        dx = -1;
+                        dz = 0;
+                        break;
+                    case 1:
+                        dx = 0;
+                        dz = 1;
+                        break;
+                    case 2:
+                        dx = 1;
+                        dz = 0;
+                        break;
+                    case 3:
+                        dx = 0;
+                        dz = -1;
+                        break;
+                    default: throw new NotImplementedException();
+                }
+
+                pos.X += dx * (ChunksPerDimension);
+                pos.Z += dz * (ChunksPerDimension);
+
+                if (++stride > leapSize)
+                {
+                    stride = 0;
+
+                    if (repeat)
+                    {
+                        leapSize++;
+                    }
+                    repeat = !repeat;
+
+                    state++;
+                    state %= 4;
+                }
+            }
+        }
+
+        Vector3 ProjectToSurface(Vector3 p)
+        {
+            return new Vector3(p.X, GetHeight(p.X, p.Z), p.Z);
+        }
+
+        void ConsumeLoadSequence(int max = 10)
+        {
+            Vector3 v;
+            for (int i = 0; i < max; i++)
+            {
+                v = LoadSequence.Current;
+                ChunkSpace.GetOrCreate(v);
+                MarkInTree(v);
+                if (!LoadSequence.MoveNext()) break;
+            }
+        }
+
+        void MarkInTree(Vector3 v)
+        {
+            var node = Tree.Root.FindLeaf(v);
+            node.Occupied = true;
+        }
+
+
+
         #endregion
     }
 }
