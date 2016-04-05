@@ -21,7 +21,7 @@ namespace Aquarium
 {
     class VoxelScreen : FlyAroundGameScreen
     {
-        const int ChunksPerDimension = 16;
+        const int ChunksPerDimension = 8;
 
         ChunkSpace ChunkSpace { get; set; }
 
@@ -56,14 +56,14 @@ namespace Aquarium
             // TODO - make this bounding box size exactly big enough for the leaves to be chunks
             Tree = OctTree.CreatePreSubdivided(MaxTreeDepth,
                 new BoundingBox(
-                new Vector3(-worldSize, -worldSize, -worldSize),
-                new Vector3(worldSize, worldSize, worldSize)));
+                spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
+                spawnPoint + new Vector3(worldSize, worldSize, worldSize)));
 
             for (int i = 0; i < RenderDepth; i++)
             {
                 Tree.VisitLeaves(node =>
                 {
-                    var c = node.Box.GetCenter();
+                    var c = node.Box.Min;
                     var h = GetHeight(c.X, c.Z);
                     if (c.Y > h)
                     {
@@ -332,7 +332,7 @@ namespace Aquarium
             if (!otherScreenHasFocus && !coveredByOtherScreen)
             {
                 // fill out space around the player
-                SceneLoad(User.Body.Position);
+                SceneLoad();
             }
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
@@ -431,24 +431,28 @@ namespace Aquarium
         }
 
         long frameCount = 0;
-        void SceneLoad(Vector3 pos)
+        void SceneLoad()
         {
+            if (Tree.Root.IsLeaf) return;
+            var camPos = RenderContext.Camera.Position;
+            if (Tree.Root.Box.Contains(camPos) == ContainmentType.Disjoint) return;
             if (frameCount++ % 20 == 0)
             {
                 if (!ConsumeLoadSequence())
                 {
-                     LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
-                    return;
+                     //LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                    //return;
                     // get new sequence
-                    var camHeight = pos.Y;
+                    var camHeight = camPos.Y;
 
-                    if (camHeight > GetHeight(RenderContext.Camera.Position.X, RenderContext.Camera.Position.Z))
+                    if (camHeight > GetHeight(camPos.X, camPos.Z))
                     {
-                        LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(pos, numChunks: 10).GetEnumerator();
+                        LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(camPos, numChunks: 20).GetEnumerator();
                     }
                     else
                     {
-                        LoadSequence = SceneLoadSequence_CameraBelowGround(pos, numChunks: 10).GetEnumerator();
+                        //LoadSequence = SceneLoadSequence_CameraBelowGround(camPos, numChunks: 10).GetEnumerator();
+                        LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
                     }
                 }
             }
@@ -459,7 +463,7 @@ namespace Aquarium
             return new Vector3(p.X, GetHeight(p.X, p.Z), p.Z);
         }
 
-        bool ConsumeLoadSequence(int max = 1)
+        bool ConsumeLoadSequence(int max = 10)
         {
             if (LoadSequence == null)
             {
