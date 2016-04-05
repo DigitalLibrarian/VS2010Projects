@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Forever.Voxel.World
 {
-    public class WorldCell
+    public enum  WorldCellState
     {
-        public Chunk Chunk { get; private set; }
-        public WorldCellState State { get; set; }
+        Unloaded,
+        Loaded
     }
 }

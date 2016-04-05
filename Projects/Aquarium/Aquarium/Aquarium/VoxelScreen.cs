@@ -30,7 +30,7 @@ namespace Aquarium
 
         Perlin Perlin = null;
 
-        OctTree<int> Tree { get; set; }
+        OctTree<bool> Tree { get; set; }
 
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
@@ -54,7 +54,7 @@ namespace Aquarium
             float worldSize = s * (float) System.Math.Pow(2, MaxTreeDepth);
 
             // TODO - make this bounding box size exactly big enough for the leaves to be chunks
-            Tree = OctTree<int>.CreatePreSubdivided(MaxTreeDepth,
+            Tree = OctTree<bool>.CreatePreSubdivided(MaxTreeDepth,
                 new BoundingBox(
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
                 spawnPoint + new Vector3(worldSize, worldSize, worldSize)));
@@ -67,10 +67,10 @@ namespace Aquarium
                     var h = GetHeight(c.X, c.Z);
                     if (c.Y > h)
                     {
-                        node.Occupied = true;
-                        if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Occupied) == null)
+                        node.Value = true;
+                        if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Value) == null)
                         {
-                            node.Parent.PruneChildren();
+                            node.Parent.PruneChildren(x => !x.Value);
                         }
                     }
                 });
@@ -159,7 +159,7 @@ namespace Aquarium
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                ShootChunksBigLaser(ray, ChunkRayTool.Derez, 2);
+                ShootChunksBigLaser(ray, ChunkRayTool.Derez, 1);
             }
 
             if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
@@ -312,7 +312,7 @@ namespace Aquarium
 
             Tree.VisitAtDepth(node =>
             {
-                Renderer.Render(RenderContext, node.Box, node.Occupied ? Color.AntiqueWhite : Color.BlueViolet);
+                Renderer.Render(RenderContext, node.Box, node.Value ? Color.AntiqueWhite : Color.BlueViolet);
             }, RenderDepth);
 
 
@@ -329,11 +329,8 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            if (!otherScreenHasFocus && !coveredByOtherScreen)
-            {
-                // fill out space around the player
-                SceneLoad();
-            }
+            // fill out space around the player
+            SceneLoad();
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -422,7 +419,7 @@ namespace Aquarium
         {
             foreach (var v in Tree.Search((node) =>
             {
-                if (node.Occupied) return false;
+                if (node.Value) return false;
                 return true;
             }))
             {
@@ -484,14 +481,14 @@ namespace Aquarium
                 var containment = child.Box.Contains(v);
                 if (containment != ContainmentType.Disjoint)
                 {
-                    if (!child.Occupied)
+                    if (!child.Value)
                     {
-                        child.Occupied = true;
+                        child.Value = true;
                         if (child.Parent == null) return;
-                        if (child.Parent.Children.All(x => x.Occupied))
+                        if (child.Parent.Children.All(x => x.Value))
                         {
                             // parent should be pruned
-                            child.Parent.PruneChildren();
+                            child.Parent.PruneChildren(x => !x.Value);
                         }
                     }
                 }
