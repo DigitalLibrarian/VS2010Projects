@@ -59,6 +59,22 @@ namespace Aquarium
                 new Vector3(-worldSize, -worldSize, -worldSize),
                 new Vector3(worldSize, worldSize, worldSize)));
 
+            for (int i = 0; i < RenderDepth; i++)
+            {
+                Tree.VisitLeaves(node =>
+                {
+                    var c = node.Box.GetCenter();
+                    var h = GetHeight(c.X, c.Z);
+                    if (c.Y > h)
+                    {
+                        node.Occupied = true;
+                        if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Occupied) == null)
+                        {
+                            node.Parent.PruneChildren();
+                        }
+                    }
+                });
+            }
         }
 
         Chunk ChunkFactory(BoundingBox bb)
@@ -86,7 +102,6 @@ namespace Aquarium
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
             });
 
-            //chunk.Invalidate();
             MarkInTree(chunk.Box.GetCenter());
 
             return chunk;
