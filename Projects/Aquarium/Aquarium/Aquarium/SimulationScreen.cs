@@ -154,8 +154,6 @@ namespace Aquarium
         {
             if (Engaged)
             {
-                //var space = Sim.UpdateSet.Principle as SimSpacePartition;
-
                 var pos = RenderContext.Camera.Position;
                 var space = Sim.Space.GetOrCreate(pos) as SimSpacePartition;
 

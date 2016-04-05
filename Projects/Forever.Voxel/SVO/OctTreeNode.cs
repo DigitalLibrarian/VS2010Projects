@@ -11,8 +11,9 @@ namespace Forever.Voxel.SVO
     {
         public const int Subdivisions = 8;
 
-        public OctTreeNode(BoundingBox box)
+        public OctTreeNode(OctTreeNode parent, BoundingBox box)
         {
+            Parent = parent;
             Box = box;
             Children = null;
             Occupied = false;
@@ -20,6 +21,7 @@ namespace Forever.Voxel.SVO
 
         public bool IsLeaf { get { return Children == null; } }
         public BoundingBox Box { get; set; }
+        public OctTreeNode Parent { get; private set; }
         public OctTreeNode[] Children { get; set; }
         public bool Occupied { get; set; }
 
@@ -38,17 +40,40 @@ namespace Forever.Voxel.SVO
 
             Children = new OctTreeNode[Subdivisions];
 
-            Children[NodePosition.NEAR_BOTTOM_LEFT] = new OctTreeNode(BBMin(min, halfSize));
-            Children[NodePosition.NEAR_BOTTOM_RIGHT] = new OctTreeNode(BBMin(min + halfX, halfSize));
+            Children[NodePosition.NEAR_BOTTOM_LEFT] = new OctTreeNode(this, BBMin(min, halfSize));
+            Children[NodePosition.NEAR_BOTTOM_RIGHT] = new OctTreeNode(this, BBMin(min + halfX, halfSize));
 
-            Children[NodePosition.NEAR_TOP_LEFT] = new OctTreeNode(BBMin(min + halfY, halfSize));
-            Children[NodePosition.NEAR_TOP_RIGHT] = new OctTreeNode(BBMin(min + halfY + halfX, halfSize));
+            Children[NodePosition.NEAR_TOP_LEFT] = new OctTreeNode(this, BBMin(min + halfY, halfSize));
+            Children[NodePosition.NEAR_TOP_RIGHT] = new OctTreeNode(this, BBMin(min + halfY + halfX, halfSize));
 
-            Children[NodePosition.FAR_BOTTOM_RIGHT] = new OctTreeNode(BBMin(min+halfX+halfZ, halfSize)); 
-            Children[NodePosition.FAR_BOTTOM_LEFT] = new OctTreeNode(BBMin(min + halfZ, halfSize));
+            Children[NodePosition.FAR_BOTTOM_RIGHT] = new OctTreeNode(this, BBMin(min+halfX+halfZ, halfSize)); 
+            Children[NodePosition.FAR_BOTTOM_LEFT] = new OctTreeNode(this, BBMin(min + halfZ, halfSize));
             
-            Children[NodePosition.FAR_TOP_RIGHT] = new OctTreeNode(BBMin(max - halfSize, halfSize));
-            Children[NodePosition.FAR_TOP_LEFT] = new OctTreeNode(BBMin(max-halfSize-halfX, halfSize));
+            Children[NodePosition.FAR_TOP_RIGHT] = new OctTreeNode(this, BBMin(max - halfSize, halfSize));
+            Children[NodePosition.FAR_TOP_LEFT] = new OctTreeNode(this, BBMin(max-halfSize-halfX, halfSize));
+        }
+
+        public void PruneChildren()
+        {
+            Occupied = true;
+            Children = null;
+            if (Parent != null  && !Parent.Occupied && Parent.SearchFirstChild(x => !x.Occupied) == null)
+            {
+                Parent.PruneChildren();
+            }
+        }
+
+        public OctTreeNode SearchFirstChild(Predicate<OctTreeNode> pred)
+        {
+            if (IsLeaf) return null;
+            foreach (var child in Children)
+            {
+                if (pred(child))
+                {
+                    return child;
+                }
+            }
+            return null;
         }
 
         BoundingBox BBMin(Vector3 min, Vector3 boxSize)
