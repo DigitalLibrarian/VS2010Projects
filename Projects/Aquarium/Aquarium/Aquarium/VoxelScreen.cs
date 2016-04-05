@@ -30,7 +30,7 @@ namespace Aquarium
 
         Perlin Perlin = null;
 
-        OctTree Tree { get; set; }
+        OctTree<int> Tree { get; set; }
 
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
@@ -54,7 +54,7 @@ namespace Aquarium
             float worldSize = s * (float) System.Math.Pow(2, MaxTreeDepth);
 
             // TODO - make this bounding box size exactly big enough for the leaves to be chunks
-            Tree = OctTree.CreatePreSubdivided(MaxTreeDepth,
+            Tree = OctTree<int>.CreatePreSubdivided(MaxTreeDepth,
                 new BoundingBox(
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
                 spawnPoint + new Vector3(worldSize, worldSize, worldSize)));
@@ -435,16 +435,13 @@ namespace Aquarium
         {
             if (Tree.Root.IsLeaf) return;
             var camPos = RenderContext.Camera.Position;
-            if (Tree.Root.Box.Contains(camPos) == ContainmentType.Disjoint) return;
             if (frameCount++ % 20 == 0)
             {
                 if (!ConsumeLoadSequence())
                 {
-                     //LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
-                    //return;
-                    // get new sequence
+                     LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                    /*
                     var camHeight = camPos.Y;
-
                     if (camHeight > GetHeight(camPos.X, camPos.Z))
                     {
                         LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(camPos, numChunks: 20).GetEnumerator();
@@ -454,6 +451,7 @@ namespace Aquarium
                         //LoadSequence = SceneLoadSequence_CameraBelowGround(camPos, numChunks: 10).GetEnumerator();
                         LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
                     }
+                     * */
                 }
             }
         }
