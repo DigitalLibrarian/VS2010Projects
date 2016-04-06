@@ -35,10 +35,16 @@ namespace Aquarium
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
 
+        Effect VoxelEffect { get; set; }
+        private readonly string EffectName = "Effects\\VoxelEffect";
+
+
         public override void LoadContent()
         {
             base.LoadContent();
             SetupPerlin();
+
+            VoxelEffect = ScreenManager.Game.Content.Load<Effect>(EffectName);
 
             ChunkSpace = new ChunkSpace(ChunksPerDimension, ChunkFactory);
 
@@ -82,8 +88,7 @@ namespace Aquarium
         Chunk ChunkFactory(BoundingBox bb)
         {
             var chunk = new Chunk(bb, ChunksPerDimension);
-            chunk.LoadContent(ScreenManager.Game.Content);
-            chunk.Initialize(RenderContext.GraphicsDevice);
+            chunk.Initialize(RenderContext.GraphicsDevice, VoxelEffect);
             var pos = bb.Min;
             chunk.VisitCoords((x, y, z) => {
                 var world = chunk.ArrayToChunk(new Vector3(x, y, z));
@@ -441,6 +446,7 @@ namespace Aquarium
             {
                 if (!ConsumeLoadSequence())
                 {
+                    if (LoadSequence != null) LoadSequence.Dispose();
                      LoadSequence = 
                          SceneLoadSequence_CameraAboveGround_SurfaceProjection(camPos, 10).Concat(
                          SceneLoadSequence_OctTree()).GetEnumerator();

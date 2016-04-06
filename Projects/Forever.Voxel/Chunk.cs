@@ -103,15 +103,10 @@ namespace Forever.Voxel
         #endregion
 
         #region Graphics Data
-        private readonly string EffectName = "Effects\\VoxelEffect";
         Effect Effect { get; set; }
-        public void LoadContent(ContentManager content)
+        public void Initialize(GraphicsDevice device, Effect effect)
         {
-            Effect = content.Load<Effect>(EffectName);
-        }
-
-        public void Initialize(GraphicsDevice device)
-        {
+            Effect = effect;
             SetupInstancing(device);
             SetUpGeometry();
             NeedRebuild = true;
@@ -198,12 +193,10 @@ namespace Forever.Voxel
         }
 
         public int InstanceCount { get; private set; }
-        public int TotalOcclusions { get; private set; }
         Voxel.ViewState[] InstanceBuffer { get; set; }
         private void RebuildInstanceBuffer(Ray cameraRay)
         {
             int next = 0;
-            var occlusions = 0;
             VisitCoords((x, y, z) =>
             {
                 var voxel = Get(x, y, z).Value;
@@ -212,16 +205,10 @@ namespace Forever.Voxel
                     if (!IsOccluded(x, y, z, cameraRay))
                     {
                         var viewState = ExtractViewState(x, y, z);
-                        //instances.Add(viewState);
                         InstanceBuffer[next++] = viewState;
-                    }
-                    else
-                    {
-                        occlusions++;
                     }
                 }
             });
-            TotalOcclusions = occlusions;
            
             InstanceCount = next;
             if (InstanceCount > 0)
@@ -510,7 +497,7 @@ namespace Forever.Voxel
             var camPos = rc.Camera.Position;
             var lightPos = new Vector3(-200, 200, -200);
             float distance = (Position - lightPos).LengthSquared();
-            
+
             var effect = Instancing.Effect;
             effect.CurrentTechnique = effect.Techniques["Instancing"];
             effect.Parameters["WVP"].SetValue(wvp);

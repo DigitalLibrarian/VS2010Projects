@@ -6,22 +6,46 @@ using Microsoft.Xna.Framework;
 
 namespace Forever.SpacePartitions
 {
+    public class Space<T> : SpaceMap<T> where T : class
+    {
+        public Space(int gridSize) : base(gridSize) { }
+
+        public IPartition<T> GetOrCreate(Vector3 pos)
+        {
+            return GetOrCreate(VectorToCoord(pos, GridSize));
+        }
+        public IPartition<T> GetOrCreate(SpaceCoord coord)
+        {
+            return GetOrCreate(coord, GridSize);
+        }
+        private IPartition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
+        {
+            if (!ContainsCoord(coord))
+            {
+                var box = CoordToBoundingBox(coord, boxHalfSize);
+                var par = CreateNewPartition(box);
+                TheMatrix.Add(coord, par);
+            }
+            return TheMatrix[coord];
+        }
+    }
+
     /// <summary>
     /// A spatial partitioned matrix of objects. 
     /// </summary>
-    public class Space<T> where T: class
+    public class SpaceMap<T> where T: class
     {
         /// <summary>
         /// 3D matrix of cell spaces
         /// </summary>
-        Dictionary<SpaceCoord, IPartition<T>> TheMatrix { get; set; }
+        protected Dictionary<SpaceCoord, IPartition<T>> TheMatrix { get; set; }
 
         public IEnumerable<SpaceCoord> Coords { get { return TheMatrix.Keys; } }
         public IEnumerable<IPartition<T>> Partitions { get { return TheMatrix.Values; } }
 
         public int GridSize { get; private set; }
 
-        public Space(int gridSize)
+        public SpaceMap(int gridSize)
         {
             GridSize = gridSize;
             TheMatrix = new Dictionary<SpaceCoord, IPartition<T>>();
@@ -83,25 +107,6 @@ namespace Forever.SpacePartitions
             return parts;
         }
 
-        public IPartition<T> GetOrCreate(Vector3 pos)
-        {
-            return GetOrCreate(VectorToCoord(pos, GridSize));
-        }
-        public IPartition<T> GetOrCreate(SpaceCoord coord)
-        {
-            return GetOrCreate(coord, GridSize);
-        }
-        private IPartition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
-        {
-            if (!TheMatrix.ContainsKey(coord))
-            {
-                var box = CoordToBoundingBox(coord, boxHalfSize);
-                var par = CreateNewPartition(box);
-                TheMatrix.Add(coord, par);
-            }
-            return TheMatrix[coord];
-        }
-
         protected SpaceCoord? GetPartitionCoord(IPartition<T> partition)
         {
 
@@ -124,7 +129,7 @@ namespace Forever.SpacePartitions
             }
         }
         
-        public bool IsLoaded(SpaceCoord coord)
+        public bool ContainsCoord(SpaceCoord coord)
         {
             return TheMatrix.ContainsKey(coord);
         }

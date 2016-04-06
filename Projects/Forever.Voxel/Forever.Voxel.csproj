@@ -95,6 +95,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Meshing\VoxelInstancing.cs" />
+    <Compile Include="SVO\ChunkTree.cs" />
     <Compile Include="SVO\NodePosition.cs" />
     <Compile Include="SVO\OctTreeNode.cs" />
     <Compile Include="SVO\RayCast.cs" />
@@ -123,6 +125,7 @@
       <Name>Forever.SpacePartitions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
