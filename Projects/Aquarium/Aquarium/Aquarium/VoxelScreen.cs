@@ -44,20 +44,22 @@ namespace Aquarium
 
             var spawnHeightAboveGround = 5 * ChunksPerDimension;
             var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
-            User.Body.Position = spawnPoint;
             Ui.Elements.AddRange(CreateUILayout());
 
-            MaxTreeDepth = 4;
-            RenderDepth = 4;
+            MaxTreeDepth = 5;
+            RenderDepth = -1;
 
             var s = (float)ChunksPerDimension;
             float worldSize = s * (float) System.Math.Pow(2, MaxTreeDepth);
 
-            // TODO - make this bounding box size exactly big enough for the leaves to be chunks
-            Tree = OctTree<bool>.CreatePreSubdivided(MaxTreeDepth,
-                new BoundingBox(
+            var treeBox = new BoundingBox(
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
-                spawnPoint + new Vector3(worldSize, worldSize, worldSize)));
+                spawnPoint + new Vector3(worldSize, worldSize, worldSize));
+            Tree = OctTree<bool>.CreatePreSubdivided(MaxTreeDepth, treeBox);
+
+            var diff = treeBox.Max - treeBox.Min;
+            var startPos = Vector3.Backward * (diff.Length() / 2f);
+            User.Body.Position = startPos;
 
             for (int i = 0; i < RenderDepth; i++)
             {
@@ -182,7 +184,7 @@ namespace Aquarium
 
             if (input.IsNewKeyPress(Microsoft.Xna.Framework.Input.Keys.OemMinus))
             {
-                if (RenderDepth > 0) RenderDepth--;
+                if (RenderDepth > -1) RenderDepth--;
             }
 
             if (input.CurrentMouseState.MiddleButton == ButtonState.Pressed)
@@ -287,7 +289,7 @@ namespace Aquarium
             {
                return sphere.Intersects(chunk.Box);
             });
-
+            
             foreach(var chunk in renderSet)
             {
                 count += chunk.InstanceCount;
@@ -310,10 +312,13 @@ namespace Aquarium
                 }
             }
 
-            Tree.VisitAtDepth(node =>
+            if (RenderDepth >= 0)
             {
-                Renderer.Render(RenderContext, node.Box, node.Value ? Color.AntiqueWhite : Color.BlueViolet);
-            }, RenderDepth);
+                Tree.VisitAtDepth(node =>
+                {
+                    Renderer.Render(RenderContext, node.Box, node.Value ? Color.AntiqueWhite : Color.BlueViolet);
+                }, RenderDepth);
+            }
 
 
             TotalInstancesLabel.Label = string.Format("Instances : {0} / {1}", count, capacity);
@@ -436,7 +441,10 @@ namespace Aquarium
             {
                 if (!ConsumeLoadSequence())
                 {
-                     LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                     LoadSequence = 
+                         SceneLoadSequence_CameraAboveGround_SurfaceProjection(camPos, 10).Concat(
+                         SceneLoadSequence_OctTree()).GetEnumerator();
+
                     /*
                     var camHeight = camPos.Y;
                     if (camHeight > GetHeight(camPos.X, camPos.Z))
