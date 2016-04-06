@@ -29,6 +29,7 @@ namespace Aquarium
 
         public override void LoadContent()
         {
+            PropagateInput = true;
             base.LoadContent();
 
             Sim = new Simulation();
@@ -83,8 +84,7 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            Sim.Update(gameTime);
-
+            if (!otherScreenHasFocus && !coveredByOtherScreen) Sim.Update(gameTime);
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -127,8 +127,6 @@ namespace Aquarium
         List<IUiElement> CreateUILayout()
         {
             var spriteFont = ScreenManager.Font;
-            var actionBarSlotHeight = 40;
-            var horizontalActionBar = new ActionBar(RenderContext, 30, actionBarSlotHeight, spriteFont);
 
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
@@ -139,13 +137,12 @@ namespace Aquarium
                 this,
                 SpawnerEditor);
 
-            horizontalActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
-            horizontalActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism(targetWindow));
-            horizontalActionBar.Slots[1].TotalCoolDown = 200;
+            ActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
+            ActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism(targetWindow));
+            ActionBar.Slots[1].TotalCoolDown = 200;
             
             return new List<IUiElement>
             {
-                horizontalActionBar,
                 targetWindow, 
             };
         }
@@ -157,8 +154,6 @@ namespace Aquarium
         {
             if (Engaged)
             {
-                //var space = Sim.UpdateSet.Principle as SimSpacePartition;
-
                 var pos = RenderContext.Camera.Position;
                 var space = Sim.Space.GetOrCreate(pos) as SimSpacePartition;
 

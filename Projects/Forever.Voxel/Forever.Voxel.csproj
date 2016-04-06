@@ -98,12 +98,10 @@
     <Compile Include="SVO\NodePosition.cs" />
     <Compile Include="SVO\OctTreeNode.cs" />
     <Compile Include="SVO\RayCast.cs" />
-    <Compile Include="SVO\SparseVoxelOctTree.cs" />
+    <Compile Include="SVO\OctTree.cs" />
     <Compile Include="ThrottledQueue.cs" />
-    <Compile Include="World\IWorldCellSpace.cs" />
     <Compile Include="World\WorldCell.cs" />
-    <Compile Include="World\WorldCellSpace.cs" />
-    <Compile Include="World\WorldChunkManager.cs" />
+    <Compile Include="World\WorldCellState.cs" />
     <Compile Include="ChunkSpace.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Voxel.cs" />

@@ -92,16 +92,10 @@ namespace Aquarium
 
         void Reset()
         {
-            var index = new List<GameScreen>
-            {
-                new SparseVoxelOctTreeScreen(),
-                new VoxelScreen(),
-                new OrganismScreen(),
-                new SimulationScreen()
-            }.ToDictionary(x => x.GetType().ToString());
-
-            var startScreen = new DevScreenSwitcher("Debugging Screen Switcher", index);
+            ScreenManager.ExitAll();
+            var startScreen = new DevScreenSwitchLauncher();
             ScreenManager.AddScreen(startScreen);
+            startScreen.BringUpSwitcherScreen();
         }
 
         /// <summary>
@@ -113,8 +107,11 @@ namespace Aquarium
         {
             // Allows the game to exit
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == Microsoft.Xna.Framework.Input.ButtonState.Pressed
+                || !ScreenManager.GetScreens().Any())
                 this.Exit();
+
+            
 
             Terminal.CheckOpen(Microsoft.Xna.Framework.Input.Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 

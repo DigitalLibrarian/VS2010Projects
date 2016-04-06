@@ -159,6 +159,11 @@ namespace Forever.SpacePartitions
             return VectorToCoord(pos, boxHalfSize);
         }
 
+        public Vector3 CoordToVector(SpaceCoord coord)
+        {
+            return CoordToVector(coord, GridSize);
+        }
+
         protected Vector3 CoordToVector(SpaceCoord coord, float boxHalfSize)
         {
 
@@ -168,6 +173,11 @@ namespace Forever.SpacePartitions
             var corner =  new Vector3(x, y, z) * (boxHalfSize*2);
             return corner +(new Vector3(1, 1, 1) * boxHalfSize);
 
+        }
+
+        public SpaceCoord VectorToCoord(Vector3 vect)
+        {
+            return VectorToCoord(vect, GridSize);
         }
 
         protected SpaceCoord VectorToCoord(Vector3 vect, float boxHalfSize)

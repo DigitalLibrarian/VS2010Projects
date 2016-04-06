@@ -16,7 +16,7 @@ namespace Aquarium
 {
     class SparseVoxelOctTreeScreen : FlyAroundGameScreen
     {
-        SparseVoxelOctTree Tree { get; set; }
+        OctTree<int> Tree { get; set; }
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
 
@@ -24,13 +24,14 @@ namespace Aquarium
 
         public override void LoadContent()
         {
+            PropagateInput = true;
             base.LoadContent();
 
             var n = 1024;
             var treeBox = new BoundingBox(new Vector3(-n, -n, -n), new Vector3(n, n, n));
 
             MaxTreeDepth = 5;
-            Tree = SparseVoxelOctTree.CreatePreSubdivided(MaxTreeDepth, treeBox);
+            Tree = OctTree<int>.CreatePreSubdivided(MaxTreeDepth, treeBox);
 
             RenderDepth = 0;
 
@@ -54,6 +55,7 @@ namespace Aquarium
 
         public override void HandleInput(InputState input)
         {
+            base.HandleInput(input);
             if(input.IsNewKeyPress(Keys.OemPlus))
             {
                 if(RenderDepth < MaxTreeDepth) RenderDepth++;
@@ -63,8 +65,6 @@ namespace Aquarium
             {
                 if(RenderDepth > 0) RenderDepth--;
             }
-
-            base.HandleInput(input);
         }
 
         public override void Draw(GameTime gameTime)

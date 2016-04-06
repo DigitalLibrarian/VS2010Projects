@@ -507,16 +507,24 @@ namespace Forever.Voxel
                 * rc.Camera.View
                 * rc.Camera.Projection;
 
+            var camPos = rc.Camera.Position;
+            var lightPos = new Vector3(-200, 200, -200);
+            float distance = (Position - lightPos).LengthSquared();
+            
             var effect = Instancing.Effect;
             effect.CurrentTechnique = effect.Techniques["Instancing"];
             effect.Parameters["WVP"].SetValue(wvp);
+            effect.Parameters["CameraPos"].SetValue(camPos);
+            effect.Parameters["LightPosition"].SetValue(lightPos);
+            effect.Parameters["LightDistanceSquared"].SetValue(distance);
+            float intensity = 0.5f;
+            effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
+            effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
 
             Instancing.Draw(duration, rc, InstanceCount);
-
-            //Renderer.Render(Box, renderContext.GraphicsDevice, World, renderContext.Camera.View, renderContext.Camera.Projection, Color.Red);
         }
 
-        Matrix World;
+        public Matrix World;
 
         #region Voxel State
         bool NeedRebuild = false;

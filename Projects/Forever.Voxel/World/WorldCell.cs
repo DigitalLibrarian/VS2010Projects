@@ -8,5 +8,6 @@ namespace Forever.Voxel.World
     public class WorldCell
     {
         public Chunk Chunk { get; private set; }
+        public WorldCellState State { get; set; }
     }
 }

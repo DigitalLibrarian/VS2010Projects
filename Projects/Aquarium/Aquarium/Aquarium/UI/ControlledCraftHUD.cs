@@ -12,7 +12,6 @@ namespace Aquarium.Ui
     
     public class ControlledCraftHUD : IUiElement
     {
-
         public Reticule EmptyCircleReticule { get; private set; }
         public Reticule FilledCircleReticule { get; private set; }
 
