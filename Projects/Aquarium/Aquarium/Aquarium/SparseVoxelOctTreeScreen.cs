@@ -16,7 +16,7 @@ namespace Aquarium
 {
     class SparseVoxelOctTreeScreen : FlyAroundGameScreen
     {
-        OctTree Tree { get; set; }
+        OctTree<int> Tree { get; set; }
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
 
@@ -31,7 +31,7 @@ namespace Aquarium
             var treeBox = new BoundingBox(new Vector3(-n, -n, -n), new Vector3(n, n, n));
 
             MaxTreeDepth = 5;
-            Tree = OctTree.CreatePreSubdivided(MaxTreeDepth, treeBox);
+            Tree = OctTree<int>.CreatePreSubdivided(MaxTreeDepth, treeBox);
 
             RenderDepth = 0;
 

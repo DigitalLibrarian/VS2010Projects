@@ -8,23 +8,23 @@ using Forever.Extensions;
 
 namespace Forever.Voxel.SVO
 {
-    public class OctTree
+    public class OctTree<T>
     {
-        public OctTreeNode Root { get; private set; }
+        public OctTreeNode<T> Root { get; private set; }
 
         public OctTree(BoundingBox box)
         {
-            Root = new OctTreeNode(null, box);
+            Root = new OctTreeNode<T>(null, box);
         }
 
-        public static OctTree CreatePreSubdivided(int depth, BoundingBox box)
+        public static OctTree<T> CreatePreSubdivided(int depth, BoundingBox box)
         {
-            var tree = new OctTree(box);
+            var tree = new OctTree<T>(box);
             Subdivide(tree.Root, depth);
             return tree;
         }
 
-        public static void Subdivide(OctTreeNode node, int depth)
+        public static void Subdivide(OctTreeNode<T> node, int depth)
         {
             if (node == null) return;
             if (depth == 0) return; // leaf
@@ -38,12 +38,12 @@ namespace Forever.Voxel.SVO
         #region Traversal
 
         
-        public IEnumerable<OctTreeNode> Search(Predicate<OctTreeNode> consumer)
+        public IEnumerable<OctTreeNode<T>> Search(Predicate<OctTreeNode<T>> consumer)
         {
             return Search(consumer, Root);
         }
-        
-        IEnumerable<OctTreeNode> Search(Predicate<OctTreeNode> consumer, OctTreeNode node)
+
+        IEnumerable<OctTreeNode<T>> Search(Predicate<OctTreeNode<T>> consumer, OctTreeNode<T> node)
         {
             bool keeper = consumer(node);
             if (keeper)
@@ -66,59 +66,59 @@ namespace Forever.Voxel.SVO
             }
         }
 
-        public void Visit(Action<OctTreeNode> action, int depth)
+        public void Visit(Action<OctTreeNode<T>> action, int depth)
         {
             Visit(action, depth, Root);
         }
 
 
-        void Visit(Action<OctTreeNode> action, int depth, OctTreeNode node)
+        void Visit(Action<OctTreeNode<T>> action, int depth, OctTreeNode<T> node)
         {
             if (node == null) return;
             if (depth < 0) return;
 
             action(node);
 
-            for (int i = 0; i < OctTreeNode.Subdivisions; i++)
+            for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
             {
                 Visit(action, depth - 1, node.Children[i]);
             }
         }
 
-        public void VisitLeaves(Action<OctTreeNode> action)
+        public void VisitLeaves(Action<OctTreeNode<T>> action)
         {
             VisitLeaves(action, Root);
         }
 
-        void VisitLeaves(Action<OctTreeNode> action, OctTreeNode node)
+        void VisitLeaves(Action<OctTreeNode<T>> action, OctTreeNode<T> node)
         {
             if(node.IsLeaf)
             {
                 action(node);
             }
 
-            for (int i = 0; i < OctTreeNode.Subdivisions; i++)
+            for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
             {
                 if (node.IsLeaf) return;
                 VisitLeaves(action, node.Children[i]);
             }
         }
 
-        public void VisitAtDepth(Action<OctTreeNode> action, int depth)
+        public void VisitAtDepth(Action<OctTreeNode<T>> action, int depth)
         {
             VisitAtDepth(action, depth, Root);
         }
 
-        void VisitAtDepth(Action<OctTreeNode> action, int depth, OctTreeNode node)
+        void VisitAtDepth(Action<OctTreeNode<T>> action, int depth, OctTreeNode<T> node)
         {
             if (node == null) return;
             if (depth == 0 || node.IsLeaf)
             {
                 action(node);
                 return;
-            } 
+            }
 
-            for (int i = 0; i < OctTreeNode.Subdivisions; i++)
+            for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
             {
                 VisitAtDepth(action, depth - 1, node.Children[i]);
             }

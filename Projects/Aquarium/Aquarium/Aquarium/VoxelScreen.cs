@@ -30,7 +30,7 @@ namespace Aquarium
 
         Perlin Perlin = null;
 
-        OctTree Tree { get; set; }
+        OctTree<bool> Tree { get; set; }
 
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
@@ -54,7 +54,7 @@ namespace Aquarium
             float worldSize = s * (float) System.Math.Pow(2, MaxTreeDepth);
 
             // TODO - make this bounding box size exactly big enough for the leaves to be chunks
-            Tree = OctTree.CreatePreSubdivided(MaxTreeDepth,
+            Tree = OctTree<bool>.CreatePreSubdivided(MaxTreeDepth,
                 new BoundingBox(
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
                 spawnPoint + new Vector3(worldSize, worldSize, worldSize)));
@@ -67,10 +67,10 @@ namespace Aquarium
                     var h = GetHeight(c.X, c.Z);
                     if (c.Y > h)
                     {
-                        node.Occupied = true;
-                        if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Occupied) == null)
+                        node.Value = true;
+                        if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Value) == null)
                         {
-                            node.Parent.PruneChildren();
+                            node.Parent.PruneChildren(x => !x.Value);
                         }
                     }
                 });
@@ -131,7 +131,7 @@ namespace Aquarium
             float half = maxHeight / 2f;
             var bottomLeft = new Vector3(-half, -half, -half); ;
             var scale = 0.9f;
-            float n = SmoothNoise(x * scale, z * scale);
+            float n = SmoothNoise(10+ x * scale, 10+ z * scale);
             var threshold = bottomLeft.Y + half + (n * half);
             return threshold;
         }
@@ -159,7 +159,7 @@ namespace Aquarium
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = GetMouseRay(mousePoint);
-                ShootChunksBigLaser(ray, ChunkRayTool.Derez, 2);
+                ShootChunksBigLaser(ray, ChunkRayTool.Derez, 1);
             }
 
             if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
@@ -312,7 +312,7 @@ namespace Aquarium
 
             Tree.VisitAtDepth(node =>
             {
-                Renderer.Render(RenderContext, node.Box, node.Occupied ? Color.AntiqueWhite : Color.BlueViolet);
+                Renderer.Render(RenderContext, node.Box, node.Value ? Color.AntiqueWhite : Color.BlueViolet);
             }, RenderDepth);
 
 
@@ -329,11 +329,8 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            if (!otherScreenHasFocus && !coveredByOtherScreen)
-            {
-                // fill out space around the player
-                SceneLoad();
-            }
+            // fill out space around the player
+            SceneLoad();
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
@@ -422,7 +419,7 @@ namespace Aquarium
         {
             foreach (var v in Tree.Search((node) =>
             {
-                if (node.Occupied) return false;
+                if (node.Value) return false;
                 return true;
             }))
             {
@@ -435,16 +432,13 @@ namespace Aquarium
         {
             if (Tree.Root.IsLeaf) return;
             var camPos = RenderContext.Camera.Position;
-            if (Tree.Root.Box.Contains(camPos) == ContainmentType.Disjoint) return;
             if (frameCount++ % 20 == 0)
             {
                 if (!ConsumeLoadSequence())
                 {
-                     //LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
-                    //return;
-                    // get new sequence
+                     LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                    /*
                     var camHeight = camPos.Y;
-
                     if (camHeight > GetHeight(camPos.X, camPos.Z))
                     {
                         LoadSequence = SceneLoadSequence_CameraAboveGround_SurfaceProjection(camPos, numChunks: 20).GetEnumerator();
@@ -454,6 +448,7 @@ namespace Aquarium
                         //LoadSequence = SceneLoadSequence_CameraBelowGround(camPos, numChunks: 10).GetEnumerator();
                         LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
                     }
+                     * */
                 }
             }
         }
@@ -486,14 +481,14 @@ namespace Aquarium
                 var containment = child.Box.Contains(v);
                 if (containment != ContainmentType.Disjoint)
                 {
-                    if (!child.Occupied)
+                    if (!child.Value)
                     {
-                        child.Occupied = true;
+                        child.Value = true;
                         if (child.Parent == null) return;
-                        if (child.Parent.Children.All(x => x.Occupied))
+                        if (child.Parent.Children.All(x => x.Value))
                         {
                             // parent should be pruned
-                            child.Parent.PruneChildren();
+                            child.Parent.PruneChildren(x => !x.Value);
                         }
                     }
                 }
