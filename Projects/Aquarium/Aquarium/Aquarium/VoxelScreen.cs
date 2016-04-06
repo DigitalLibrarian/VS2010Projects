@@ -131,7 +131,7 @@ namespace Aquarium
             float half = maxHeight / 2f;
             var bottomLeft = new Vector3(-half, -half, -half); ;
             var scale = 0.9f;
-            float n = SmoothNoise(x * scale, z * scale);
+            float n = SmoothNoise(10+ x * scale, 10+ z * scale);
             var threshold = bottomLeft.Y + half + (n * half);
             return threshold;
         }

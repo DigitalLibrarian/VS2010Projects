@@ -1,25 +1,21 @@
 float4x4 WVP;
-
-// TODO: add effect parameters here.
+float3 CameraPos;
+float3 LightPosition;
+float3 LightDiffuseColorIntensity;
+float LightDistanceSquared;
+float3 DiffuseColor;
 
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
     float4 Color : COLOR0;
-
-
-    // TODO: add input channels such as texture
-    // coordinates and vertex colors here.
 };
 
 struct VertexShaderOutput
 {
-    float4 Position : POSITION0;
+    float4 RealPosition : POSITION0;
+	float4 Position : TEXCOORD0;
 	float4 Color : COLOR0;
-
-    // TODO: add vertex shader outputs such as colors and texture
-    // coordinates here. These values will automatically be interpolated
-    // over the triangle, and provided as input to your pixel shader.
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float4 chunkSpacePos : POSITION1, 
@@ -28,28 +24,44 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float4 chunkSpa
     VertexShaderOutput output;
 
 	float4 pos = chunkSpacePos + input.Position;
-    output.Position = mul(pos, WVP);
-
+	output.Position = mul(pos, WVP);
+	output.RealPosition = output.Position;
 	output.Color = instanceColor;
-
-    // TODO: add your vertex shader code here.
-
+	
     return output;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-    // TODO: add your pixel shader code here.
 
-    return input.Color;
+
+  // Phong relfection is ambient + light-diffuse + spec highlights.
+  // I = Ia*ka*Oda + fatt*Ip[kd*Od(N.L) + ks(R.V)^n]
+  // and http://en.wikipedia.org/wiki/Phong_shading
+  // Get light direction for this fragment
+  float3 lightDir = normalize(input.Position - LightPosition);
+ 
+ 
+  float3 normal = normalize(cross(ddx(input.Position), ddy(input.Position)));
+
+  // Note: Non-uniform scaling not supported
+  float diffuseLighting = saturate(dot(normal, -lightDir)); // per pixel diffuse lighting
+ 
+  // Introduce fall-off of light intensity
+  diffuseLighting *= (LightDistanceSquared / dot(LightPosition - input.Position, LightPosition - input.Position));
+  // Using Blinn half angle modification for performance over correctness
+  float3 h = normalize(normalize(CameraPos - input.Position) - lightDir);
+ 
+  return float4(saturate(
+	input.Color +
+    (DiffuseColor * LightDiffuseColorIntensity * diffuseLighting * 0.6)
+    ), 1);
 }
 
 technique Instancing
 {
     pass Pass1
     {
-        // TODO: set renderstates here.
-
         VertexShader = compile vs_3_0 VertexShaderFunction();
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }
