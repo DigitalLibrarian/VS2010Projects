@@ -160,6 +160,16 @@
       <Importer>FbxImporter</Importer>
       <Processor>ModelProcessor</Processor>
     </Compile>
+    <Compile Include="Segoe18.spritefont">
+      <Name>Segoe18</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+    <Compile Include="Segoe30.spritefont">
+      <Name>Segoe30</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
     <None Include="SimpleGui\Skins\GreySkin\Map.txt">
       <Name>Map</Name>
       <Processor>PassThroughProcessor</Processor>
@@ -209,6 +219,18 @@
   <ItemGroup>
     <Compile Include="Models\TurboSquid\Low poly starfighter\wasphunter_texture.jpg">
       <Name>wasphunter_texture</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddButton.png">
+      <Name>AddButton</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="TrashButton.png">
+      <Name>TrashButton</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
