@@ -12,6 +12,7 @@ using Nuclex.UserInterface;
 using Nuclex.Input;
 using Nuclex.UserInterface.Controls.Desktop;
 using Nuclex.UserInterface.Controls.Arcade;
+using Aquarium.UI.Controls;
 
 namespace Aquarium
 {
@@ -52,6 +53,7 @@ namespace Aquarium
             // stretches across the whole screen (all controls are positioned using both
             // a percentual position/size and absolute position/size). We change this to
             // prevent GUI or HUD elements from appearing outside the title-safe area.
+
             mainScreen.Desktop.Bounds = new UniRectangle(
               new UniScalar(0.1f, 0.0f), new UniScalar(0.1f, 0.0f), // x and y
               new UniScalar(0.8f, 0.0f), new UniScalar(0.8f, 0.0f) // width and height
@@ -59,11 +61,11 @@ namespace Aquarium
 
 
             // Next, we add our demonstration dialog to the screen
+            mainScreen.Desktop.Children.Add(new PopulationWindow());
             mainScreen.Desktop.Children.Add(new DemoDialog());
             mainScreen.Desktop.Children.Add(new DemoPanel());
-
         }
-
+        
         public event EventHandler<EventArgs> DeviceCreated;
 
         public event EventHandler<EventArgs> DeviceDisposing;
@@ -93,7 +95,7 @@ namespace Aquarium
     {
         public DemoPanel()
         {
-            this.Bounds = new UniRectangle(500, 500, 200, 200);
+            this.Bounds = new UniRectangle(700, 700, 200, 200);
         }
     }
 
@@ -120,7 +122,9 @@ namespace Aquarium
         /// </summary>
         private void InitializeComponent()
         {
+            float TotalWidth = 512f;
             this.Title = "Windows have titles";
+            this.Bounds = new UniRectangle(800.0f, 100.0f, TotalWidth, 384.0f);
             this.helloWorldLabel = new Nuclex.UserInterface.Controls.LabelControl();
             this.horSliderLabel = new Nuclex.UserInterface.Controls.LabelControl();
             this.verSliderLabel = new Nuclex.UserInterface.Controls.LabelControl();
@@ -145,10 +149,6 @@ namespace Aquarium
             this.cancelButton.Bounds = new UniRectangle(
               new UniScalar(1.0f, -90.0f), new UniScalar(1.0f, -40.0f), 80, 24
             );
-            //
-            // DemoDialog
-            //
-            this.Bounds = new UniRectangle(100.0f, 100.0f, 512.0f, 384.0f);
 
             this.horSliderLabel.Text = "Horizontal Slider";
             this.horSliderLabel.Bounds = new UniRectangle(10, 80, 100, 20);
@@ -200,7 +200,7 @@ namespace Aquarium
             this.closeWindowButton = new CloseWindowButtonControl()
             {
                 Text = "X",
-                Bounds = new UniRectangle(this.Bounds.Right - 125, 2, 20, 20),
+                Bounds = new UniRectangle(TotalWidth - 25, 2, 20, 20),
                 //Enabled = true
             };
             this.closeWindowButton.Pressed += new EventHandler(closeWindowButton_Pressed);
