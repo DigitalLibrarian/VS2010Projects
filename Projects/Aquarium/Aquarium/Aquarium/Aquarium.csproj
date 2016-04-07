@@ -69,6 +69,9 @@
     <Reference Include="LibNoise">
       <HintPath>..\..\..\..\randomDlls\LibNoise.dll</HintPath>
     </Reference>
+    <Reference Include="LzmaSharp">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\LzmaSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
       <Private>False</Private>
     </Reference>
@@ -99,16 +102,63 @@
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
-    <Reference Include="RedBadger.Xpf, Version=1.0.4573.38537, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\randomDlls\RedBadger.Xpf.dll</HintPath>
+    <Reference Include="NMock.StrongNamed">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\NMock.StrongNamed.dll</HintPath>
     </Reference>
-    <Reference Include="RedBadger.Xpf.Adapters.Xna, Version=1.0.4573.38537, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="Nuclex.Audio">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Audio.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Fonts">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Fonts.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Fonts.Content.TrueTypeImporter">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Fonts.Content.TrueTypeImporter.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Game">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Game.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Game.ContentCompressor">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Game.ContentCompressor.exe</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Geometry">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Geometry.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Graphics">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Graphics.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Graphics.SpecialEffects">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Graphics.SpecialEffects.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Input">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Input.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Math">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Networking">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Support">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Support.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Testing.Xna">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Testing.Xna.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.UserInterface">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.UserInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="Nuclex.Windows.Forms">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\Nuclex.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.2.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\randomDlls\RedBadger.Xpf.Adapters.Xna.dll</HintPath>
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="RuminateGui">
       <HintPath>..\..\..\..\randomDlls\RuminateGui.dll</HintPath>
+    </Reference>
+    <Reference Include="SlimDX.DirectInput">
+      <HintPath>..\..\..\..\randomDlls\NuclexFramework\SlimDX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -141,6 +191,7 @@
     <Compile Include="DevScreen.cs" />
     <Compile Include="FlyAroundGameScreen.cs" />
     <Compile Include="MathHelper.cs" />
+    <Compile Include="NuclexFrameworkScreen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
@@ -175,7 +226,6 @@
     <Compile Include="UI\UiElement.cs" />
     <Compile Include="UI\UiOverlay.cs" />
     <Compile Include="VoxelScreen.cs" />
-    <Compile Include="XpfGuiScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

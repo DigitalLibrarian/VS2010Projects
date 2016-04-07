@@ -15,7 +15,7 @@ namespace Aquarium
         {
             var index = new List<GameScreen>
             {
-                new XpfGuiScreen(),
+                new NuclexFrameworkScreen(),
                 new SparseVoxelOctTreeScreen(),
                 new VoxelScreen(),
                 new SimulationScreen()
