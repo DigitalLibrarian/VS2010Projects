@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework;
 using Nuclex.UserInterface;
 using Nuclex.Input;
 using Nuclex.UserInterface.Controls.Desktop;
+using Nuclex.UserInterface.Controls.Arcade;
 
 namespace Aquarium
 {
@@ -59,6 +60,7 @@ namespace Aquarium
 
             // Next, we add our demonstration dialog to the screen
             mainScreen.Desktop.Children.Add(new DemoDialog());
+            mainScreen.Desktop.Children.Add(new DemoPanel());
 
         }
 
@@ -83,6 +85,15 @@ namespace Aquarium
 
             DebugDrawer.Draw(gameTime);
             base.Draw(gameTime);
+        }
+    }
+
+
+    class DemoPanel : PanelControl
+    {
+        public DemoPanel()
+        {
+            this.Bounds = new UniRectangle(500, 500, 200, 200);
         }
     }
 
@@ -186,6 +197,14 @@ namespace Aquarium
             };
             this.option.Text = "Do you like chicken?";
 
+            this.closeWindowButton = new CloseWindowButtonControl()
+            {
+                Text = "X",
+                Bounds = new UniRectangle(this.Bounds.Right - 125, 2, 20, 20),
+                //Enabled = true
+            };
+            this.closeWindowButton.Pressed += new EventHandler(closeWindowButton_Pressed);
+
             Children.Add(this.helloWorldLabel);
             Children.Add(this.okButton);
             Children.Add(this.cancelButton);
@@ -198,6 +217,12 @@ namespace Aquarium
             Children.Add(this.choice3);
             Children.Add(this.list);
             Children.Add(this.option);
+            Children.Add(closeWindowButton);
+        }
+
+        void closeWindowButton_Pressed(object sender, EventArgs e)
+        {
+            Close();
         }
 
         #endregion // NOT Component Designer generated code
@@ -220,5 +245,6 @@ namespace Aquarium
 
         private Nuclex.UserInterface.Controls.Desktop.ListControl list;
         private Nuclex.UserInterface.Controls.Desktop.OptionControl option;
+        private Nuclex.UserInterface.Controls.Desktop.CloseWindowButtonControl closeWindowButton;
     }
 }
