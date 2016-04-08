@@ -56,6 +56,7 @@ namespace Aquarium
             Viewport viewport = GraphicsDevice.Viewport;
             Screen mainScreen = new Screen(viewport.Width, viewport.Height);
             this.GuiManager.Screen = mainScreen;
+        }
         public override void UnloadContent()
         {
             GuiManager.Dispose();

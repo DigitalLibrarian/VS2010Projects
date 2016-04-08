@@ -24,7 +24,7 @@ namespace Aquarium.UI.Controls
         public static readonly float SliderWidth = 270;
         public static readonly float SliderHeight = 20;
         public static readonly float LabelWidth = 100;
-        public static readonly float LabelHeight = 20;
+        public static readonly float LabelHeight = 25;
         public static readonly float ValueLabelWidth = 80;
         public static readonly float ValueLabelHeight = 25;
 
@@ -66,9 +66,10 @@ namespace Aquarium.UI.Controls
         public void InitializeComponent()
         {
             _Scale = 1f;
+            float textOffsetY = 5;
             NameLabel = new LabelControl()
             {
-                Bounds = new UniRectangle(Pad, Pad, LabelWidth, LabelHeight)
+                Bounds = new UniRectangle(Pad, Pad+textOffsetY, LabelWidth, LabelHeight)
             };
 
             Slider = new HorizontalSliderControl

@@ -232,6 +232,8 @@
   <ItemGroup>
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />
+    <None Include="Resources\skin.xsd" />
+    <None Include="Resources\Skins\Suave\Suave.skin.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Forever.Extensions\Forever.Extensions.csproj">

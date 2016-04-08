@@ -12,7 +12,9 @@ using Nuclex.UserInterface;
 using Nuclex.Input;
 using Nuclex.UserInterface.Controls.Desktop;
 using Nuclex.UserInterface.Controls.Arcade;
+using Nuclex.Graphics.SpecialEffects.Water;
 using Aquarium.UI.Controls;
+using Nuclex.Graphics.Batching;
 
 namespace Aquarium
 {
