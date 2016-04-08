@@ -162,11 +162,25 @@ namespace Aquarium.UI.Controls
 
             this.Bounds = new UniRectangle(panelPadding, panelPadding, Width, Height);
 
+
+            var closeWindowButton = new CloseWindowButtonControl()
+            {
+                Text = "X",
+                Bounds = new UniRectangle(this.Width - 25, 2, 21, 21),
+            };
+            closeWindowButton.Pressed += new EventHandler(closeWindowButton_Pressed);
+
             return new List<Control>
                 {
+                    closeWindowButton,
                     optionPanel,
                     sliderPanel,
                 };
+        }
+
+        void closeWindowButton_Pressed(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         SliderGroupControl CreateSliderGroup(float x, float y, float w, float h, string text, float scale, bool showInt)

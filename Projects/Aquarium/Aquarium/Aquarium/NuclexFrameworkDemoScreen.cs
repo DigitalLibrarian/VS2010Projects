@@ -16,75 +16,21 @@ using Aquarium.UI.Controls;
 
 namespace Aquarium
 {
-    class NuclexFrameworkScreen : DevScreen, IGraphicsDeviceService
+    class NuclexFrameworkDemoScreen : FlyAroundGameScreen
     {
-        GuiManager GuiManager { get; set; }
-        RenderContext RenderContext { get; set; }
-        DebugDrawer DebugDrawer { get; set; }
-
         public override void LoadContent()
         {
             base.LoadContent();
-            var gd = ScreenManager.Game.GraphicsDevice;
 
-            var input = new InputManager();
-
-            GuiManager = new Nuclex.UserInterface.GuiManager(ScreenManager.GraphicsDeviceManager, input);
-            //GuiManager.Initialize();
+            this.GuiManager.Screen.Desktop.Children.Add(new PopulationWindowControl());
+            this.GuiManager.Screen.Desktop.Children.Add(new DemoDialog());
             
-            ScreenManager.Game.Components.Add(GuiManager);
-            ScreenManager.Game.Components.Add(input);
-
-            RenderContext = new RenderContext(
-                    new EyeCamera(gd),
-                    gd
-                );
-            RenderContext.Camera.Position = Vector3.Backward * 10;
-            DebugDrawer = new DebugDrawer(this);
-
-            // Create a new screen. Screens manage the state of a GUI and its rendering
-            // surface. If you have a GUI in your game window, you'd first create a screen
-            // for that. If you have an in-game computer display where you want to use
-            // a GUI, you can create another screen for that and thus cleanly separate
-            // the state of the in-game computer from your game's main menu GUI :)
-            Viewport viewport = GraphicsDevice.Viewport;
-            Screen mainScreen = new Screen(viewport.Width, viewport.Height);
-            this.GuiManager.Screen = mainScreen;
-
-            // Each screen has a 'desktop' control. This invisible control by default
-            // stretches across the whole screen (all controls are positioned using both
-            // a percentual position/size and absolute position/size). We change this to
-            // prevent GUI or HUD elements from appearing outside the title-safe area.
-
-            mainScreen.Desktop.Bounds = new UniRectangle(
-              new UniScalar(0.1f, 0.0f), new UniScalar(0.1f, 0.0f), // x and y
-              new UniScalar(0.8f, 0.0f), new UniScalar(0.8f, 0.0f) // width and height
-            );
-
-
-            // Next, we add our demonstration dialog to the screen
-            mainScreen.Desktop.Children.Add(new PopulationWindowControl());
-            mainScreen.Desktop.Children.Add(new DemoDialog());
-        }
-        
-        public event EventHandler<EventArgs> DeviceCreated;
-
-        public event EventHandler<EventArgs> DeviceDisposing;
-
-        public event EventHandler<EventArgs> DeviceReset;
-
-        public event EventHandler<EventArgs> DeviceResetting;
-
-        public GraphicsDevice GraphicsDevice
-        {
-            get { return ScreenManager.Game.GraphicsDevice; }
+            User.Body.Position = Vector3.Backward * 10;
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            DebugDrawer.ViewProjection = RenderContext.Camera.View * RenderContext.Camera.Projection;
             DebugDrawer.DrawSolidArrow(Vector3.Zero, Vector3.Up, Color.White);
-
             DebugDrawer.Draw(gameTime);
             base.Draw(gameTime);
         }
@@ -93,13 +39,11 @@ namespace Aquarium
     /// <summary>Dialog that demonstrates the capabilities of the GUI library</summary>
     public partial class DemoDialog : WindowControl
     {
-
         /// <summary>Initializes a new GUI demonstration dialog</summary>
         public DemoDialog()
         {
             InitializeComponent();
         }
-
     }
 
     partial class DemoDialog
