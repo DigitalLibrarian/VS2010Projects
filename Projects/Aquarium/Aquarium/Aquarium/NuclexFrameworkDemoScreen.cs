@@ -20,6 +20,8 @@ namespace Aquarium
 {
     class NuclexFrameworkDemoScreen : FlyAroundGameScreen
     {
+        Model SkySphere;
+        Effect SkySphereEffect;
         public override void LoadContent()
         {
             base.LoadContent();
@@ -28,12 +30,34 @@ namespace Aquarium
             this.GuiManager.Screen.Desktop.Children.Add(new DemoDialog());
             
             User.Body.Position = Vector3.Backward * 10;
+            var content = ScreenManager.Game.Content;
+            SkySphereEffect = content.Load<Effect>("Effects//SkySphere");
+            TextureCube SkyboxTexture =
+                content.Load<TextureCube>("TextureCube//Space");
+            SkySphere = content.Load<Model>("Models//SphereHighPoly");
+            SkySphereEffect.Parameters["SkyboxTexture"].SetValue(SkyboxTexture);
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = SkySphereEffect;
+                }
+            }
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
             DebugDrawer.DrawSolidArrow(Vector3.Zero, Vector3.Up, Color.White);
             DebugDrawer.Draw(gameTime);
+            var view = RenderContext.Camera.View;
+            var proj = RenderContext.Camera.Projection;
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(view);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(proj);
+            // Draw the sphere model that the effect projects onto
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                mesh.Draw();
+            }
             base.Draw(gameTime);
         }
     }
