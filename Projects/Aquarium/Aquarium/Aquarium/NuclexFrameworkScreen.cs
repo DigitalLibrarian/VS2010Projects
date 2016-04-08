@@ -30,6 +30,8 @@ namespace Aquarium
             var input = new InputManager();
 
             GuiManager = new Nuclex.UserInterface.GuiManager(ScreenManager.GraphicsDeviceManager, input);
+            //GuiManager.Initialize();
+            
             ScreenManager.Game.Components.Add(GuiManager);
             ScreenManager.Game.Components.Add(input);
 
@@ -61,9 +63,8 @@ namespace Aquarium
 
 
             // Next, we add our demonstration dialog to the screen
-            mainScreen.Desktop.Children.Add(new PopulationWindow());
+            mainScreen.Desktop.Children.Add(new PopulationWindowControl());
             mainScreen.Desktop.Children.Add(new DemoDialog());
-            mainScreen.Desktop.Children.Add(new DemoPanel());
         }
         
         public event EventHandler<EventArgs> DeviceCreated;
@@ -82,20 +83,10 @@ namespace Aquarium
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
             DebugDrawer.ViewProjection = RenderContext.Camera.View * RenderContext.Camera.Projection;
-
             DebugDrawer.DrawSolidArrow(Vector3.Zero, Vector3.Up, Color.White);
 
             DebugDrawer.Draw(gameTime);
             base.Draw(gameTime);
-        }
-    }
-
-
-    class DemoPanel : PanelControl
-    {
-        public DemoPanel()
-        {
-            this.Bounds = new UniRectangle(700, 700, 200, 200);
         }
     }
 

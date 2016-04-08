@@ -9,30 +9,35 @@ using Nuclex.UserInterface.Controls.Desktop;
 
 namespace Aquarium.UI.Controls
 {
-
-    public partial class SliderGroup : Control
+    public partial class SliderGroupControl : Control
     {
         /// <summary>Initializes a new GUI demonstration dialog</summary>
-        public SliderGroup()
+        public SliderGroupControl()
         {
             InitializeComponent();
         }
 
     }
 
-    partial class SliderGroup 
+    partial class SliderGroupControl
     {
+        public static readonly float SliderWidth = 270;
+        public static readonly float SliderHeight = 20;
+        public static readonly float LabelWidth = 100;
+        public static readonly float LabelHeight = 20;
+        public static readonly float ValueLabelWidth = 80;
+        public static readonly float ValueLabelHeight = 25;
+
         public bool ShowInt { get; set; }
-        public static readonly float Width = 400;
-        public static readonly float Height = 50;
+        public static readonly float Width = Pad + SliderWidth + Pad + ValueLabelWidth + Pad;
+        public static readonly float Height = Pad + LabelHeight + Pad + SliderHeight + Pad;
+
+        public static readonly float Pad = 5;
 
         float _Scale;
         public float Scale
         {
-            get
-            {
-                return _Scale;
-            }
+            get { return _Scale; }
             set
             {
                 _Scale = value;
@@ -63,21 +68,19 @@ namespace Aquarium.UI.Controls
             _Scale = 1f;
             NameLabel = new LabelControl()
             {
-                Bounds = new UniRectangle(0, 0, 100, 20)
+                Bounds = new UniRectangle(Pad, Pad, LabelWidth, LabelHeight)
             };
 
             Slider = new HorizontalSliderControl
             {
-                Bounds = new UniRectangle(0, 25, 300, 20),
+                Bounds = new UniRectangle(Pad, Pad + LabelHeight + Pad, SliderWidth, SliderHeight),
                 ThumbSize = 0.1f,
                 ThumbPosition = 0.0f,
             };
 
-            float valueLabelWidth = 25;
-            float valueLabelHeight = 25;
             ValueLabel = new LabelControl()
             {
-                Bounds = new UniRectangle(300 + 5, 20, valueLabelWidth, valueLabelHeight)
+                Bounds = new UniRectangle(Pad + SliderWidth + Pad, Pad + LabelHeight + Pad, ValueLabelWidth, ValueLabelHeight)
             };
 
             Slider.Moved += new EventHandler(Slider_Moved);
