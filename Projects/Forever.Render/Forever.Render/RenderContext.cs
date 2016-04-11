@@ -68,11 +68,11 @@ namespace Forever.Render
 
     public bool InView(BoundingBox box)
     {
-        return GetViewFrustum().Intersects(box);
+        return GetViewFrustum().Contains(box) != ContainmentType.Disjoint;
     }
     public bool InView(BoundingSphere sphere)
     {
-        return GetViewFrustum().Intersects(sphere);
+        return GetViewFrustum().Contains(sphere) != ContainmentType.Disjoint;
     }
 
     public Ray GetCameraRay()

@@ -16,9 +16,10 @@ namespace Forever.Voxel.SVO
             Parent = parent;
             Box = box;
             Children = null;
+            IsLeaf = true;
         }
 
-        public bool IsLeaf { get { return Children == null; } }
+        public bool IsLeaf { get; set; }
         public BoundingBox Box { get; set; }
         public OctTreeNode<T> Parent { get; private set; }
         public OctTreeNode<T>[] Children { get; set; }
@@ -50,25 +51,22 @@ namespace Forever.Voxel.SVO
 
             Children[NodePosition.FAR_TOP_RIGHT] = new OctTreeNode<T>(this, BBMin(max - halfSize, halfSize));
             Children[NodePosition.FAR_TOP_LEFT] = new OctTreeNode<T>(this, BBMin(max - halfSize - halfX, halfSize));
+
+            IsLeaf = false;
         }
 
-        public void PruneChildren(Predicate<OctTreeNode<T>> pred)
+        public void Prune()
         {
-            Children = null;
-            if (Parent != null && Parent.SearchFirstChild(pred) == null)
-            {
-                Parent.PruneChildren(pred);
-            }
+            IsLeaf = true;
         }
 
         public OctTreeNode<T> SearchFirstChild(Predicate<OctTreeNode<T>> pred)
         {
-            if (IsLeaf) return null;
-            foreach (var child in Children)
+            for(int i = 0; i < OctTreeNode<T>.Subdivisions;i++)
             {
-                if (pred(child))
+                if (pred(Children[i]))
                 {
-                    return child;
+                    return Children[i];
                 }
             }
             return null;

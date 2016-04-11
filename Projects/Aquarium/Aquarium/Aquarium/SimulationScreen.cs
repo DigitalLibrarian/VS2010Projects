@@ -20,12 +20,25 @@ using Aquarium.Ui.Targets;
 using Forever.Render.Cameras;
 
 using Forever.Extensions;
+using Aquarium.Targeting;
+using Aquarium.UI.Controls;
+using Nuclex.UserInterface.Controls;
+
 
 namespace Aquarium
 {
     class SimulationScreen : FlyAroundGameScreen
     {
         Simulation Sim { get; set; }
+
+        TargetManager TargetManager { get; set; }
+        TargetWindowControl TargetWindowControl { get; set; }
+        PopulationWindowControl PopulationWindowControl { get; set; }
+
+        List<Control> ControlsToAdd { get; set; }
+        List<Control> ControlsToRemove { get; set; }
+
+        Aquarium.Life.Spec.OrganismSpecParser SpecParser = new Life.Spec.OrganismSpecParser();
 
         public override void LoadContent()
         {
@@ -34,7 +47,15 @@ namespace Aquarium
 
             Sim = new Simulation();
 
-            Ui.Elements.AddRange(CreateUILayout());
+            ControlsToAdd = new List<Control>();
+            ControlsToRemove = new List<Control>();
+
+            TargetManager = new Targeting.TargetManager(RenderContext, InputManager,
+                new Func<Ray, ITarget>((ray) => GetNextTarget(ray)));
+            TargetManager.OnNewTarget += new EventHandler<NewTargetEventArgs>(TargetManager_OnNewTarget);
+            TargetManager.RegisterForInput();
+
+            SetupActionBar();
 
             var asset = AssetNames.UHFSatelliteModel;
             SpawnerModel = ScreenManager.Game.Content.Load<Model>(asset);
@@ -45,6 +66,12 @@ namespace Aquarium
             User.Body.Position = principle.Box.GetCenter();
             User.ControlForces.Analog.ForceShiftMag = 0.01f;
         }
+
+        void TargetManager_OnNewTarget(object sender, NewTargetEventArgs e)
+        {
+            targetWindow_OnNewTarget(sender, e);
+        }
+
 
         Model SpawnerModel { get; set; }
 
@@ -74,7 +101,6 @@ namespace Aquarium
         {
             Sim.Draw(gameTime, RenderContext);
 
-
             var pos = RenderContext.Camera.Position;
             var principle = Sim.Space.GetOrCreate(pos);
 
@@ -84,9 +110,29 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            if (!otherScreenHasFocus && !coveredByOtherScreen) Sim.Update(gameTime);
+            if (!otherScreenHasFocus && !coveredByOtherScreen)
+            {
+                Sim.Update(gameTime);
+                if (TargetWindowControl != null && TargetWindowControl.IsOpen)
+                {
+                    TargetWindowControl.UpdateTarget();
+                }
+            }
+
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+
+            foreach (var c in ControlsToRemove)
+            {
+                GuiManager.Screen.Desktop.Children.Remove(c);
+            }
+            ControlsToRemove.Clear();
+
+            foreach (var c in ControlsToAdd)
+            {
+                GuiManager.Screen.Desktop.Children.Add(c);
+            }
+            ControlsToAdd.Clear();
         }
 
 
@@ -105,9 +151,9 @@ namespace Aquarium
             spawners.Add(agent);
         }
 
-        private void KillOrganism(TargetWindow targetWindow)
+        private void KillOrganism()
         {
-            var target = targetWindow.Target;
+            var target = this.TargetManager.Target;
 
             if (target != null && target is OrganismAgent)
             {
@@ -117,13 +163,9 @@ namespace Aquarium
             }
         }
 
-        private void LifeForceEditor(TargetWindow targetWindow)
-        {
-            var target = targetWindow.Target;
-        }
 
         List<SpawnerAgent> spawners = new List<SpawnerAgent>();
-
+        bool TargetWindowAcquiringTargets = true;
         List<IUiElement> CreateUILayout()
         {
             var spriteFont = ScreenManager.Font;
@@ -131,22 +173,69 @@ namespace Aquarium
             SpawnerEditor = new SpawnerEditor(ScreenManager.Game, RenderContext);
             var targetWindow = new TargetWindow(
                 new Func<Ray, ITarget>((ray) => GetNextTarget(ray)), 
+                new Func<TargetWindow, bool>(tw => TargetWindowAcquiringTargets),
                 RenderContext, 
                 DebugLabelStrip(), 
-                ScreenManager.Font,
-                this,
-                SpawnerEditor);
+                ScreenManager.Font);
 
-            ActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
-            ActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism(targetWindow));
-            ActionBar.Slots[1].TotalCoolDown = 200;
-            
+            targetWindow.OnNewTarget += new EventHandler<NewTargetEventArgs>(targetWindow_OnNewTarget);
+
+            SetupActionBar();
+
             return new List<IUiElement>
             {
                 targetWindow, 
             };
         }
-        //TODO - make spawner editor manage this
+
+        void SetupActionBar()
+        {
+            ActionBar.Slots[0].Action = new ActionBarAction(() => AddNewSpawnerAgent());
+            ActionBar.Slots[1].Action = new ActionBarAction(() => KillOrganism());
+            ActionBar.Slots[1].TotalCoolDown = 200;
+        }
+
+        void targetWindow_OnNewTarget(object sender, NewTargetEventArgs e)
+        {
+            if (ControlsToRemove.Any()) return;
+            if (e.Target is SpawnerAgent)
+            {
+                if(PopulationWindowControl == null)
+                {
+                    PopulationWindowControl = new UI.Controls.PopulationWindowControl(0, 45);
+                    PopulationWindowControl.OnCloseButtonPress += new EventHandler(PopulationWindow_OnCloseButtonPress);
+                    PopulationWindowControl.Bindings.ReadFromModel(PopulationWindowControl, e.Target as SpawnerAgent, SpecParser);
+                    ControlsToAdd.Add(PopulationWindowControl);
+                }
+            }
+
+            if (TargetWindowControl != null && TargetWindowControl.Target == e.Target) return;
+            if (TargetWindowControl != null)
+            {
+                TargetWindowControl_OnCloseButtonPress(this, null);
+            }else
+            {
+                TargetWindowControl = new TargetWindowControl(1310, 10);
+                TargetWindowControl.OnCloseButtonPress += new EventHandler(TargetWindowControl_OnCloseButtonPress);
+                TargetWindowControl.SetNewTarget(e.Target);
+                ControlsToAdd.Add(TargetWindowControl);
+
+                TargetWindowAcquiringTargets = false;
+            }
+        }
+
+        void TargetWindowControl_OnCloseButtonPress(object sender, EventArgs e)
+        {
+            ControlsToRemove.Add(TargetWindowControl);
+            TargetWindowControl = null;
+        }
+
+        void PopulationWindow_OnCloseButtonPress(object sender, EventArgs e)
+        {
+            ControlsToRemove.Add(PopulationWindowControl);
+            PopulationWindowControl = null;
+        }
+
         SpawnerEditor SpawnerEditor;
         bool Engaged = true;
         ITarget LastTarget = null;

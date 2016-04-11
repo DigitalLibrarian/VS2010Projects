@@ -19,16 +19,6 @@ namespace Forever.Voxel
         {
             return new ChunkSpacePartition(box, ChunkFactory(box));
         }
-
-        public BoundingBox GetBoundingBox()
-        {
-            var box = new BoundingBox();
-            foreach (var part in Partitions)
-            {
-                box = BoundingBox.CreateMerged(box, part.Box);
-            }
-            return box;
-        }
     }
 
     public class ChunkSpacePartition : Partition<Chunk>

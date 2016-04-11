@@ -27,7 +27,14 @@ namespace Aquarium.Ui
             base.LoadContent();
             if (Gui == null)
             {
-                Gui = CreateGui();
+                try
+                {
+                    Gui = CreateGui();
+                }
+                catch (System.Reflection.ReflectionTypeLoadException re)
+                {
+                    throw re;
+                }
             }
         }
 

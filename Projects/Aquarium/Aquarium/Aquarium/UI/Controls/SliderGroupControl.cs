@@ -60,6 +60,10 @@ namespace Aquarium.UI.Controls
             set { NameLabel.Text = value; }
         }
 
+        // Summary:
+        //     Triggered when the slider has been moved
+        public event EventHandler ValueChanged;
+
         public LabelControl NameLabel { get; set; }
         public LabelControl ValueLabel { get; set; }
         HorizontalSliderControl Slider { get; set; }
@@ -94,6 +98,10 @@ namespace Aquarium.UI.Controls
         void Slider_Moved(object sender, EventArgs e)
         {
             UpdateValueLabel();
+            if (ValueChanged != null)
+            {
+                ValueChanged(this, e);
+            }
         }
 
         private void UpdateValueLabel()

@@ -15,7 +15,7 @@ namespace Aquarium
 {
     public class DevScreen : GameScreen, IGraphicsDeviceService
     {
-        private InputManager InputManager { get; set; }
+        protected InputManager InputManager { get; set; }
 
         protected GuiManager GuiManager { get; set; }
         protected Random Random { get; private set; }

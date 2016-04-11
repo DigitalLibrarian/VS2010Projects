@@ -5,14 +5,11 @@ using System.Text;
 
 using Microsoft.Xna.Framework;
 
-using Aquarium.Agent;
-
-namespace Aquarium.Ui.Targets
+namespace Aquarium.Targeting
 {
     public interface ITarget
     {
         string Label { get; }
-        IAgent Agent { get; }
         BoundingBox TargetBB { get; }
     }
 

@@ -15,9 +15,24 @@ using Nuclex.UserInterface.Controls.Arcade;
 using Nuclex.Graphics.SpecialEffects.Water;
 using Aquarium.UI.Controls;
 using Nuclex.Graphics.Batching;
+using Aquarium.Targeting;
 
 namespace Aquarium
 {
+
+    public class DumbTarget : ITarget
+    {
+
+        string ITarget.Label
+        {
+            get { return "I \nam\n a\n target\n label\r\n woo \nhoo!"; }
+        }
+
+        BoundingBox ITarget.TargetBB
+        {
+            get { return new BoundingBox(); }
+        }
+    }
     class NuclexFrameworkDemoScreen : FlyAroundGameScreen
     {
         Model SkySphere;
@@ -26,8 +41,12 @@ namespace Aquarium
         {
             base.LoadContent();
 
-            this.GuiManager.Screen.Desktop.Children.Add(new PopulationWindowControl());
+            var targetWindow = new TargetWindowControl(1310, 10);
+            targetWindow.SetNewTarget(new DumbTarget());
+            this.GuiManager.Screen.Desktop.Children.Add(targetWindow);
+            this.GuiManager.Screen.Desktop.Children.Add(new PopulationWindowControl(10, 50));
             this.GuiManager.Screen.Desktop.Children.Add(new DemoDialog());
+            this.GuiManager.Screen.Desktop.Children.Add(new DebugLogWindowControl(100, 750));
             
             User.Body.Position = Vector3.Backward * 10;
             var content = ScreenManager.Game.Content;
@@ -85,7 +104,7 @@ namespace Aquarium
         {
             float TotalWidth = 512f;
             this.Title = "Windows have titles";
-            this.Bounds = new UniRectangle(800.0f, 100.0f, TotalWidth, 384.0f);
+            this.Bounds = new UniRectangle(770.0f, 100.0f, TotalWidth, 384.0f);
             this.helloWorldLabel = new Nuclex.UserInterface.Controls.LabelControl();
             this.horSliderLabel = new Nuclex.UserInterface.Controls.LabelControl();
             this.verSliderLabel = new Nuclex.UserInterface.Controls.LabelControl();
@@ -158,13 +177,7 @@ namespace Aquarium
             };
             this.option.Text = "Do you like chicken?";
 
-            this.closeWindowButton = new CloseWindowButtonControl()
-            {
-                Text = "X",
-                Bounds = new UniRectangle(TotalWidth - 25, 2, 20, 20),
-                //Enabled = true
-            };
-            this.closeWindowButton.Pressed += new EventHandler(closeWindowButton_Pressed);
+            this.closeWindowButton = new Aquarium.UI.Controls.CloseWindowButtonControl(this);
 
             Children.Add(this.helloWorldLabel);
             Children.Add(this.okButton);
@@ -181,10 +194,6 @@ namespace Aquarium
             Children.Add(closeWindowButton);
         }
 
-        void closeWindowButton_Pressed(object sender, EventArgs e)
-        {
-            Close();
-        }
 
         #endregion // NOT Component Designer generated code
 
@@ -206,6 +215,6 @@ namespace Aquarium
 
         private Nuclex.UserInterface.Controls.Desktop.ListControl list;
         private Nuclex.UserInterface.Controls.Desktop.OptionControl option;
-        private Nuclex.UserInterface.Controls.Desktop.CloseWindowButtonControl closeWindowButton;
+        private Aquarium.UI.Controls.CloseWindowButtonControl closeWindowButton;
     }
 }

@@ -29,12 +29,46 @@ namespace Forever.Voxel.SVO
             if (node == null) return;
             if (depth == 0) return; // leaf
 
-            node.Subdivide();
-            for(int i = 0; i < NodePosition.MaxNodeCount; i++)
+            if (node.IsLeaf)
             {
-                Subdivide(node.Children[i], depth-1);
+                node.Subdivide();
+                for (int i = 0; i < NodePosition.MaxNodeCount; i++)
+                {
+                    Subdivide(node.Children[i], depth - 1);
+                }
             }
         }
+
+        public OctTreeNode<T> SubdivideOrGet(Vector3 v, int maxDepth)
+        {
+            return SubdivideOrGet(Root, v, maxDepth);
+        }
+
+        private static OctTreeNode<T> SubdivideOrGet(OctTreeNode<T> node, Vector3 v, int maxDepth)
+        {
+            if (maxDepth == 0)
+            {
+                if (node.Box.Contains(v) == ContainmentType.Contains)
+                {
+                    return node;
+                }
+                return null;
+            }
+
+            if (node.IsLeaf)
+            {
+                Subdivide(node, maxDepth);
+            }
+
+            OctTreeNode<T> t = null;
+            for (int i = 0; i < NodePosition.MaxNodeCount && t == null; i++)
+            {
+                t = SubdivideOrGet(node.Children[i], v, maxDepth - 1);
+                if (t != null) return t;
+            }
+            return t;
+        }
+
         #region Traversal
 
         
@@ -85,6 +119,68 @@ namespace Forever.Voxel.SVO
             }
         }
 
+        public OctTreeNode<T> FindFirstLeaf(Predicate<OctTreeNode<T>> action)
+        {
+            return FindFirstLeaf(action, Root);
+        }
+
+        OctTreeNode<T> FindFirstLeaf(Predicate<OctTreeNode<T>> action, OctTreeNode<T> node)
+        {
+            if (action(node))
+            {
+                if (node.IsLeaf)
+                {
+                    return node;
+                }
+
+                OctTreeNode<T> t = null;
+                for (int i = 0; i < OctTreeNode<T>.Subdivisions && t == null; i++)
+                {
+                    t = FindFirstLeaf(action, node.Children[i]);
+
+                    /*
+                    if (action(node.Children[i]))
+                    {
+                        if (node.Children[i].IsLeaf)
+                        {
+                            return node.Children[i];
+                        }
+
+                        t = FindFirstLeaf(action, node.Children[i]);
+                    }
+                     * */
+                }
+                return t;
+            }
+            return null;
+        }
+
+        public IEnumerable<OctTreeNode<T>> GetLeaves(Predicate<OctTreeNode<T>> pred)
+        {
+            return GetLeaves(Root, pred);
+        }
+
+        public IEnumerable<OctTreeNode<T>> GetLeaves(OctTreeNode<T> node, Predicate<OctTreeNode<T>> pred)
+        {
+            if (pred(node))
+            {
+                if (node.IsLeaf)
+                {
+                    yield return node;
+                }
+                else
+                {
+                    for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
+                    {
+                        foreach (var l in GetLeaves(node.Children[i], pred))
+                        {
+                            yield return l;
+                        }
+                    }
+                }
+            }
+        }
+       
         public void VisitLeaves(Action<OctTreeNode<T>> action)
         {
             VisitLeaves(action, Root);
@@ -103,7 +199,7 @@ namespace Forever.Voxel.SVO
                 VisitLeaves(action, node.Children[i]);
             }
         }
-
+        
         public void VisitAtDepth(Action<OctTreeNode<T>> action, int depth)
         {
             VisitAtDepth(action, depth, Root);

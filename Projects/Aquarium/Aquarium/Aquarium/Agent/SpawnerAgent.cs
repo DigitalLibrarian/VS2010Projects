@@ -19,6 +19,7 @@ using Aquarium.Sim;
 using Aquarium.Ui.Targets;
 using Aquarium.Life.Spec;
 using Forever.Extensions;
+using Aquarium.Targeting;
 
 
 namespace Aquarium.Agent
@@ -241,11 +242,6 @@ namespace Aquarium.Agent
         string ITarget.Label
         {
             get { return this.ToString(); }
-        }
-
-        IAgent ITarget.Agent
-        {
-            get { return this; }
         }
 
         BoundingBox ITarget.TargetBB

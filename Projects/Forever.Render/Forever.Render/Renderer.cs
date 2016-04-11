@@ -253,6 +253,7 @@ namespace Forever.Render
         effect.World = world;
         effect.View = view;
         effect.Projection = projection;
+        
 
         foreach (EffectPass pass in effect.CurrentTechnique.Passes)
         {

@@ -16,6 +16,7 @@ using Microsoft.Xna.Framework;
 using Aquarium.Ui.Targets;
 using Forever.Screens;
 using Aquarium.Life;
+using Aquarium.Targeting;
 
 namespace Aquarium.Ui
 {

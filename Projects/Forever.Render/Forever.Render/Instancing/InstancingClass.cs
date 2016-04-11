@@ -32,21 +32,22 @@ namespace Forever.Render.Instancing
 
             InstanceVertexDeclaration = vertexDeclaration;
             Effect = effect;
-        }
-
-        public void Draw(float duration, RenderContext renderContext, int instanceCount)
-        {
-            if (instanceCount <= 0) return;
-            var gd = renderContext.GraphicsDevice;
 
             var bindings = new VertexBufferBinding[2];
             bindings[0] = new VertexBufferBinding(GeometryBuffer);
             bindings[1] = new VertexBufferBinding(InstanceBuffer, 0, 1);
-            gd.SetVertexBuffers(bindings);
-            gd.Indices = IndexBuffer;
+            Bindings = bindings;
+        }
+        VertexBufferBinding[] Bindings { get; set; }
+        public void Draw(float duration, RenderContext renderContext, int instanceCount)
+        {
+            if (instanceCount <= 0) return;
+
+            renderContext.GraphicsDevice.SetVertexBuffers(Bindings);
+            renderContext.GraphicsDevice.Indices = IndexBuffer;
 
             Effect.CurrentTechnique.Passes[0].Apply();
-            gd.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 24, instanceCount);
+            renderContext.GraphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 24, instanceCount);
         }
 
 
