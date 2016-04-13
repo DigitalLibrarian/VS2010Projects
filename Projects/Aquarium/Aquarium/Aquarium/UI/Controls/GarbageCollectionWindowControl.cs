@@ -35,13 +35,12 @@ namespace Aquarium.UI.Controls
             InfoLabelControl = new LabelControl()
             {
                 Text = BuildInfoLabelText(),
-                //Bounds = new Nuclex.UserInterface.UniRectangle(pad, 20 + (infoLabelHeight / 2), infoLabelWidth, 40 + infoLabelHeight)
-                Bounds = new Nuclex.UserInterface.UniRectangle(0, 40, infoLabelWidth, infoLabelHeight)
+                Bounds = new Nuclex.UserInterface.UniRectangle(0, 0, infoLabelWidth, infoLabelHeight)
             };
 
             var labelPanel = new Control()
             {
-                Bounds = new Nuclex.UserInterface.UniRectangle(0, 20-(infoLabelHeight/2), infoLabelWidth, 40 + infoLabelHeight)
+                Bounds = new Nuclex.UserInterface.UniRectangle(pad, 40, infoLabelWidth, infoLabelHeight)
             };
             labelPanel.Children.Add(InfoLabelControl);
 

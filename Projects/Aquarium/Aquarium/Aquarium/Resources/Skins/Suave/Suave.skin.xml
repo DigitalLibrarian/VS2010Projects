@@ -92,6 +92,7 @@ that uses the theme, please give due credit to the original artist!
       Frame used for a label
     -->
     <frame name="label">
+      <text font="default" hplacement="left" vplacement="top" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
