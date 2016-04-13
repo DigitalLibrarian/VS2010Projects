@@ -116,7 +116,7 @@ namespace Aquarium
         }
         void SetupPerlin()
         {
-            NoiseQuality quality = NoiseQuality.Standard;
+            NoiseQuality quality = NoiseQuality.High;
             int seed = 0;
             int octaves = 2;
             double frequency = 0.005;
