@@ -10,6 +10,7 @@ using Nuclex.Graphics.Debugging;
 using Forever.Render.Cameras;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Nuclex.UserInterface.Visuals.Flat;
 
 namespace Aquarium
 {
@@ -45,6 +46,7 @@ namespace Aquarium
 
             InputManager = new InputManager();
             GuiManager = new Nuclex.UserInterface.GuiManager(ScreenManager.GraphicsDeviceManager, InputManager);
+            //GuiManager.Visualizer = FlatGuiVisualizer.FromResource(ScreenManager.Game.Services, Resources.ResourceManager, "Suave_skin");
             GuiManager.Initialize();
             DebugDrawer = new DebugDrawer(this);
 
@@ -59,14 +61,23 @@ namespace Aquarium
         }
         public override void UnloadContent()
         {
+            // TODO - probably should dispose of that visualizer
             GuiManager.Dispose();
             GuiManager = null;
 
             InputManager.Dispose();
             InputManager = null;
+
             DebugDrawer.Dispose();
             DebugDrawer = null;
             base.UnloadContent();
+        }
+
+        public override void HandleInput(InputState input)
+        {
+            base.HandleInput(input);
+
+            InputManager.Update();
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
@@ -81,7 +92,6 @@ namespace Aquarium
         {
             if (!otherScreenHasFocus && !coveredByOtherScreen)
             {
-                InputManager.Update();
                 GuiManager.Update(gameTime);
             }
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);

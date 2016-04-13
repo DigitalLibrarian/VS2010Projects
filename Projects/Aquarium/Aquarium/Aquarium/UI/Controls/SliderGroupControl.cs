@@ -22,10 +22,10 @@ namespace Aquarium.UI.Controls
     partial class SliderGroupControl
     {
         public static readonly float SliderWidth = 270;
-        public static readonly float SliderHeight = 20;
+        public static readonly float SliderHeight = 25;
         public static readonly float LabelWidth = 100;
         public static readonly float LabelHeight = 25;
-        public static readonly float ValueLabelWidth = 80;
+        public static readonly float ValueLabelWidth = 90;
         public static readonly float ValueLabelHeight = 25;
 
         public bool ShowInt { get; set; }

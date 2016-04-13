@@ -25,7 +25,7 @@ namespace Aquarium
 
         string ITarget.Label
         {
-            get { return "I \nam\n a\n target\n label\r\n woo \nhoo!"; }
+            get { return "I am a target label woo hoo!"; }
         }
 
         BoundingBox ITarget.TargetBB
@@ -47,6 +47,7 @@ namespace Aquarium
             this.GuiManager.Screen.Desktop.Children.Add(new PopulationWindowControl(10, 50));
             this.GuiManager.Screen.Desktop.Children.Add(new DemoDialog());
             this.GuiManager.Screen.Desktop.Children.Add(new DebugLogWindowControl(100, 750));
+            this.GuiManager.Screen.Desktop.Children.Add(new GarbageCollectionWindowControl(600, 200));
             
             User.Body.Position = Vector3.Backward * 10;
             var content = ScreenManager.Game.Content;
@@ -66,17 +67,18 @@ namespace Aquarium
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            DebugDrawer.DrawSolidArrow(Vector3.Zero, Vector3.Up, Color.White);
-            DebugDrawer.Draw(gameTime);
+            //DebugDrawer.DrawSolidArrow(Vector3.Zero, Vector3.Up, Color.White);
+            //DebugDrawer.Draw(gameTime);
             var view = RenderContext.Camera.View;
             var proj = RenderContext.Camera.Projection;
             SkySphereEffect.Parameters["ViewMatrix"].SetValue(view);
             SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(proj);
             // Draw the sphere model that the effect projects onto
-            foreach (ModelMesh mesh in SkySphere.Meshes)
+            for(int i = 0; i < SkySphere.Meshes.Count;i++)
             {
-                mesh.Draw();
+                SkySphere.Meshes[i].Draw();
             }
+
             base.Draw(gameTime);
         }
     }

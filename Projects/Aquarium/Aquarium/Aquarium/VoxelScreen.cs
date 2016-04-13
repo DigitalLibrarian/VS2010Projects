@@ -21,7 +21,7 @@ namespace Aquarium
 {
     class VoxelScreen : FlyAroundGameScreen
     {
-        const int VoxelsPerDimension = 8;
+        const int VoxelsPerDimension = 16;
 
         ChunkSpace ChunkSpace { get; set; }
 
@@ -96,7 +96,7 @@ namespace Aquarium
                 float tX = (pos.X + (x * VoxelsPerDimension));
                 float tY = (pos.Y + (y * VoxelsPerDimension));
                 float tZ = (pos.Z + (z * VoxelsPerDimension));
-                
+
                 chunk.Voxels[x][y][z].Material = new Material(
                     new Color(
                        (float) x / VoxelsPerDimension,
@@ -118,8 +118,8 @@ namespace Aquarium
         {
             NoiseQuality quality = NoiseQuality.Standard;
             int seed = 0;
-            int octaves = 6;
-            double frequency = 0.0005;
+            int octaves = 2;
+            double frequency = 0.005;
             double lacunarity = 0.5;
             double persistence = 0;
 
@@ -293,28 +293,24 @@ namespace Aquarium
             var pos = RenderContext.Camera.Position;
             var sphere = new BoundingBox(pos - halfSize, pos + halfSize);
 
-            // Look for ones to draw
-            //if (true)
-            //{
-                ListRenderSet.Clear();
-                int numAdded = ChunkSpace.Find((chunk) =>
-                {
-                    return sphere.Contains(chunk.Box) != ContainmentType.Disjoint;//.InView(chunk.Box);
-                }, ListRenderSet, MaxRenderSetSize);
+            ListRenderSet.Clear();
+            int numAdded = ChunkSpace.Find((chunk) =>
+            {
+                return (sphere.Contains(chunk.Box) != ContainmentType.Disjoint) && RenderContext.InView(chunk.Box);
+            }, ListRenderSet, MaxRenderSetSize);
 
-                for (int i = 0; i < numAdded; i++)
-                {
-                    this.RenderingChunk = ListRenderSet[i];
-                    count += RenderingChunk.InstanceCount;
-                    capacity += RenderingChunk.Capacity;
+            for (int i = 0; i < numAdded; i++)
+            {
+                this.RenderingChunk = ListRenderSet[i];
+                count += RenderingChunk.InstanceCount;
+                capacity += RenderingChunk.Capacity;
 
-                    RenderingChunk.Draw(duration, RenderContext);
-                    if (debug)
-                    {
-                        Renderer.Render(RenderingChunk.Box, RenderContext.GraphicsDevice, RenderingChunk.World, RenderContext.Camera.View, RenderContext.Camera.Projection, Color.DarkSalmon);
-                    }
+                RenderingChunk.Draw(duration, RenderContext);
+                if (debug)
+                {
+                    Renderer.Render(RenderingChunk.Box, RenderContext.GraphicsDevice, RenderingChunk.World, RenderContext.Camera.View, RenderContext.Camera.Projection, Color.DarkSalmon);
                 }
-            //}
+            }
 
             if (RenderDepth >= 0)
             {
@@ -425,22 +421,11 @@ namespace Aquarium
 
         IEnumerable<Vector3> SceneLoadSequence_OctTree()
         {
-            /*
-            var leaves = new List<Vector3>();
-            LoadingTree.VisitLeaves((node) =>
-            {
-                if (!node.Value)
-                {
-                    leaves.Add(node.Box.GetCenter());
-                }
-            });
-             
-            return leaves;
-             * */
 
             while (!LoadingTree.Root.IsLeaf)
             {
-                foreach (var leaf in LoadingTree.GetLeaves(x => !x.Value))
+                var leaf = LoadingTree.FindFirstLeaf(x => !x.Value);
+                if (leaf != null)
                 {
                     yield return leaf.Box.GetCenter();
                 }
@@ -468,7 +453,7 @@ namespace Aquarium
             return new Vector3(p.X, GetHeight(p.X, p.Z), p.Z);
         }
 
-        bool ConsumeLoadSequence(int max = 5)
+        bool ConsumeLoadSequence(int max = 2)
         {
             if (LoadSequence == null)
             {

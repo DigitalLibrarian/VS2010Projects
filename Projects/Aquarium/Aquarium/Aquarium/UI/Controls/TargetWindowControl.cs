@@ -59,7 +59,7 @@ namespace Aquarium.UI.Controls
         IEnumerable<Control> CreateUi()
         {
             Width = 600;
-            Height = 400;
+            Height = 200;
 
             this.Bounds = new UniRectangle (
                 StartX, StartY, Width, Height
@@ -68,7 +68,7 @@ namespace Aquarium.UI.Controls
             var pad = 10;
             TargetLabel = new LabelControl()
             {
-                Bounds = new UniRectangle(pad, pad, Width-(pad), Height-(pad)),
+                Bounds = new UniRectangle(pad, 0, Width-(pad), Height-(pad)),
             };
             CloseWindowButtonControl = new CloseWindowButtonControl(this);
             return new List<Control>{

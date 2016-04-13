@@ -85,7 +85,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="1" y="43" w="5" h="4" id="border-sw" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="6" y="43" w="32" h="4" id="border-s" />
       <region source="controls" hplacement="right" vplacement="bottom" x="38" y="43" w="5" h="4" id="border-se" />
-      <text font="title" hplacement="left" vplacement="top" xoffset="8" yoffset="18" color="#ffffff" />
+      <text font="title" hplacement="left" vplacement="top" xoffset="8" yoffset="0" color="#ffffff" />
     </frame>
 
     <!--

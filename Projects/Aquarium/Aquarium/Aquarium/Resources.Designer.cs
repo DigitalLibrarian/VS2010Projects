@@ -59,5 +59,66 @@ namespace Aquarium {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] DefaultFont {
+            get {
+                object obj = ResourceManager.GetObject("DefaultFont", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+        ///&lt;!--Created with Liquid XML Studio - FREE Community Edition 7.0.2.746 (http://www.liquid-technologies.com)--&gt;
+        ///
+        ///&lt;xs:schema elementFormDefault=&quot;qualified&quot; id=&quot;skin&quot; xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
+        ///  &lt;!--
+        ///    targetNamespace=&quot;http://tempuri.org/skin.xsd&quot;
+        ///    xmlns=&quot;http://tempuri.org/skin.xsd&quot;
+        ///    xmlns:mstns=&quot;http://tempuri.org/skin.xsd&quot;
+        ///  --&gt;
+        ///
+        ///  &lt;!-- Complex type for declaring a font used in this skin --&gt;
+        ///  &lt;xs:complexType name=&quot;fontType&quot;&gt;
+        ///     [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string skin {
+            get {
+                return ResourceManager.GetString("skin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Suave_skin {
+            get {
+                object obj = ResourceManager.GetObject("Suave_skin", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] SuaveSheet {
+            get {
+                object obj = ResourceManager.GetObject("SuaveSheet", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] TitleFont {
+            get {
+                object obj = ResourceManager.GetObject("TitleFont", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

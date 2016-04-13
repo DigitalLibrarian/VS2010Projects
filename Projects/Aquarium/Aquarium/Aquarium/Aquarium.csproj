@@ -163,6 +163,7 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Reactive, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\randomDlls\System.Reactive.dll</HintPath>
@@ -196,6 +197,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="DevScreenSwitcher.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SimulationScreen.cs" />
     <Compile Include="Sim\IRayPickable.cs" />
     <Compile Include="Sim\ISimObject.cs" />
@@ -212,6 +218,7 @@
     <Compile Include="UI\ControlledCraftHUD.cs" />
     <Compile Include="UI\Controls\CloseWindowButtonControl.cs" />
     <Compile Include="UI\Controls\DebugLogWindowControl.cs" />
+    <Compile Include="UI\Controls\GarbageCollectionWindowControl.cs" />
     <Compile Include="UI\Controls\PopulationWindowControl.cs" />
     <Compile Include="UI\Controls\SliderGroupControl.cs" />
     <Compile Include="UI\Controls\TargetWindowControl.cs" />
@@ -237,8 +244,13 @@
   <ItemGroup>
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />
+    <None Include="bin\x86\Debug\Content\DefaultFont.xnb" />
+    <None Include="bin\x86\Debug\Content\SuaveSheet.xnb" />
+    <None Include="bin\x86\Debug\Content\TitleFont.xnb" />
+    <None Include="Resources\suavesheet.png" />
     <None Include="Resources\skin.xsd" />
     <None Include="Resources\Skins\Suave\Suave.skin.xml" />
+    <None Include="Resources\titlefont.spritefont" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Forever.Extensions\Forever.Extensions.csproj">
@@ -306,7 +318,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
