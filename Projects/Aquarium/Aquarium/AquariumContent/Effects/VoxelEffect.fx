@@ -33,15 +33,11 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float4 chunkSpa
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-
-
   // Phong relfection is ambient + light-diffuse + spec highlights.
   // I = Ia*ka*Oda + fatt*Ip[kd*Od(N.L) + ks(R.V)^n]
   // and http://en.wikipedia.org/wiki/Phong_shading
   // Get light direction for this fragment
   float3 lightDir = normalize(input.Position - LightPosition);
- 
- 
   float3 normal = normalize(cross(ddx(input.Position), ddy(input.Position)));
 
   // Note: Non-uniform scaling not supported

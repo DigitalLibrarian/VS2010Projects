@@ -46,7 +46,7 @@ namespace Aquarium
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            ScreenManager = new ScreenManager(this);
+            ScreenManager = new ScreenManager(this, graphics);
 
         }
 
@@ -58,6 +58,7 @@ namespace Aquarium
         /// </summary>
         protected override void Initialize()
         {
+            GC.CancelFullGCNotification();
             this.Window.AllowUserResizing = true;
             this.IsMouseVisible = true;
 
@@ -110,8 +111,6 @@ namespace Aquarium
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == Microsoft.Xna.Framework.Input.ButtonState.Pressed
                 || !ScreenManager.GetScreens().Any())
                 this.Exit();
-
-            
 
             Terminal.CheckOpen(Microsoft.Xna.Framework.Input.Keys.OemTilde, Keyboard.GetState(PlayerIndex.One));
 

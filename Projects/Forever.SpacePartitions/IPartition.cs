@@ -9,7 +9,7 @@ namespace Forever.SpacePartitions
     public interface IPartition<T> 
     {
         BoundingBox Box { get; set; }
-        IEnumerable<T> Objects { get; }
+        IList<T> Objects { get; }
         bool Assign(T obj);
         bool UnAssign(T obj);
         void Clear();

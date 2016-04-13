@@ -10,7 +10,6 @@ using Microsoft.Xna.Framework;
 
 namespace Forever.Voxel
 {
-
     public enum ChunkRayTool
     {
         Derez,
@@ -103,15 +102,10 @@ namespace Forever.Voxel
         #endregion
 
         #region Graphics Data
-        private readonly string EffectName = "Effects\\VoxelEffect";
         Effect Effect { get; set; }
-        public void LoadContent(ContentManager content)
+        public void Initialize(GraphicsDevice device, Effect effect)
         {
-            Effect = content.Load<Effect>(EffectName);
-        }
-
-        public void Initialize(GraphicsDevice device)
-        {
+            Effect = effect;
             SetupInstancing(device);
             SetUpGeometry();
             NeedRebuild = true;
@@ -198,12 +192,10 @@ namespace Forever.Voxel
         }
 
         public int InstanceCount { get; private set; }
-        public int TotalOcclusions { get; private set; }
         Voxel.ViewState[] InstanceBuffer { get; set; }
         private void RebuildInstanceBuffer(Ray cameraRay)
         {
             int next = 0;
-            var occlusions = 0;
             VisitCoords((x, y, z) =>
             {
                 var voxel = Get(x, y, z).Value;
@@ -212,16 +204,10 @@ namespace Forever.Voxel
                     if (!IsOccluded(x, y, z, cameraRay))
                     {
                         var viewState = ExtractViewState(x, y, z);
-                        //instances.Add(viewState);
                         InstanceBuffer[next++] = viewState;
-                    }
-                    else
-                    {
-                        occlusions++;
                     }
                 }
             });
-            TotalOcclusions = occlusions;
            
             InstanceCount = next;
             if (InstanceCount > 0)
@@ -241,32 +227,30 @@ namespace Forever.Voxel
                 -Vector3.UnitY, 
                 -Vector3.UnitZ
                                      };
-
+                                  
         bool IsOccluded(int x, int y, int z, Ray cameraRay)
         {
-            var camVector = cameraRay.Position + cameraRay.Direction;
-            foreach(var d in VoxelFaceNormals)
+            var camVector = this.ArrayToChunk(this.ArrayVector(x, y, z)) - this.WorldToChunk(cameraRay.Position);
+            camVector.Normalize();
+            Vector3 d;
+            for(int i = 0; i < VoxelFaceNormals.Length;i++)
             {
-                int dx, dy, dz;
-                Indices(d, out dx, out dy, out dz);
+                d = VoxelFaceNormals[i];
                 
-                int tx = x + dx, ty = y + dy, tz = z + dz;
-                // TODO - if it is a face voxel, then the direction 
-                // is one of the faces it participates in.  For such a voxel,
-                // it should only be drawn if one of the normals faces the camera
-                if (!InBound(tx, ty, tz))
+                // is normal facing camera
+                if (Vector3.Dot(d, camVector) < 0)
                 {
-                    if (Vector3.Dot(d, camVector) > 0)
+                    int dx, dy, dz;
+                    Indices(d, out dx, out dy, out dz);
+                
+                    int tx = x + dx, ty = y + dy, tz = z + dz;
+                    // if i can step off the edge of the chunk, then i am not occluded
+                    // if voxel the in the face direction is not being drawn then i am not occluded
+                    if (!InBound(tx, ty, tz) || !Get(tx, ty, tz).Value.ShouldRender())
                     {
                         return false;
                     }
-                }
-                else
-                {
-                    if (!Get(tx, ty, tz).Value.ShouldRender())
-                    {
-                        return false;
-                    }
+
                 }
             }
             return true;
@@ -279,12 +263,10 @@ namespace Forever.Voxel
                 Voxels[x][y][z].Material = DefaultMaterial;
             }
 
-            var material = Voxels[x][y][z].Material;
-            var c = ArrayVector(x, y, z);
-            var pos = ArrayToChunk(c) + BlockOffset();
+            var pos = ArrayToChunk(ArrayVector(x, y, z)) + BlockOffset();
             return new Voxel.ViewState
             {
-                Color = material.Color,
+                Color = Voxels[x][y][z].Material.Color,
                 Position = new Vector4(pos.X, pos.Y, pos.Z, 0)
             };
         }
@@ -294,13 +276,6 @@ namespace Forever.Voxel
         #endregion
 
         #region Space Conversions
-        Vector3 ArrayNormal(Vector3 v)
-        {
-            float x = v.X;
-            float y = v.Y;
-            float z = v.Z;
-            return new Vector3(x, y, z);
-        }
 
         public Vector3 ArrayVector(int x, int y, int z)
         {
@@ -510,16 +485,15 @@ namespace Forever.Voxel
             var camPos = rc.Camera.Position;
             var lightPos = new Vector3(-200, 200, -200);
             float distance = (Position - lightPos).LengthSquared();
-            
-            var effect = Instancing.Effect;
-            effect.CurrentTechnique = effect.Techniques["Instancing"];
-            effect.Parameters["WVP"].SetValue(wvp);
-            effect.Parameters["CameraPos"].SetValue(camPos);
-            effect.Parameters["LightPosition"].SetValue(lightPos);
-            effect.Parameters["LightDistanceSquared"].SetValue(distance);
+
+            Instancing.Effect.CurrentTechnique = Instancing.Effect.Techniques["Instancing"];
+            Instancing.Effect.Parameters["WVP"].SetValue(wvp);
+            Instancing.Effect.Parameters["CameraPos"].SetValue(camPos);
+            Instancing.Effect.Parameters["LightPosition"].SetValue(lightPos);
+            Instancing.Effect.Parameters["LightDistanceSquared"].SetValue(distance);
             float intensity = 0.5f;
-            effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
-            effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
+            Instancing.Effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
+            Instancing.Effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
 
             Instancing.Draw(duration, rc, InstanceCount);
         }

@@ -21,7 +21,7 @@ namespace Aquarium.Ui
 
         Func<float> Getter { get; set; }
         Action<float> Setter { get; set; }
-
+        
         public SliderWidgetGroup(int x, int y, int min, int max, string labelText, Func<float> getter, Action<float> setter)
         {
             Max = max;
@@ -49,7 +49,7 @@ namespace Aquarium.Ui
            
             Slider = slider;
             ValueLabel = sliderLabel;
-
+            
             Widgets = new List<Widget>
             {
                

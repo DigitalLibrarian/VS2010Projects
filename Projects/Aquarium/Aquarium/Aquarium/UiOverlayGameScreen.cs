@@ -14,17 +14,11 @@ namespace Aquarium
     abstract class UiOverlayGameScreen : DevScreen
     {
         protected UiOverlay Ui { get; set; }
-        protected RenderContext RenderContext { get; set; }
 
         public override void LoadContent()
         {
             base.LoadContent();
 
-            var gd = ScreenManager.GraphicsDevice;
-            RenderContext = new RenderContext(
-                    new EyeCamera(gd),
-                    gd
-                );
             Ui = new UiOverlay(
                 ScreenManager,
                 RenderContext

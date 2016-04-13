@@ -19,8 +19,6 @@ namespace Forever.Render
         /// <summary>
         /// Real world positional vector of the camera
         /// </summary>
-        /// 
-       // [EntityInspector("Camera.Pos")]
         Vector3 Position { get; set; }
         /// <summary>
         /// This is the projection matrix for your models if you want to see through this camera
@@ -33,20 +31,15 @@ namespace Forever.Render
         /// <summary>
         /// Real-world normalized vector representing up from camera's perspective
         /// </summary>
-        //[EntityInspector("Camera.Up")]
         Vector3 Up { get; }
         /// <summary>
         /// Real-world normalized vector representing star board (right) from camera's perspective
         /// </summary>
-        //[EntityInspector("Camera.Right")]
         Vector3 Right { get; }
 
-        Vector3 Forward { get; }
         /// <summary>
         /// Real-world normalized vector representing forward from camera's perspective
         /// </summary>
-        //[EntityInspector("Camera.Forward")]
-
-        //TODO - think about a LookAt(Vector3 pos, Vector3 up)
+        Vector3 Forward { get; }
     }
 }

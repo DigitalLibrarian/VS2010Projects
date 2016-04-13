@@ -15,9 +15,11 @@ namespace Aquarium
         {
             var index = new List<GameScreen>
             {
+                new NuclexFrameworkDemoScreen(),
                 new SparseVoxelOctTreeScreen(),
                 new VoxelScreen(),
-                new SimulationScreen()
+                new SimulationScreen(),
+                new FlyAroundGameScreen()
             }.ToDictionary(x => x.GetType().ToString());;
 
             Switcher = new DevScreenSwitcher(this, "Screen Switcher", index, ShouldClose);

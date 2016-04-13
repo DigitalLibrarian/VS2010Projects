@@ -16,12 +16,12 @@ using Aquarium.Ui.Targets;
 
 using Aquarium.Sim;
 using Forever.Extensions;
+using Aquarium.Targeting;
 
 namespace Aquarium.Agent
 {
     public class OrganismAgent : PopulationMember, IAgent, IRayPickable, ITarget
     {
-
         public delegate void OnDeathEventHandler(OrganismAgent agent);
         public event OnDeathEventHandler OnDeath;
         int totalOrgans;
@@ -58,9 +58,6 @@ namespace Aquarium.Agent
             }
         }
 
-
-
-
         bool IRayPickable.IsHit(Microsoft.Xna.Framework.Ray ray)
         {
             var maybe = ray.Intersects(Organism.WorldBB);
@@ -83,11 +80,6 @@ namespace Aquarium.Agent
                     totalOrgans
                     ); 
             }
-        }
-
-        IAgent ITarget.Agent
-        {
-            get { return this; }
         }
 
         BoundingBox ITarget.TargetBB

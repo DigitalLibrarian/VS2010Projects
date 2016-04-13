@@ -10,7 +10,7 @@ namespace Forever.SpacePartitions
     {
         public BoundingBox Box { get;  set; }
         List<T> contents;
-        public IEnumerable<T> Objects { get { return contents; } }
+        public IList<T> Objects { get { return contents; } }
 
         public Partition(BoundingBox box)
         {

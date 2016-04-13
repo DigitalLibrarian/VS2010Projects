@@ -6,32 +6,68 @@ using Microsoft.Xna.Framework;
 
 namespace Forever.SpacePartitions
 {
+    public class Space<T> : SpaceMap<T> where T : class
+    {
+        public Space(int gridSize) : base(gridSize) { }
+
+        public IPartition<T> GetOrCreate(Vector3 pos)
+        {
+            return GetOrCreate(VectorToCoord(pos, GridSize));
+        }
+        public IPartition<T> GetOrCreate(SpaceCoord coord)
+        {
+            return GetOrCreate(coord, GridSize);
+        }
+        private IPartition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
+        {
+            if (!ContainsCoord(coord))
+            {
+                var box = CoordToBoundingBox(coord, boxHalfSize);
+                var par = CreateNewPartition(box);
+                AddCoord(coord, par);
+            }
+            return TheMatrix[coord];
+        }
+        
+    }
+
     /// <summary>
     /// A spatial partitioned matrix of objects. 
     /// </summary>
-    public class Space<T> where T: class
+    public class SpaceMap<T> where T: class
     {
         /// <summary>
         /// 3D matrix of cell spaces
         /// </summary>
-        Dictionary<SpaceCoord, IPartition<T>> TheMatrix { get; set; }
-
-        public IEnumerable<SpaceCoord> Coords { get { return TheMatrix.Keys; } }
-        public IEnumerable<IPartition<T>> Partitions { get { return TheMatrix.Values; } }
+        protected Dictionary<SpaceCoord, IPartition<T>> TheMatrix { get; set; }
 
         public int GridSize { get; private set; }
 
-        public Space(int gridSize)
+        public SpaceMap(int gridSize)
         {
             GridSize = gridSize;
             TheMatrix = new Dictionary<SpaceCoord, IPartition<T>>();
         }
 
-        public IEnumerable<SpaceCoord> GetLoadedCoords()
+        List<SpaceCoord> ActiveCoords = new List<SpaceCoord>();
+        List<IPartition<T>> ActivePartitions = new List<IPartition<T>>();
+        protected void AddCoord(SpaceCoord coord, IPartition<T> par)
         {
-            return TheMatrix.Keys;
+            ActiveCoords.Add(coord);
+            ActivePartitions.Add(par);
+
+            TheMatrix.Add(coord, par);
         }
-        
+
+        protected void RemoveCoord(SpaceCoord coord)
+        {
+            int i = ActiveCoords.FindIndex(0, x => x.GetHashCode() == coord.GetHashCode());
+            ActiveCoords.RemoveAt(i);
+            ActivePartitions.RemoveAt(i);
+
+            TheMatrix.Remove(coord);
+        }
+
         #region Conversions
         public BoundingBox CoordToBoundingBox(SpaceCoord coord)
         {
@@ -52,7 +88,7 @@ namespace Forever.SpacePartitions
             return new BoundingBox(min, max);   
         }
 
-        protected IEnumerable<SpaceCoord> CoordBox(SpaceCoord c, int coordBoxHalf=1)
+        protected IList<SpaceCoord> CoordBox(SpaceCoord c, int coordBoxHalf = 1)
         {
             List<SpaceCoord> list = new List<SpaceCoord>();
             for (int x = -coordBoxHalf; x < coordBoxHalf+1; x++)
@@ -68,7 +104,7 @@ namespace Forever.SpacePartitions
             return list;
         }
 
-        private IEnumerable<IPartition<T>> CoordBoxPartitions(SpaceCoord c, int coordBoxHalf = 1)
+        private IList<IPartition<T>> CoordBoxPartitions(SpaceCoord c, int coordBoxHalf = 1)
         {
             List<IPartition<T>> parts = new List<IPartition<T>>();
             var coords = CoordBox(c, coordBoxHalf);
@@ -81,25 +117,6 @@ namespace Forever.SpacePartitions
             }
 
             return parts;
-        }
-
-        public IPartition<T> GetOrCreate(Vector3 pos)
-        {
-            return GetOrCreate(VectorToCoord(pos, GridSize));
-        }
-        public IPartition<T> GetOrCreate(SpaceCoord coord)
-        {
-            return GetOrCreate(coord, GridSize);
-        }
-        private IPartition<T> GetOrCreate(SpaceCoord coord, float boxHalfSize)
-        {
-            if (!TheMatrix.ContainsKey(coord))
-            {
-                var box = CoordToBoundingBox(coord, boxHalfSize);
-                var par = CreateNewPartition(box);
-                TheMatrix.Add(coord, par);
-            }
-            return TheMatrix[coord];
         }
 
         protected SpaceCoord? GetPartitionCoord(IPartition<T> partition)
@@ -120,18 +137,19 @@ namespace Forever.SpacePartitions
             var coord = GetPartitionCoord(partition);
             if (coord.HasValue)
             {
-                TheMatrix.Remove(coord.Value);
+                RemoveCoord(coord.Value);
             }
         }
         
-        public bool IsLoaded(SpaceCoord coord)
+        
+        public bool ContainsCoord(SpaceCoord coord)
         {
             return TheMatrix.ContainsKey(coord);
         }
 
         public void Add(SpaceCoord coord, IPartition<T> par)
         {
-            TheMatrix.Add(coord, par);
+            AddCoord(coord, par);
         }
 
         protected virtual IPartition<T> CreateNewPartition(BoundingBox box)
@@ -212,6 +230,51 @@ namespace Forever.SpacePartitions
             int cellRadius = (int)(radius / GridSize);
             var c = VectorToCoord(pos, GridSize);
             return CoordBoxPartitions(c, cellRadius);
+        }
+
+        public int Find(Func<T, bool> test, List<T> buffer, int maxSize)
+        {
+            int numAdded = 0;
+            for (int i = 0; i < ActivePartitions.Count; i++)
+            {
+                var partition = ActivePartitions[i];
+                int objCount = partition.Objects.Count;
+                for(int j = 0; j < objCount;j++)
+                {
+                    if (test(partition.Objects[j]))
+                    {
+                        buffer.Add(partition.Objects[j]);
+                        numAdded++;
+                        if (buffer.Count >= maxSize)
+                        {
+                            return numAdded;
+                        }
+                    }
+                }
+            }
+            return numAdded;
+        }
+
+        public int Find(Func<T, bool> test, T[] buffer, int start, int max)
+        {
+            if (max == 0) return 0;
+            int numAdded = 0;
+            for (int i = 0; i < TheMatrix.Values.Count; i++)
+            {
+                var partition = TheMatrix.Values.ElementAt(i);
+                foreach(var obj in partition.Objects)
+                {
+                    if (test(obj))
+                    {
+                        buffer[start++] = obj;
+                        if (numAdded++ >= max)
+                        {
+                            return numAdded;
+                        }
+                    }
+                }
+            }
+            return numAdded;
         }
 
         public IEnumerable<T> Query(Func<SpaceCoord, T, bool> test)

@@ -7,6 +7,9 @@ namespace Forever.Voxel.World
 {
     public enum  WorldCellState
     {
+        /// <summary>
+        /// The chunk has been instantiated
+        /// </summary>
         Unloaded,
         Loaded
     }

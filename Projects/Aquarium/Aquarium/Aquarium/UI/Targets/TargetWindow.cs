@@ -12,6 +12,7 @@ using Forever.Screens;
 using Forever.Extensions;
 
 using Aquarium.Agent;
+using Aquarium.Targeting;
 
 namespace Aquarium.Ui.Targets
 {
@@ -26,29 +27,27 @@ namespace Aquarium.Ui.Targets
         public SpriteFont SpriteFont { get; private set; }
         Func<Ray, ITarget> TargetFinder { get; set; }
 
-        SimulationScreen Screen { get; set;}
-
-        SpawnerEditor SpawnerEditor;
+        Func<TargetWindow, bool> ShouldAcceptInput { get; set; }
+        public event EventHandler<NewTargetEventArgs> OnNewTarget;
 
         public TargetWindow(
-            Func<Ray, ITarget> targetFinder, RenderContext renderContext, Vector2 offset, SpriteFont font, 
-            SimulationScreen screen,
-            SpawnerEditor spawnerAgentEditor
+            Func<Ray, ITarget> targetFinder, 
+            Func<TargetWindow, bool> shouldAcceptInput,
+            RenderContext renderContext, 
+            Vector2 offset, 
+            SpriteFont font
             )
         {
             TargetFinder = targetFinder;
+            ShouldAcceptInput = shouldAcceptInput;
             RenderContext = renderContext;
             Offset = offset;
             SpriteFont = font;
-            Screen = screen;
-            SpawnerEditor = spawnerAgentEditor;
-
-            
         }
         
         public void HandleInput(Forever.Screens.InputState input)
         {
-            if (SpawnerEditor.IsOpen || SpawnerEditor.IsExiting) return;
+            if (!ShouldAcceptInput(this)) return;
 
             // if mouse click, produce ray and test for new target
             if (input.IsMouseLeftClick())
@@ -58,18 +57,17 @@ namespace Aquarium.Ui.Targets
                 var ray = GetMouseRay(mousePoint);
 
                 Target = TargetFinder(ray);
-                OnNewTarget();
+                Fire_OnNewTarget();
             }
         }
 
-        private void OnNewTarget()
+        private void Fire_OnNewTarget()
         {
             if (Target != null)
             {
-                if (Target is SpawnerAgent)
+                if(OnNewTarget != null)
                 {
-                    SpawnerEditor.AcquireTarget(Target);
-                    LoadNewPopup(SpawnerEditor);
+                    OnNewTarget(this, new NewTargetEventArgs { Target = this.Target });
                 }
             }
         }
@@ -113,10 +111,5 @@ namespace Aquarium.Ui.Targets
         }
 
         public void Update(GameTime gameTime) { }
-
-        private void LoadNewPopup(GameScreen screen)
-        {
-            Screen.ScreenManager.AddScreen(screen);
-        }
     }
 }

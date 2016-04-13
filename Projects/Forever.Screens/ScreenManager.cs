@@ -77,6 +77,7 @@ namespace Forever.Screens
             set { traceEnabled = value; }
         }
 
+        public GraphicsDeviceManager GraphicsDeviceManager { get; set; }
 
         #endregion
 
@@ -86,9 +87,10 @@ namespace Forever.Screens
         /// <summary>
         /// Constructs a new screen manager component.
         /// </summary>
-        public ScreenManager(Game game)
+        public ScreenManager(Game game, GraphicsDeviceManager graphics)
             : base(game)
         {
+            GraphicsDeviceManager = graphics;
         }
 
 
