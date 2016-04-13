@@ -46,7 +46,7 @@ namespace Aquarium
 
             InputManager = new InputManager();
             GuiManager = new Nuclex.UserInterface.GuiManager(ScreenManager.GraphicsDeviceManager, InputManager);
-            //GuiManager.Visualizer = FlatGuiVisualizer.FromResource(ScreenManager.Game.Services, Resources.ResourceManager, "Suave_skin");
+            GuiManager.Visualizer = FlatGuiVisualizer.FromResource(ScreenManager.Game.Services, Resources.ResourceManager, "Suave_skin");
             GuiManager.Initialize();
             DebugDrawer = new DebugDrawer(this);
 

@@ -68,7 +68,6 @@ namespace Aquarium.UI.Controls
             var pad = 10;
             TargetLabel = new LabelControl()
             {
-                Bounds = new UniRectangle(pad, 0, Width-(pad), Height-(pad)),
             };
             CloseWindowButtonControl = new CloseWindowButtonControl(this);
             return new List<Control>{

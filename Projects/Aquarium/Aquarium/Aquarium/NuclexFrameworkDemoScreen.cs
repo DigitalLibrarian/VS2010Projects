@@ -118,7 +118,6 @@ namespace Aquarium
             // helloWorldLabel
             //
             this.helloWorldLabel.Text = "Hello World! This is a label.";
-            this.helloWorldLabel.Bounds = new UniRectangle(10.0f, 25.0f, 110.0f, 30.0f);
             //
             // okButton
             //
@@ -133,7 +132,6 @@ namespace Aquarium
             );
 
             this.horSliderLabel.Text = "Horizontal Slider";
-            this.horSliderLabel.Bounds = new UniRectangle(10, 80, 100, 20);
             this.horSlider = new HorizontalSliderControl
             {
                 Bounds = new UniRectangle(10, 100, 100, 20),
@@ -141,7 +139,6 @@ namespace Aquarium
                 ThumbPosition = 0.25f,
             };
             this.verSliderLabel.Text = "Vertical Slider";
-            this.verSliderLabel.Bounds = new UniRectangle(180, 140, 100, 20);
             this.verSlider = new VerticalSliderControl
             {
                 Bounds = new UniRectangle(150, 100, 20, 100),

@@ -92,7 +92,6 @@ that uses the theme, please give due credit to the original artist!
       Frame used for a label
     -->
     <frame name="label">
-      <text font="default" hplacement="left" vplacement="center" yoffset="15" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -138,7 +137,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="1" y="58" w="4" h="3" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="5" y="58" w="11" h="3" />
       <region source="controls" hplacement="right" vplacement="bottom" x="16" y="58" w="3" h="3" />
-      <text font="default" hplacement="center" vplacement="center" yoffset="15" color="#3F3F3F" />
+      <text font="default" hplacement="center" vplacement="center" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -154,7 +153,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="1" y="72" w="4" h="3" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="5" y="72" w="11" h="3" />
       <region source="controls" hplacement="right" vplacement="bottom" x="16" y="72" w="3" h="3" />
-      <text font="default" hplacement="center" vplacement="center" yoffset="15" color="#3F3F3F" />
+      <text font="default" hplacement="center" vplacement="center" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -170,7 +169,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="1" y="100" w="4" h="3" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="5" y="100" w="11" h="3" />
       <region source="controls" hplacement="right" vplacement="bottom" x="16" y="100" w="3" h="3" />
-      <text font="default" hplacement="center" vplacement="center" yoffset="15" color="#3F3F3F" />
+      <text font="default" hplacement="center" vplacement="center" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -186,7 +185,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="1" y="87" w="4" h="2" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="5" y="87" w="11" h="2" />
       <region source="controls" hplacement="right" vplacement="bottom" x="16" y="87" w="3" h="2" />
-      <text font="default" hplacement="center" vplacement="center" xoffset="1" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="center" vplacement="center" xoffset="1" yoffset="1" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -194,7 +193,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.off.disabled">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="62" y="90" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#7f7f7f" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#7f7f7f" />
     </frame>
 
     <!--
@@ -202,7 +201,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.off.depressed">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="62" y="76" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -210,7 +209,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.off.highlighted">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="62" y="62" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -218,7 +217,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.off.normal">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="62" y="48" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -226,7 +225,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.on.disabled">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="76" y="90" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#7f7f7f" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#7f7f7f" />
     </frame>
 
     <!--
@@ -234,7 +233,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.on.depressed">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="76" y="76" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -242,7 +241,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.on.highlighted">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="76" y="62" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -250,7 +249,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="radio.on.normal">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="76" y="48" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -258,7 +257,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.off.disabled">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="20" y="90" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#7f7f7f" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#7f7f7f" />
     </frame>
 
     <!--
@@ -266,7 +265,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.off.normal">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="20" y="48" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -274,7 +273,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.off.highlighted">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="20" y="62" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -282,7 +281,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.off.depressed">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="20" y="76" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -290,7 +289,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.on.disabled">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="34" y="90" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#7f7f7f" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#7f7f7f" />
     </frame>
 
     <!--
@@ -298,7 +297,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.on.normal">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="34" y="48" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -306,7 +305,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.on.highlighted">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="34" y="62" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -314,7 +313,7 @@ that uses the theme, please give due credit to the original artist!
     -->
     <frame name="check.on.depressed">
       <region source="controls" hplacement="stretch" vplacement="stretch" x="34" y="76" w="13" h="13" />
-      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="16" color="#3F3F3F" />
+      <text font="default" hplacement="left" vplacement="center" xoffset="4" yoffset="0" color="#3F3F3F" />
     </frame>
 
     <!--
@@ -462,7 +461,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="92" y="23" w="1" h="1" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="93" y="23" w="62" h="1" />
       <region source="controls" hplacement="right" vplacement="bottom" x="155" y="23" w="1" h="1" />
-      <text font="default" color="#3F3F3F" hplacement="left" vplacement="center" xoffset="4" yoffset="15" />
+      <text font="default" color="#3F3F3F" hplacement="left" vplacement="center" xoffset="4" yoffset="0" />
     </frame>
 
     <!--
@@ -478,7 +477,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="157" y="23" w="1" h="1" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="158" y="23" w="62" h="1" />
       <region source="controls" hplacement="right" vplacement="bottom" x="220" y="23" w="1" h="1" />
-      <text font="default" color="#3F3F3F" hplacement="left" vplacement="center" xoffset="4" yoffset="15" />
+      <text font="default" color="#3F3F3F" hplacement="left" vplacement="center" xoffset="4" yoffset="0" />
     </frame>
 
     <!--
@@ -494,7 +493,7 @@ that uses the theme, please give due credit to the original artist!
       <region source="controls" hplacement="left" vplacement="bottom" x="92" y="23" w="1" h="1" />
       <region source="controls" hplacement="stretch" vplacement="bottom" x="93" y="23" w="62" h="1" />
       <region source="controls" hplacement="right" vplacement="bottom" x="155" y="23" w="1" h="1" />
-      <text font="default" color="#3F3F3F" hplacement="left" vplacement="top" xoffset="4" yoffset="15" />
+      <text font="default" color="#3F3F3F" hplacement="left" vplacement="top" xoffset="4" yoffset="0" />
     </frame>
 
     <!--
