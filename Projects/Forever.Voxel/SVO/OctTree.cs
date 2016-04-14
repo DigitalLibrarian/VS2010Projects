@@ -119,6 +119,11 @@ namespace Forever.Voxel.SVO
             }
         }
 
+        public OctTreeNode<T> GetLeafContaining(Vector3 v)
+        {
+            return FindFirstLeaf((x) => x.Box.Contains(v) != ContainmentType.Disjoint);
+        }
+
         public OctTreeNode<T> FindFirstLeaf(Predicate<OctTreeNode<T>> action)
         {
             return FindFirstLeaf(action, Root);

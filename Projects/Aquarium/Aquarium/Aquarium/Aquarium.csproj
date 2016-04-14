@@ -197,6 +197,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="DevScreenSwitcher.cs" />
+    <Compile Include="RayCastScreen.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -220,8 +221,10 @@
     <Compile Include="UI\Controls\DebugLogWindowControl.cs" />
     <Compile Include="UI\Controls\GarbageCollectionWindowControl.cs" />
     <Compile Include="UI\Controls\PopulationWindowControl.cs" />
+    <Compile Include="UI\Controls\RayCastWindowControl.cs" />
     <Compile Include="UI\Controls\SliderGroupControl.cs" />
     <Compile Include="UI\Controls\TargetWindowControl.cs" />
+    <Compile Include="UI\Controls\TreeTesterWindowControl.cs" />
     <Compile Include="UI\LabelUiElement.cs" />
     <Compile Include="UI\Odometer.cs" />
     <Compile Include="UI\RuminateGuiGameScreen.cs" />

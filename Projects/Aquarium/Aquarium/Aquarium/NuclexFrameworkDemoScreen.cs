@@ -16,23 +16,10 @@ using Nuclex.Graphics.SpecialEffects.Water;
 using Aquarium.UI.Controls;
 using Nuclex.Graphics.Batching;
 using Aquarium.Targeting;
+using Nuclex.UserInterface.Controls;
 
 namespace Aquarium
 {
-
-    public class DumbTarget : ITarget
-    {
-
-        string ITarget.Label
-        {
-            get { return "I am a target label woo hoo!"; }
-        }
-
-        BoundingBox ITarget.TargetBB
-        {
-            get { return new BoundingBox(); }
-        }
-    }
     class NuclexFrameworkDemoScreen : FlyAroundGameScreen
     {
         Model SkySphere;
@@ -43,12 +30,23 @@ namespace Aquarium
 
             var targetWindow = new TargetWindowControl(1310, 10);
             targetWindow.SetNewTarget(new DumbTarget());
-            this.GuiManager.Screen.Desktop.Children.Add(targetWindow);
-            this.GuiManager.Screen.Desktop.Children.Add(new PopulationWindowControl(10, 50));
-            this.GuiManager.Screen.Desktop.Children.Add(new DemoDialog());
-            this.GuiManager.Screen.Desktop.Children.Add(new DebugLogWindowControl(100, 750));
-            this.GuiManager.Screen.Desktop.Children.Add(new GarbageCollectionWindowControl(600, 200));
-            
+
+            // TODO - replace this with some way to browse through a list of windows to display
+            foreach (var control in new Control[]{
+                new RayCastWindowControl(100, 600),
+                targetWindow,
+                new PopulationWindowControl(10, 50),
+                new DemoDialog(),
+                new DebugLogWindowControl(100, 750),
+                new GarbageCollectionWindowControl(600, 200),
+                new TreeTesterWindowControl<bool>(700, 300)
+            })
+            {
+                this.GuiManager.Screen.Desktop.Children.Add(control);
+            }
+
+
+
             User.Body.Position = Vector3.Backward * 10;
             var content = ScreenManager.Game.Content;
             SkySphereEffect = content.Load<Effect>("Effects//SkySphere");
@@ -218,5 +216,20 @@ namespace Aquarium
         private Nuclex.UserInterface.Controls.Desktop.ListControl list;
         private Nuclex.UserInterface.Controls.Desktop.OptionControl option;
         private Aquarium.UI.Controls.CloseWindowButtonControl closeWindowButton;
+    }
+
+
+    public class DumbTarget : ITarget
+    {
+
+        string ITarget.Label
+        {
+            get { return "I am a target label woo hoo!"; }
+        }
+
+        BoundingBox ITarget.TargetBB
+        {
+            get { return new BoundingBox(); }
+        }
     }
 }

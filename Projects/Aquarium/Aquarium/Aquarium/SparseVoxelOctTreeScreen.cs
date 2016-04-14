@@ -11,6 +11,7 @@ using Forever.Render;
 using Microsoft.Xna.Framework.Input;
 using Aquarium.Ui;
 using Aquarium.UI;
+using Aquarium.UI.Controls;
 
 namespace Aquarium
 {
@@ -21,6 +22,7 @@ namespace Aquarium
         int RenderDepth { get; set; }
 
         LabelUiElement FaceSizeLabel { get; set; }
+        TreeTesterWindowControl<int> TreeTesterWindowControl { get; set; }
 
         public override void LoadContent()
         {
@@ -41,10 +43,15 @@ namespace Aquarium
             User.Body.Position = startPos;
             Ui.Elements.AddRange(CreateUILayout());
 
+            TreeTesterWindowControl = new TreeTesterWindowControl<int>(1500, 300);
+            this.GuiManager.Screen.Desktop.Children.Add(TreeTesterWindowControl);
+
+            TreeTesterWindowControl.Bind(this.Tree, this.Tree.Root);
         }
 
         List<IUiElement> CreateUILayout()
         {
+            // TODO - move this to a window control TreeViewer that can be reused as a debugging tool
             var spriteFont = ScreenManager.Font;
             FaceSizeLabel = new LabelUiElement(RenderContext, spriteFont, DebugLabelStrip());
 
@@ -84,6 +91,12 @@ namespace Aquarium
 
 
             }, RenderDepth);
+
+            var testerNode = TreeTesterWindowControl.CurrentNode;
+            if (testerNode != null)
+            {
+                Renderer.Render(RenderContext, testerNode.Box, Color.White);
+            }
 
             FaceSizeLabel.Label = string.Format("Depth: {0} Size: {1}", RenderDepth, smallest);
             base.Draw(gameTime);
