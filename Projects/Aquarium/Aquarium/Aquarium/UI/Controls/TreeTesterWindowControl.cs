@@ -233,6 +233,7 @@ namespace Aquarium.UI.Controls
                 Bounds = new UniRectangle(Pad + 40, Pad, labelWidth, labelHeight)
             };
 
+
             ParentButtonControl = new ButtonControl
             {
                 Text = "Up",
@@ -297,9 +298,10 @@ namespace Aquarium.UI.Controls
         #region Node Info
         private Control NodeInfoPanel { get; set; }
         private LabelControl NodeInfoLabel { get; set; }
+        private ButtonControl PruneButtonControl { get; set; }
         void CreateNodeInfoPanel(UniScalar startX, UniScalar startY)
         {
-            int labelWidth = 60;
+            int labelWidth = 200;
             int labelHeight = 15;
             var label = new LabelControl
             {
@@ -313,6 +315,13 @@ namespace Aquarium.UI.Controls
             {
                 Bounds = new UniRectangle(Pad, Pad + labelHeight + Pad, nodeInfoLabelWidth, nodeInfoLabelHeight)
             };
+
+            PruneButtonControl = new ButtonControl
+            {
+                Text = "Prune",
+                Bounds = new UniRectangle(Pad + nodeInfoLabelWidth + Pad, Pad + labelHeight + Pad, ButtonWidth + ButtonWidth, ButtonHeight)
+            };
+            PruneButtonControl.Pressed += new EventHandler(PruneButtonControl_Pressed);
             UpdateNodeInfo();
 
             int width = Pad + Math.Max(nodeInfoLabelWidth, labelWidth) + Pad;
@@ -324,6 +333,13 @@ namespace Aquarium.UI.Controls
 
             NodeInfoPanel.Children.Add(label);
             NodeInfoPanel.Children.Add(NodeInfoLabel);
+            NodeInfoPanel.Children.Add(PruneButtonControl);
+        }
+
+        void PruneButtonControl_Pressed(object sender, EventArgs e)
+        {
+            Node.Prune();
+            UpdateViewState();
         }
 
         StringBuilder NodeInfoBuilder = new StringBuilder();
@@ -341,16 +357,19 @@ namespace Aquarium.UI.Controls
 
             if (Node == null)
             {
+                PruneButtonControl.Enabled = false;
                 NodeInfoBuilder.AppendLine("No Node Attached");
             }
             else
             {
+                PruneButtonControl.Enabled = !Node.IsLeaf;
                 NodeInfoBuilder.AppendFormat("Parent: {0}{1}", Node.Parent == null ? "NO" : "YES", Environment.NewLine);
                 var t = Node.Value;
                 NodeInfoBuilder.AppendFormat("Value: {0}{1}", t == null ? "NULL" : t.ToString(), Environment.NewLine);
             }
 
             NodeInfoLabel.Text = NodeInfoBuilder.ToString();
+
         }
         #endregion
 

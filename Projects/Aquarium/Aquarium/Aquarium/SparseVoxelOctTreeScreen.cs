@@ -29,7 +29,7 @@ namespace Aquarium
             PropagateInput = true;
             base.LoadContent();
 
-            var n = 1024;
+            var n = 1024f / 200f;
             var treeBox = new BoundingBox(new Vector3(-n, -n, -n), new Vector3(n, n, n));
 
             MaxTreeDepth = 5;
@@ -76,12 +76,13 @@ namespace Aquarium
             if (input.IsMouseLeftClick())
             {
                 var r = RenderContext.GetScreenRay(input.CurrentMousePoint.ToVector2());
-
                 Ray = new Ray(r.Position + r.Direction, r.Direction);
+                RayColor = Tree.Root.Box.Intersects(Ray.Value).HasValue ? Color.Blue : Color.SlateGray;
             }
         }
 
         Ray? Ray { get; set; }
+        Color RayColor { get; set; }
 
         public override void Draw(GameTime gameTime)
         {
@@ -109,7 +110,7 @@ namespace Aquarium
 
             if (Ray.HasValue)
             {
-                DebugDrawer.DrawLine(Ray.Value.Position, Ray.Value.Position + (Ray.Value.Direction*5000), Color.White);
+                DebugDrawer.DrawLine(Ray.Value.Position, Ray.Value.Position + (Ray.Value.Direction*100), RayColor);
                 DebugDrawer.Draw(gameTime);
             }
 
