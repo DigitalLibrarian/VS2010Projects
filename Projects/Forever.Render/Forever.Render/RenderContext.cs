@@ -79,5 +79,20 @@ namespace Forever.Render
     {
         return new Ray(Camera.Position, Camera.Forward);
     }
+
+    public Ray GetScreenRay(Vector2 screenPos)
+    {
+        var projection = Camera.Projection;
+        var view = Camera.View;
+        Viewport viewport = GraphicsDevice.Viewport;
+
+        Vector3 near = new Vector3(screenPos, 0);
+        Vector3 far = new Vector3(screenPos, 1);
+
+        near = viewport.Unproject(near, projection, view, Matrix.Identity);
+        far = viewport.Unproject(far, projection, view, Matrix.Identity);
+
+        return new Ray(Camera.Position, Vector3.Normalize(far - near));
+    }
   }
 }

@@ -164,7 +164,7 @@ namespace Aquarium
             if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
-                var ray = GetMouseRay(mousePoint);
+                var ray = RenderContext.GetScreenRay(mousePoint);
                 ShootChunksBigLaser(ray, ChunkRayTool.Derez, 1);
             }
 
@@ -172,7 +172,7 @@ namespace Aquarium
                 && input.LastMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
-                var ray = GetMouseRay(mousePoint);
+                var ray = RenderContext.GetScreenRay(mousePoint);
                 ShootChunks(ray, ChunkRayTool.Rez, false);
             }
 
@@ -259,21 +259,6 @@ namespace Aquarium
                     }
                 }
             }
-        }
-
-        public Ray GetMouseRay(Vector2 mousePosition)
-        {
-            var projection = RenderContext.Camera.Projection;
-            var view = RenderContext.Camera.View;
-            Viewport viewport = RenderContext.GraphicsDevice.Viewport;
-
-            Vector3 near = new Vector3(mousePosition, 0);
-            Vector3 far = new Vector3(mousePosition, 1);
-
-            near = viewport.Unproject(near, projection, view, Matrix.Identity);
-            far = viewport.Unproject(far, projection, view, Matrix.Identity);
-
-            return new Ray(RenderContext.Camera.Position, Vector3.Normalize(far - near));
         }
         Chunk[] RenderSet { get; set; }
         int MaxRenderSetSize = 2048*2*2*2*2;

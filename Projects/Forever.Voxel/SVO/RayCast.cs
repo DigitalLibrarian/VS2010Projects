@@ -18,10 +18,21 @@ namespace Forever.Voxel.SVO
         //    return 0;
            // return GetFirstNode(ray.
         //}
-
+        /*
         static uint GetFirstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm)
         {
             return 0;
+        }
+         * */
+
+        static OctTreeNode<T> GetFirstNode<T>(OctTree<T> tree, Ray ray)
+        {
+            return null;
+        }
+
+        static OctTreeNode<T> GetNextNode<T>(OctTreeNode<T> node, Ray ray)
+        {
+            return null;
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Aquarium.Ui.Targets
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 //todo - limit to targeting area
-                var ray = GetMouseRay(mousePoint);
+                var ray = RenderContext.GetScreenRay(mousePoint);
 
                 Target = TargetFinder(ray);
                 Fire_OnNewTarget();
@@ -71,22 +71,6 @@ namespace Aquarium.Ui.Targets
                 }
             }
         }
-
-        public Ray GetMouseRay(Vector2 mousePosition)
-        {
-            var projection = RenderContext.Camera.Projection;
-            var view = RenderContext.Camera.View;
-            Viewport viewport = RenderContext.GraphicsDevice.Viewport;
-
-            Vector3 near = new Vector3(mousePosition, 0);
-            Vector3 far = new Vector3(mousePosition, 1);
-
-            near = viewport.Unproject(near, projection, view, Matrix.Identity);
-            far = viewport.Unproject(far, projection, view, Matrix.Identity);
-
-            return new Ray(near, Vector3.Normalize(far - near));
-        }
-
 
         public void Draw(GameTime gameTime, SpriteBatch batch)
         {

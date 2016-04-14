@@ -72,7 +72,14 @@ namespace Aquarium
             {
                 if(RenderDepth > 0) RenderDepth--;
             }
+
+            if (input.IsMouseLeftClick())
+            {
+
+            }
         }
+
+        Ray? Ray { get; set; }
 
         public override void Draw(GameTime gameTime)
         {
