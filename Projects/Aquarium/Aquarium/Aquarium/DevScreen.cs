@@ -82,6 +82,7 @@ namespace Aquarium
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
+            DebugDrawer.Reset();
             DebugDrawer.ViewProjection = RenderContext.Camera.View * RenderContext.Camera.Projection;
             GuiManager.Draw(gameTime);
 

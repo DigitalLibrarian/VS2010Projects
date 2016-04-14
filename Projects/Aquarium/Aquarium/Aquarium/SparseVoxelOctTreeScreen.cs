@@ -75,7 +75,9 @@ namespace Aquarium
 
             if (input.IsMouseLeftClick())
             {
+                var r = RenderContext.GetScreenRay(input.CurrentMousePoint.ToVector2());
 
+                Ray = new Ray(r.Position + r.Direction, r.Direction);
             }
         }
 
@@ -103,6 +105,12 @@ namespace Aquarium
             if (testerNode != null)
             {
                 Renderer.Render(RenderContext, testerNode.Box, Color.White);
+            }
+
+            if (Ray.HasValue)
+            {
+                DebugDrawer.DrawLine(Ray.Value.Position, Ray.Value.Position + (Ray.Value.Direction*5000), Color.White);
+                DebugDrawer.Draw(gameTime);
             }
 
             FaceSizeLabel.Label = string.Format("Depth: {0} Size: {1}", RenderDepth, smallest);
