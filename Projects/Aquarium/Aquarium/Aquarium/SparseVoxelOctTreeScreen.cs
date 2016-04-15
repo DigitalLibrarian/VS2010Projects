@@ -89,6 +89,8 @@ namespace Aquarium
                 }
                 else
                 {
+                    // TODO - dispose 
+                    RayPathSequence = null;
                     RayColor = Color.SlateGray;
                 }
             }

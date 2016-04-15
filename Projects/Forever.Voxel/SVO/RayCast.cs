@@ -15,13 +15,9 @@ namespace Forever.Voxel.SVO
 
     static internal class RayCast
     {
-       
-
         // Static memory access is slower. 
 		// the paper suggested passing the possible exist nodes as function arguments on the stack which is faster
 		static uint[,] NextNodeTable ;
-        
-        //static uint a; //flags for the negative direction, used to transform the octree nodes using an XOR operation.
 
         static RayCast ()
         {
@@ -190,7 +186,6 @@ namespace Forever.Voxel.SVO
 		    // Calculate the initiale ray parameters.
 		    uint a=0; // flag for negative ray components.
             var halfsize = root.Box.GetHalfSize();
-            //var origin = ray.Position - root.Box.GetCenter() + halfsize;
             var origin = ray.Position - root.Box.Min;
             var bounds = new BoundingBox(Vector3.Zero, halfsize * 2);
             var boxSize = bounds.Max;

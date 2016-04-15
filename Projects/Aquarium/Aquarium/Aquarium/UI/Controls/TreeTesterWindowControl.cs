@@ -9,6 +9,7 @@ using Forever.Voxel.SVO;
 using Microsoft.Xna.Framework;
 
 using Forever.Extensions;
+using Microsoft.Xna.Framework.Input;
 
 namespace Aquarium.UI.Controls
 {
@@ -282,15 +283,15 @@ namespace Aquarium.UI.Controls
             int i = int.Parse((sender as ButtonControl).Text);
 
             Node = Node.Children[i];
+
             UpdateViewState();
         }
 
         void UpdateTreeWalker()
         {
-            ParentButtonControl.Enabled = Node.Parent != null;
+            ParentButtonControl.Enabled = Node != null && Node.Parent != null;
             for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
             {
-                ChildButtons[i].Enabled = !Node.IsLeaf;
             }
         }
         #endregion
