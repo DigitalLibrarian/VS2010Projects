@@ -150,18 +150,6 @@ namespace Forever.Voxel.SVO
                 for (int i = 0; i < OctTreeNode<T>.Subdivisions && t == null; i++)
                 {
                     t = FindFirstLeaf(action, node.Children[i]);
-
-                    /*
-                    if (action(node.Children[i]))
-                    {
-                        if (node.Children[i].IsLeaf)
-                        {
-                            return node.Children[i];
-                        }
-
-                        t = FindFirstLeaf(action, node.Children[i]);
-                    }
-                     * */
                 }
                 return t;
             }

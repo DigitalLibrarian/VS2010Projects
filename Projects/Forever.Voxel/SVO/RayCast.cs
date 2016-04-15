@@ -13,7 +13,7 @@ namespace Forever.Voxel.SVO
      * http://codingshuttle.com/2014/03/implemnting-an-octree-raycasting-algorithm/
     */
 
-    static class RayCast
+    static internal class RayCast
     {
        
 
@@ -189,17 +189,6 @@ namespace Forever.Voxel.SVO
 
 		    // Calculate the initiale ray parameters.
 		    uint a=0; // flag for negative ray components.
-            /*
-		    AxisAlignedBox bounds = root->m_bounds;
-		    glm::vec3 minimum = bounds.GetMinimum();
-		    glm::vec3 maximum = bounds.GetMaximum();
-		    glm::vec3 halfsize = bounds.GetHalfSize();
-		    origin = origin - bounds.GetCenter() + halfsize;
-		    bounds.SetMinimum( minimum-minimum);
-		    bounds.SetMaximum( maximum - minimum);
-		    glm::vec3 boxSize = root->m_bounds.GetSize();
-             * */
-            
             var halfsize = root.Box.GetHalfSize();
             //var origin = ray.Position - root.Box.GetCenter() + halfsize;
             var origin = ray.Position - root.Box.Min;

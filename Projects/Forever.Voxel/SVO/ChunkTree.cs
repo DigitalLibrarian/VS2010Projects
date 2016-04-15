@@ -9,17 +9,21 @@ namespace Forever.Voxel.SVO
 {
     public class ChunkTree
     {
+        const int VoxelsPerDimension = 16;
         public int Depth { get; set; }
         public OctTree<Chunk> Tree { get; private set; }
-        public static ChunkTree Create(Vector3 pos, float chunkSize, int depth)
+        public static ChunkTree Create(Vector3 pos, float worldSize, Func<BoundingBox, Chunk> chunkFactory)
         {
-            var s = chunkSize;
-            float worldSize = s * (float)System.Math.Pow(2, depth);
+            float chunkSize = VoxelsPerDimension;
+            // hmm
+            int depth = (int)Math.Log(worldSize/chunkSize, 2);
 
             var treeBox = new BoundingBox(
                 pos + new Vector3(-worldSize, -worldSize, -worldSize),
                 pos + new Vector3(worldSize, worldSize, worldSize));
             var tree = OctTree<Chunk>.CreatePreSubdivided(depth, treeBox);
+
+            tree.VisitAtDepth((n) => n.Value = chunkFactory(n.Box), depth - 1);
 
             return new ChunkTree
             {
