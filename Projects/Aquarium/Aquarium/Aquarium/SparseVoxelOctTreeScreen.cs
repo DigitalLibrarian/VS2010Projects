@@ -38,10 +38,10 @@ namespace Aquarium
             RenderDepth = 0;
 
             var diff = treeBox.Max - treeBox.Min;
-            var startPos = Vector3.Backward * (diff.Length());
+            var startPos = Vector3.Forward * (diff.Length());
             RenderContext.Camera.Position = startPos;
             User.Body.Position = startPos;
-            //User.Body.Orientation = Quaternion.CreateFromYawPitchRoll(0f, (float)Math.PI, 0f);
+            User.Body.Orientation = Quaternion.CreateFromRotationMatrix(Matrix.CreateLookAt(startPos, Tree.Root.Box.GetCenter(), Vector3.Up));
             Ui.Elements.AddRange(CreateUILayout());
 
             TreeTesterWindowControl = new TreeTesterWindowControl<int>(1500, 300);

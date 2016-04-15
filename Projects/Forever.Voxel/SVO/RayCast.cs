@@ -21,7 +21,7 @@ namespace Forever.Voxel.SVO
 		// the paper suggested passing the possible exist nodes as function arguments on the stack which is faster
 		static uint[,] NextNodeTable ;
         
-        static uint a; //flags for the negative direction, used to transform the octree nodes using an XOR operation.
+        //static uint a; //flags for the negative direction, used to transform the octree nodes using an XOR operation.
 
         static RayCast ()
         {
@@ -35,37 +35,6 @@ namespace Forever.Voxel.SVO
 			    {8, 8, 7},
 			    {8, 8, 8}
             };
-        }
-
-        static OctTreeNode<T> GetFirstNode<T>(OctTree<T> tree, Ray ray)
-        {
-            return GetNextNode(tree.Root, ray);
-        }
-        
-        static OctTreeNode<T> GetNextNode<T>(OctTreeNode<T> node, Ray ray)
-        {
-            // This method assume that the ray intersects the node, 
-            // and that we haven't visited it yet
-
-            // get the distance along the ray that the intersection happened
-            float d = node.Box.Intersects(ray).Value;
-
-            if (node.IsLeaf)
-            {
-                /* we need to follow the ray and figure out
-                 *
-                 *  * If there is a next child that will be hit next (return it)
-                 *  * If we need to go back up the tree and over, in ray direction (and recurse in that direction)
-                 */
-
-
-            }
-            else
-            {
-                // We need to go down and find the first leaf of intersection
-            }
-
-            return null;
         }
 
         static uint GetFirstNode( float tx0, float ty0, float tz0, float txm, float tym, float tzm)
@@ -90,7 +59,7 @@ namespace Forever.Voxel.SVO
 
 		    if( txm < tz0 ) entryPlane |= 4; 
 		    if( tym < tz0 ) entryPlane |= 2;
-	
+             
 		    return entryPlane; //returns the first node
         }
 
@@ -112,15 +81,13 @@ namespace Forever.Voxel.SVO
 		    if ( tz1 < min ){
 			    minIndex = 2;
 		    }
-
             
-
 		    int exitPlane = minIndex;
 
 		    return RayCast.NextNodeTable[currentNode, exitPlane];
 	    }
 
-        static IEnumerable<OctTreeNode<T>> ProcessSubNode<T>(OctTreeNode<T> node, float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, int level)
+        static IEnumerable<OctTreeNode<T>> ProcessSubNode<T>(OctTreeNode<T> node, float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, int level, uint a)
         {
             if (!(tx1 < 0 || ty1 < 0 || tz1 < 0))
             {
@@ -143,7 +110,7 @@ namespace Forever.Voxel.SVO
                         switch (currentNode)
                         {
                             case 0:
-                                foreach (var n in ProcessSubNode(node.Children[a], tx0, ty0, tz0, txM, tyM, tzM, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a], tx0, ty0, tz0, txM, tyM, tzM, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -151,7 +118,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 1:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 1], tx0, ty0, tzM, txM, tyM, tz1, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 1], tx0, ty0, tzM, txM, tyM, tz1, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -159,7 +126,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 2:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 2], tx0, tyM, tz0, txM, ty1, tzM, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 2], tx0, tyM, tz0, txM, ty1, tzM, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -167,7 +134,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 3:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 3], tx0, tyM, tzM, txM, ty1, tz1, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 3], tx0, tyM, tzM, txM, ty1, tz1, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -175,7 +142,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 4:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 4], txM, ty0, tz0, tx1, tyM, tzM, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 4], txM, ty0, tz0, tx1, tyM, tzM, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -184,7 +151,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 5:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 5], txM, ty0, tzM, tx1, tyM, tz1, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 5], txM, ty0, tzM, tx1, tyM, tz1, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -193,7 +160,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 6:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 6], txM, tyM, tz0, tx1, ty1, tzM, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 6], txM, tyM, tz0, tx1, ty1, tzM, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -202,7 +169,7 @@ namespace Forever.Voxel.SVO
                                 break;
 
                             case 7:
-                                foreach (var n in ProcessSubNode(node.Children[a ^ 7], txM, tyM, tzM, tx1, ty1, tz1, level + 1))
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 7], txM, tyM, tzM, tx1, ty1, tz1, level + 1, a))
                                 {
                                     yield return n;
                                 }
@@ -219,8 +186,9 @@ namespace Forever.Voxel.SVO
 	    public static IEnumerable<OctTreeNode<T>> RayTraverse<T>(OctTreeNode<T> root, Ray ray)
 	    {
 
+
 		    // Calculate the initiale ray parameters.
-		    a=0; // flag for negative ray components.
+		    uint a=0; // flag for negative ray components.
             /*
 		    AxisAlignedBox bounds = root->m_bounds;
 		    glm::vec3 minimum = bounds.GetMinimum();
@@ -231,32 +199,37 @@ namespace Forever.Voxel.SVO
 		    bounds.SetMaximum( maximum - minimum);
 		    glm::vec3 boxSize = root->m_bounds.GetSize();
              * */
-            var minimum = root.Box.Min;
-            var maximum = root.Box.Max;
+            
             var halfsize = root.Box.GetHalfSize();
-            var origin = ray.Position - root.Box.GetCenter() + halfsize;
-            var bounds = new BoundingBox(minimum - minimum, maximum - minimum);
-            var boxSize = bounds.Max - bounds.Min;
+            //var origin = ray.Position - root.Box.GetCenter() + halfsize;
+            var origin = ray.Position - root.Box.Min;
+            var bounds = new BoundingBox(Vector3.Zero, halfsize * 2);
+            var boxSize = bounds.Max;
             var dir = ray.Direction;
 
-		    if (dir.X < 0.0f){
-			    origin.X = boxSize.X - origin.X;
-			    dir.X *= -1.0f;
-			    a |= 4;
+            if (dir.X < 0.0f)
+            {
+                origin.X = boxSize.X - origin.X;
+                dir.X *= -1.0f;
+            }
+            else
+            {
+                // don't ask me
+                a |= 4;
             }
 
-            if (dir.Y < 0.0f){
-			    origin.Y = boxSize.Y - origin.Y;
-		        dir.Y *= -1.0f;
-			    a |= 2;
+            if (dir.Y < 0.0f)
+            {
+                origin.Y = boxSize.Y - origin.Y;
+                a |= 2;
+                dir.Y *= -1.0f;
             }
 
             if (dir.Z < 0.0f)
             {
                 origin.Z = boxSize.Z - origin.Z;
-
-                dir.Z *= -1.0f;
                 a |= 1;
+                dir.Z *= -1.0f;
             }
 
 		    float invDirx = 1.0f / dir.X;
@@ -279,7 +252,7 @@ namespace Forever.Voxel.SVO
 		    // Visiting current node, perform actual work here
             if (maxOf0 < minOf1)
             {
-                foreach(var n in ProcessSubNode(root, tx0, ty0, tz0, tx1, ty1, tz1, 0))
+                foreach(var n in ProcessSubNode(root, tx0, ty0, tz0, tx1, ty1, tz1, 0, a))
                 {
                     yield return n;
                 }
