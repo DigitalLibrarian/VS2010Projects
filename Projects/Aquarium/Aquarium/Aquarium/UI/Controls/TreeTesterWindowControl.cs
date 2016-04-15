@@ -292,6 +292,7 @@ namespace Aquarium.UI.Controls
             ParentButtonControl.Enabled = Node != null && Node.Parent != null;
             for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
             {
+                ChildButtons[i].Enabled = Node != null && !Node.IsLeaf && ChildButtons[i] != null;
             }
         }
         #endregion
