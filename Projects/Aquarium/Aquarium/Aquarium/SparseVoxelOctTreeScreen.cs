@@ -32,7 +32,7 @@ namespace Aquarium
             var n = 1024f / 200f;
             var treeBox = new BoundingBox(new Vector3(-n, -n, -n), new Vector3(n, n, n));
 
-            MaxTreeDepth = 5;
+            MaxTreeDepth = 8;
             Tree = OctTree<int>.CreatePreSubdivided(MaxTreeDepth, treeBox);
 
             RenderDepth = 0;

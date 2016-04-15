@@ -33,7 +33,6 @@ namespace Aquarium
 
             // TODO - replace this with some way to browse through a list of windows to display
             foreach (var control in new Control[]{
-                new RayCastWindowControl(100, 600),
                 targetWindow,
                 new PopulationWindowControl(10, 50),
                 new DemoDialog(),
