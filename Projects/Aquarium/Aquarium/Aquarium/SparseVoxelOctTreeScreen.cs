@@ -41,6 +41,7 @@ namespace Aquarium
             var startPos = Vector3.Backward * (diff.Length());
             RenderContext.Camera.Position = startPos;
             User.Body.Position = startPos;
+            //User.Body.Orientation = Quaternion.CreateFromYawPitchRoll(0f, (float)Math.PI, 0f);
             Ui.Elements.AddRange(CreateUILayout());
 
             TreeTesterWindowControl = new TreeTesterWindowControl<int>(1500, 300);
@@ -60,6 +61,8 @@ namespace Aquarium
             };
         }
 
+        IEnumerable<OctTreeNode<int>> RayPathSequence { get; set; }
+
         public override void HandleInput(InputState input)
         {
             base.HandleInput(input);
@@ -77,7 +80,17 @@ namespace Aquarium
             {
                 var r = RenderContext.GetScreenRay(input.CurrentMousePoint.ToVector2());
                 Ray = new Ray(r.Position + r.Direction, r.Direction);
-                RayColor = Tree.Root.Box.Intersects(Ray.Value).HasValue ? Color.Blue : Color.SlateGray;
+                bool intersects = Tree.Root.Box.Intersects(Ray.Value).HasValue;
+                if (intersects)
+                {
+                    RayColor = Color.Blue;
+                    // TODO - dispose 
+                    RayPathSequence = Tree.RayCast(r);
+                }
+                else
+                {
+                    RayColor = Color.SlateGray;
+                }
             }
         }
 
@@ -112,6 +125,14 @@ namespace Aquarium
             {
                 DebugDrawer.DrawLine(Ray.Value.Position, Ray.Value.Position + (Ray.Value.Direction*100), RayColor);
                 DebugDrawer.Draw(gameTime);
+            }
+
+            if (RayPathSequence != null)
+            {
+                foreach (var n in RayPathSequence)
+                {
+                    Renderer.Render(RenderContext, n.Box, Color.YellowGreen);
+                }
             }
 
             FaceSizeLabel.Label = string.Format("Depth: {0} Size: {1}", RenderDepth, smallest);

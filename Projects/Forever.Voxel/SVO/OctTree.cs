@@ -119,6 +119,14 @@ namespace Forever.Voxel.SVO
             }
         }
 
+        public IEnumerable<OctTreeNode<T>> RayCast(Ray r)
+        {
+            foreach (var n in SVO.RayCast.RayTraverse<T>(this.Root, r))
+            {
+                yield return n;
+            }
+        }
+
         public OctTreeNode<T> GetLeafContaining(Vector3 v)
         {
             return FindFirstLeaf((x) => x.Box.Contains(v) != ContainmentType.Disjoint);

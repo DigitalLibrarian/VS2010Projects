@@ -90,5 +90,10 @@ namespace Forever.Extensions
             var diff = (bb.Max - bb.Min);
             return bb.Min + (diff * 0.5f);
         }
+
+        public static Vector3 GetHalfSize(this BoundingBox bb)
+        {
+            return (bb.Max - bb.Min) * 0.5f;
+        }
     }
 }

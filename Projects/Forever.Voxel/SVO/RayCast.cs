@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
+using Forever.Extensions;
+
 namespace Forever.Voxel.SVO
 {
     /* This is all based on blog code that I found and ported.  It came attached with the license so it is included as well.
@@ -13,27 +15,17 @@ namespace Forever.Voxel.SVO
 
     static class RayCast
     {
-        //public static uint GetFirstNode(Ray ray, OctTree<T> tree)
-        //{
-        //    return 0;
-           // return GetFirstNode(ray.
-        //}
-        /*
-        static uint GetFirstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm)
-        {
-            return 0;
-        }
-         * */
+       
 
-                		// Static memory access is slower. 
+        // Static memory access is slower. 
 		// the paper suggested passing the possible exist nodes as function arguments on the stack which is faster
-		static int[,] nextNodeTable ;
+		static uint[,] NextNodeTable ;
         
-        static int a; //flags for the negative direction, used to transform the octree nodes using an XOR operation.
+        static uint a; //flags for the negative direction, used to transform the octree nodes using an XOR operation.
 
         static RayCast ()
         {
-            nextNodeTable = new int[,]{
+            NextNodeTable = new uint[,]{
 			    {4, 2, 1},
 			    {5, 3, 8},
 			    {6, 8, 3},
@@ -76,10 +68,10 @@ namespace Forever.Voxel.SVO
             return null;
         }
 
-        static int GetFirstNode( float tx0, float ty0, float tz0, float txm, float tym, float tzm)
+        static uint GetFirstNode( float tx0, float ty0, float tz0, float txm, float tym, float tzm)
 	    {		
 
-		    int entryPlane = 0;
+		    uint entryPlane = 0;
 		    //Get entry plane
 
 		    if( tx0 > ty0 ){
@@ -96,23 +88,14 @@ namespace Forever.Voxel.SVO
 			    return entryPlane;
 		    }
 
-
 		    if( txm < tz0 ) entryPlane |= 4; 
 		    if( tym < tz0 ) entryPlane |= 2;
-
 	
 		    return entryPlane; //returns the first node
         }
 
 
-        enum ExitPlane : byte
-        {
-            YZ = 0,
-            XZ = 1,
-            XY = 2,
-        };   
-
-	    static int GetNextNode( int currentNode, float tx1, float ty1, float tz1)
+	    static uint GetNextNode(uint currentNode, float tx1, float ty1, float tz1)
 	    {
 
 		    //Get exit plane
@@ -130,9 +113,11 @@ namespace Forever.Voxel.SVO
 			    minIndex = 2;
 		    }
 
+            
+
 		    int exitPlane = minIndex;
 
-		    return RayCast.nextNodeTable[currentNode, exitPlane];
+		    return RayCast.NextNodeTable[currentNode, exitPlane];
 	    }
 
         static IEnumerable<OctTreeNode<T>> ProcessSubNode<T>(OctTreeNode<T> node, float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, int level)
@@ -144,57 +129,170 @@ namespace Forever.Voxel.SVO
                 {
                     yield return node;
                 }
-
-                float txM = 0.5f * (tx0 + tx1);
-                float tyM = 0.5f * (ty0 + ty1);
-                float tzM = 0.5f * (tz0 + tz1);
-
-                int currentNode = GetFirstNode(tx0, ty0, tz0, txM, tyM, tzM);
-
-                do
+                else
                 {
-                    switch (currentNode)
+
+                    float txM = 0.5f * (tx0 + tx1);
+                    float tyM = 0.5f * (ty0 + ty1);
+                    float tzM = 0.5f * (tz0 + tz1);
+
+                    uint currentNode = GetFirstNode(tx0, ty0, tz0, txM, tyM, tzM);
+
+                    do
                     {
-                        case 0: ProcessSubNode(node.Children[a], tx0, ty0, tz0, txM, tyM, tzM, level + 1);
-                            currentNode = GetNextNode(currentNode, txM, tyM, tzM);
-                            break;
+                        switch (currentNode)
+                        {
+                            case 0:
+                                foreach (var n in ProcessSubNode(node.Children[a], tx0, ty0, tz0, txM, tyM, tzM, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, txM, tyM, tzM);
+                                break;
 
-                        case 1: ProcessSubNode(node.Children[a ^ 1], tx0, ty0, tzM, txM, tyM, tz1, level + 1);
-                            currentNode = GetNextNode(currentNode, txM, tyM, tz1);
-                            break;
+                            case 1:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 1], tx0, ty0, tzM, txM, tyM, tz1, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, txM, tyM, tz1);
+                                break;
 
-                        case 2: ProcessSubNode(node.Children[a ^ 2], tx0, tyM, tz0, txM, ty1, tzM, level + 1);
-                            currentNode = GetNextNode(currentNode, txM, ty1, tzM);
-                            break;
+                            case 2:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 2], tx0, tyM, tz0, txM, ty1, tzM, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, txM, ty1, tzM);
+                                break;
 
-                        case 3: ProcessSubNode(node.Children[a ^ 3], tx0, tyM, tzM, txM, ty1, tz1, level + 1);
-                            currentNode = GetNextNode(currentNode, txM, ty1, tz1);
-                            break;
+                            case 3:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 3], tx0, tyM, tzM, txM, ty1, tz1, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, txM, ty1, tz1);
+                                break;
 
-                        case 4: ProcessSubNode(node.Children[a ^ 4], txM, ty0, tz0, tx1, tyM, tzM, level + 1);
-                            currentNode = GetNextNode(currentNode, tx1, tyM, tzM);
+                            case 4:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 4], txM, ty0, tz0, tx1, tyM, tzM, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, tx1, tyM, tzM);
 
-                            break;
+                                break;
 
-                        case 5: ProcessSubNode(node.Children[a ^ 5], txM, ty0, tzM, tx1, tyM, tz1, level + 1);
-                            currentNode = GetNextNode(currentNode, tx1, tyM, tz1);
+                            case 5:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 5], txM, ty0, tzM, tx1, tyM, tz1, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, tx1, tyM, tz1);
 
-                            break;
+                                break;
 
-                        case 6: ProcessSubNode(node.Children[a ^ 6], txM, tyM, tz0, tx1, ty1, tzM, level + 1);
-                            currentNode = GetNextNode(currentNode, tx1, ty1, tzM);
+                            case 6:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 6], txM, tyM, tz0, tx1, ty1, tzM, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = GetNextNode(currentNode, tx1, ty1, tzM);
 
-                            break;
+                                break;
 
-                        case 7: ProcessSubNode(node.Children[a ^ 7], txM, tyM, tzM, tx1, ty1, tz1, level + 1);
-                            currentNode = 8;		//if we reach the far top right node then there are no nodes we can reach from here, given that our ray is always travelling in a positive direction.
-                            break;
-                    }
+                            case 7:
+                                foreach (var n in ProcessSubNode(node.Children[a ^ 7], txM, tyM, tzM, tx1, ty1, tz1, level + 1))
+                                {
+                                    yield return n;
+                                }
+                                currentNode = 8;		//if we reach the far top right node then there are no nodes we can reach from here, given that our ray is always travelling in a positive direction.
+                                break;
+                        }
 
-                } while (currentNode < 8);
+                    } while (currentNode < 8);
+                }
             }
         }
 
+                
+	    public static IEnumerable<OctTreeNode<T>> RayTraverse<T>(OctTreeNode<T> root, Ray ray)
+	    {
+
+		    // Calculate the initiale ray parameters.
+		    a=0; // flag for negative ray components.
+            /*
+		    AxisAlignedBox bounds = root->m_bounds;
+		    glm::vec3 minimum = bounds.GetMinimum();
+		    glm::vec3 maximum = bounds.GetMaximum();
+		    glm::vec3 halfsize = bounds.GetHalfSize();
+		    origin = origin - bounds.GetCenter() + halfsize;
+		    bounds.SetMinimum( minimum-minimum);
+		    bounds.SetMaximum( maximum - minimum);
+		    glm::vec3 boxSize = root->m_bounds.GetSize();
+             * */
+            var minimum = root.Box.Min;
+            var maximum = root.Box.Max;
+            var halfsize = root.Box.GetHalfSize();
+            var origin = ray.Position - root.Box.GetCenter() + halfsize;
+            var bounds = new BoundingBox(minimum - minimum, maximum - minimum);
+            var boxSize = bounds.Max - bounds.Min;
+            var dir = ray.Direction;
+
+		    if (dir.X < 0.0f){
+			    origin.X = boxSize.X - origin.X;
+			    dir.X *= -1.0f;
+			    a |= 4;
+            }
+
+            if (dir.Y < 0.0f){
+			    origin.Y = boxSize.Y - origin.Y;
+		        dir.Y *= -1.0f;
+			    a |= 2;
+            }
+
+            if (dir.Z < 0.0f)
+            {
+                origin.Z = boxSize.Z - origin.Z;
+
+                dir.Z *= -1.0f;
+                a |= 1;
+            }
+
+		    float invDirx = 1.0f / dir.X;
+		    float invDiry = 1.0f / dir.Y;
+		    float invDirz = 1.0f / dir.Z;
+
+
+		    float tx0 = ( bounds.Min.X - origin.X) * invDirx;
+		    float tx1 = ( bounds.Max.X - origin.X) * invDirx;
+		
+		    float ty0 = ( bounds.Min.Y - origin.Y) * invDiry;
+		    float ty1 = ( bounds.Max.Y - origin.Y) * invDiry;
+		
+		    float tz0 = ( bounds.Min.Z - origin.Z) * invDirz;
+		    float tz1 = ( bounds.Max.Z - origin.Z) * invDirz;
+
+		    float maxOf0 = Max( Max(tx0, ty0), tz0 );
+		    float minOf1 = Min( Min(tx1, ty1), tz1);
+
+		    // Visiting current node, perform actual work here
+            if (maxOf0 < minOf1)
+            {
+                foreach(var n in ProcessSubNode(root, tx0, ty0, tz0, tx1, ty1, tz1, 0))
+                {
+                    yield return n;
+                }
+            }
+	    }
+        public static float Max(float f1, float f2)
+        {
+            return (float)Math.Max((float)f1, (float)f2);
+        }
+        public static float Min(float f1, float f2)
+        {
+            return (float)Math.Min((float)f1, (float)f2);
+        }
     }
 }
 
