@@ -21,7 +21,7 @@ namespace Aquarium
 {
     class VoxelScreen : FlyAroundGameScreen
     {
-        const int VoxelsPerDimension = 16;
+        const int VoxelsPerDimension = 8;
 
         ChunkSpace ChunkSpace { get; set; }
 
@@ -30,6 +30,7 @@ namespace Aquarium
         Perlin Perlin = null;
 
         OctTree<bool> LoadingTree { get; set; }
+        OctTree<Chunk> ChunkTree { get; set; }
 
         int MaxTreeDepth { get; set; }
         int RenderDepth { get; set; }
@@ -46,11 +47,11 @@ namespace Aquarium
 
             ChunkSpace = new ChunkSpace(VoxelsPerDimension, ChunkFactory);
 
-            var spawnHeightAboveGround = 5 * VoxelsPerDimension;
+            var spawnHeightAboveGround = 30 * VoxelsPerDimension;
             var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
             Ui.Elements.AddRange(CreateUILayout());
 
-            MaxTreeDepth = 4;
+            MaxTreeDepth = 5;
             RenderDepth = -1;
 
             var s = (float)VoxelsPerDimension;
@@ -60,18 +61,21 @@ namespace Aquarium
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
                 spawnPoint + new Vector3(worldSize, worldSize, worldSize));
             LoadingTree = OctTree<bool>.CreatePreSubdivided(MaxTreeDepth, treeBox);
+            ChunkTree = OctTree<Chunk>.CreatePreSubdivided(MaxTreeDepth, treeBox);
 
             var diff = treeBox.Max - treeBox.Min;
-            var startPos = Vector3.Backward * (diff.Length() / 2f);
+            var startPos = Vector3.Zero;
+            startPos = ProjectToHeight(startPos, ChunkTree.Root.Box.Max.Y);
             User.Body.Position = startPos;
-            
+            User.Body.Orientation = Quaternion.CreateFromYawPitchRoll(0f, (float)System.Math.PI/-2f, 0f);
+
             for (int i = 0; i < MaxTreeDepth; i++)
             {
                 LoadingTree.VisitLeaves(node =>
                 {
                     var c = node.Box.Min;
                     var h = GetHeight(c.X, c.Z);
-                    if (c.Y > h)
+                    if (c.Y > h && !node.Value)
                     {
                         node.Value = true;
                         if (node.Parent != null && node.Parent.SearchFirstChild(x => !x.Value) == null)
@@ -81,9 +85,6 @@ namespace Aquarium
                     }
                 });
             }
-
-            RenderSet = new Chunk[MaxRenderSetSize];
-            ListRenderSet = new List<Chunk>();
         }
         
         Chunk ChunkFactory(BoundingBox bb)
@@ -109,19 +110,17 @@ namespace Aquarium
                 bool active = world.Y < height;
                 chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
             });
-
-            MarkInTree(chunk.Box.GetCenter());
-
+            
             return chunk;
         }
         void SetupPerlin()
         {
             NoiseQuality quality = NoiseQuality.High;
-            int seed = 0;
-            int octaves = 2;
-            double frequency = 0.005;
-            double lacunarity = 0.5;
-            double persistence = 0;
+            int seed = 3;
+            int octaves = 8;
+            double frequency = 0.0001;
+            double lacunarity = 0.0;
+            double persistence = 1;
 
             var module = new Perlin();
             module.Frequency = frequency;
@@ -135,11 +134,11 @@ namespace Aquarium
 
         float GetHeight(float x, float z)
         {
-            int maxHeight = 100 * VoxelsPerDimension;
+            int maxHeight = 1000 * VoxelsPerDimension;
             float half = maxHeight / 2f;
             var bottomLeft = new Vector3(-half, -half, -half); ;
             var scale = 0.9f;
-            float n = SmoothNoise(10+ x * scale, 10+ z * scale);
+            float n = SmoothNoise(x * scale, z * scale);
             var threshold = bottomLeft.Y + half + (n * half);
             return threshold;
         }
@@ -161,11 +160,18 @@ namespace Aquarium
 
         public override void HandleInput(InputState input)
         {
-            if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed
+                && input.LastMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = RenderContext.GetScreenRay(mousePoint);
                 ShootChunksBigLaser(ray, ChunkRayTool.Derez, 1);
+            }
+            else if (input.CurrentMouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                var mousePoint = input.CurrentMousePoint.ToVector2();
+                var ray = RenderContext.GetScreenRay(mousePoint);
+                ShootChunksOctTree(ray, ChunkRayTool.Derez, true);
             }
 
             if (input.CurrentMouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released
@@ -173,7 +179,7 @@ namespace Aquarium
             {
                 var mousePoint = input.CurrentMousePoint.ToVector2();
                 var ray = RenderContext.GetScreenRay(mousePoint);
-                ShootChunks(ray, ChunkRayTool.Rez, false);
+                ShootChunksOctTree(ray, ChunkRayTool.Rez, false);
             }
 
             if(input.IsNewKeyPress(Microsoft.Xna.Framework.Input.Keys.K))
@@ -204,7 +210,7 @@ namespace Aquarium
             CenteredCubeIterate(MarkInTree, RenderContext.Camera.Position, 4);
         }
 
-        void CenteredCubeIterate(Action<Vector3> action, Vector3 pos, int halfSize)
+        void CenteredCubeIterate(Action<Chunk> action, Vector3 pos, int halfSize)
         {
             for (int x = -halfSize; x < halfSize; x++)
             {
@@ -212,32 +218,30 @@ namespace Aquarium
                 {
                     for (int y = -halfSize; y < halfSize; y++)
                     {
-                        action(pos + (new Vector3(x, y, z) * VoxelsPerDimension));
+                        action(ChunkSpace.GetOrCreate(pos + (new Vector3(x, y, z) * VoxelsPerDimension)).Objects.First() as Chunk);
                     }
                 }
             }
         }
 
-        public void ShootChunks(Ray ray, ChunkRayTool tool, bool closestFirst)
+        public void ShootChunksOctTree(Ray ray, ChunkRayTool tool, bool closestFirst)
         {
-            var rayHits = ChunkSpace.Query((coord, chunk) =>
-            {
-                return chunk.Box.Intersects(ray).HasValue;
-            });
+            var seq = ChunkTree.RayCast(ray);
 
-            if (closestFirst)
+            if (!closestFirst)
             {
-                rayHits = rayHits.OrderBy(x => (x.Position - ray.Position).LengthSquared());
+                // TODO - fix this
+                seq = seq.Reverse();
             }
-            else
+
+            foreach (var node in seq)
             {
-                rayHits = rayHits.OrderByDescending(x => (x.Position - ray.Position).LengthSquared());
-            }
-            foreach (var chunk in rayHits)
-            {
-                if(chunk.ToolRay(ray, tool))
+                if (node.Value != null)
                 {
-                    return;
+                    if (node.Value.ToolRay(ray, tool))
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -255,15 +259,11 @@ namespace Aquarium
                         var offset = new Vector3(x, y, z);
                         var p = ray.Position + offset;
                         var r = new Ray(p, ray.Direction);
-                        ShootChunks(r, tool, true);
+                        ShootChunksOctTree(r, tool, true);
                     }
                 }
             }
         }
-        Chunk[] RenderSet { get; set; }
-        int MaxRenderSetSize = 2048*2*2*2*2;
-        List<Chunk> ListRenderSet { get; set; }
-
         Chunk RenderingChunk;
         public override void Draw(GameTime gameTime)
         {
@@ -272,30 +272,33 @@ namespace Aquarium
             int count = 0;
             int capacity = 0;
 
-            var numChunksXZ = 400;
-            var numChunksY = 100;
+            var numChunksXZ = 4000;
+            var numChunksY = 1000;
             var halfSize = new Vector3(numChunksXZ/2f, numChunksY/2f, numChunksXZ/2f) * VoxelsPerDimension;
             var pos = RenderContext.Camera.Position;
             var sphere = new BoundingBox(pos - halfSize, pos + halfSize);
 
-            ListRenderSet.Clear();
-            int numAdded = ChunkSpace.Find((chunk) =>
+            int numRendered = 0;
+            ChunkTree.VisitLeaves(leaf =>
             {
-                return (sphere.Contains(chunk.Box) != ContainmentType.Disjoint) && RenderContext.InView(chunk.Box);
-            }, ListRenderSet, MaxRenderSetSize);
-
-            for (int i = 0; i < numAdded; i++)
-            {
-                this.RenderingChunk = ListRenderSet[i];
-                count += RenderingChunk.InstanceCount;
-                capacity += RenderingChunk.Capacity;
-
-                RenderingChunk.Draw(duration, RenderContext);
-                if (debug)
+                if (leaf.Value != null 
+                    && sphere.Contains(leaf.Value.Box) != ContainmentType.Disjoint 
+                    && RenderContext.InView(leaf.Value.Box))
                 {
-                    Renderer.Render(RenderingChunk.Box, RenderContext.GraphicsDevice, RenderingChunk.World, RenderContext.Camera.View, RenderContext.Camera.Projection, Color.DarkSalmon);
+
+                    this.RenderingChunk = leaf.Value;
+                    count += RenderingChunk.InstanceCount;
+                    capacity += RenderingChunk.Capacity;
+
+                    RenderingChunk.Draw(duration, RenderContext);
+                    numRendered++;
+                    if (debug)
+                    {
+                        Renderer.Render(RenderingChunk.Box, RenderContext.GraphicsDevice, RenderingChunk.World, RenderContext.Camera.View, RenderContext.Camera.Projection, Color.DarkSalmon);
+                    }
+
                 }
-            }
+            });
 
             if (RenderDepth >= 0)
             {
@@ -305,8 +308,18 @@ namespace Aquarium
                 }, RenderDepth);
             }
 
+            if (TestRay.HasValue)
+            {
+                DebugDrawer.DrawLine(TestRay.Value.Position, TestRay.Value.Position + (TestRay.Value.Direction * ChunkTree.Root.Box.GetHalfSize().Y * 2 ), Color.LimeGreen);
+                DebugDrawer.Draw(gameTime);
+            }
 
-            DebugLabel.Label = string.Format("Chunks Rendered : {0}. Voxels Rendered {1}. Volume Rendered {2}.", numAdded, count, capacity);
+            if (TestBox.HasValue)
+            {
+                Renderer.Render(RenderContext, TestBox.Value, Color.Yellow);
+            }
+
+            DebugLabel.Label = string.Format("Chunks Rendered : {0}. Voxels Rendered {1}. Volume Rendered {2}.", numRendered, count, capacity);
             base.Draw(gameTime);
         }
         bool debug;
@@ -317,10 +330,10 @@ namespace Aquarium
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
+            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+
             // fill out space around the player
             SceneLoad();
-
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
 
 
@@ -417,6 +430,70 @@ namespace Aquarium
             }
         }
 
+        Ray? TestRay;
+        BoundingBox? TestBox;
+
+        IEnumerable<Vector3> SceneLoadSequence_PerlinIsoSurface_RayCast()
+        {
+
+            var tree = LoadingTree;
+            var pos = tree.Root.Box.Min;
+            float delta = ChunkSpace.GridSize;
+            for (float x = tree.Root.Box.Min.X; x < tree.Root.Box.Max.X; x += delta)
+            {
+                for (float z = tree.Root.Box.Min.Z; z < tree.Root.Box.Max.Z; z += delta)
+                {
+                    var v = new Vector3(x, tree.Root.Box.Max.Y + (delta / 2), z);
+                    var dir = new Vector3(x + 0.00001f, tree.Root.Box.Min.Y - (delta / 2), z + 0.00001f) - v;
+                    dir.Normalize();
+                    TestRay = new Ray(v, dir);
+                    foreach(var node in tree.RayCast(TestRay.Value))
+                    {
+                        if (node != null)
+                        {
+                            if (!node.Value)
+                            {
+                                TestBox = node.Box;
+                                yield return node.Box.GetCenter();
+                            }
+                            if (node.Box.Max.Y < GetHeight(node.Box.Max.X, node.Box.Max.Z)) break;
+                        }
+                    } 
+                }
+            }
+
+        }
+
+        IEnumerable<Vector3> SceneLoadSequence_PerlinIsoSurface()
+        {   
+            var boxSize = ChunkTree.Root.Box.GetHalfSize()*2;
+            var offset = new Vector3(0.5f, 0.5f, 0.5f) * VoxelsPerDimension;
+            int numChunks = (int)boxSize.X / VoxelsPerDimension;
+            var chunkSize = new Vector3(VoxelsPerDimension, VoxelsPerDimension, VoxelsPerDimension);
+
+            var pos = ChunkTree.Root.Box.Min;
+            for (int x = 0; x < numChunks; x++)
+            {
+                for (int z = 0; z < numChunks; z++)
+                {
+                    var chunkPos = pos + (new Vector3(x, 0, z) * VoxelsPerDimension);
+                    float yWorld = GetHeight(chunkPos.X, chunkPos.Z);
+                    var v = new Vector3(chunkPos.X, yWorld, chunkPos.Z);
+
+                    OctTreeNode<Chunk> node  = ChunkTree.GetLeafContaining(v);
+
+                    if (node != null)
+                    {
+                        foreach (var corner in node.Box.GetCorners())
+                        {
+                            yield return corner+offset;
+                        }
+                    }
+                }
+            }
+            
+        }
+
 
         long frameCount = 0;
         void SceneLoad()
@@ -428,17 +505,22 @@ namespace Aquarium
                 {
                     if (LoadSequence != null) LoadSequence.Dispose();
 
-                    LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                    LoadSequence = SceneLoadSequence_PerlinIsoSurface_RayCast().GetEnumerator();
                 }
             }
         }
 
         Vector3 ProjectToSurface(Vector3 p)
         {
-            return new Vector3(p.X, GetHeight(p.X, p.Z), p.Z);
+            return ProjectToHeight(p, GetHeight(p.X, p.Z));
         }
 
-        bool ConsumeLoadSequence(int max = 2)
+        Vector3 ProjectToHeight(Vector3 p, float h)
+        {
+            return new Vector3(p.X, h, p.Z);
+        }
+
+        bool ConsumeLoadSequence(int max = 8)
         {
             if (LoadSequence == null)
             {
@@ -448,25 +530,38 @@ namespace Aquarium
             for (int i = 0; i < max; i++)
             {
                 v = LoadSequence.Current;
-                ChunkSpace.GetOrCreate(v);
+                var loadedNode = ChunkTree.GetLeafContaining(v);
+                if (loadedNode != null && loadedNode.Value == null)
+                {
+                    MarkInTree(ChunkSpace.GetOrCreate(v).Objects.First() as Chunk);
+                }
+
                 if (!LoadSequence.MoveNext()) return false;
             }
             return true;
         }
 
-        void MarkInTree(Vector3 v)
+        void MarkInTree(Chunk c)
         {
-            var leaf = LoadingTree.FindFirstLeaf(x => !x.Value && x.Box.Contains(v) == ContainmentType.Contains);
-            if (leaf != null)
+            var v = c.Box.GetCenter();
+            var loadingLeaf = LoadingTree.GetLeafContaining(v);
+            if (loadingLeaf != null)// && !loadingLeaf.Value)
             {
-                leaf.Value = true;
-                
-                while (leaf.IsLeaf && leaf.Parent != null && !leaf.Parent.Value && !leaf.Parent.Children.Any(x => !x.Value))
+                loadingLeaf.Value = true;
+
+                var chunkLeaf = ChunkTree.GetLeafContaining(v);
+                chunkLeaf.Value = c;
+
+                while (loadingLeaf.IsLeaf && loadingLeaf.Parent != null && !loadingLeaf.Parent.Value && !loadingLeaf.Parent.Children.Any(x => !x.Value))
                 {
-                    leaf = leaf.Parent;
-                    leaf.Value = true;
-                    leaf.Prune();
+                    loadingLeaf = loadingLeaf.Parent;
+                    loadingLeaf.Value = true;
+                    loadingLeaf.Prune();
                 }
+            }
+            else
+            {
+                int brak = 0;
             }
         }
 

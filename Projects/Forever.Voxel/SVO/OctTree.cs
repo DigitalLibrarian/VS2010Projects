@@ -156,12 +156,36 @@ namespace Forever.Voxel.SVO
             return null;
         }
 
+        public IEnumerable<OctTreeNode<T>> GetLeaves()
+        {
+            return GetLeaves(this.Root);
+        }
+
+
+        private IEnumerable<OctTreeNode<T>> GetLeaves(OctTreeNode<T> node)
+        {
+            if (node.IsLeaf)
+            {
+                yield return node;
+            }
+            else
+            {
+                for (int i = 0; i < OctTreeNode<T>.Subdivisions; i++)
+                {
+                    foreach (var l in GetLeaves(node.Children[i]))
+                    {
+                        yield return l;
+                    }
+                }
+            }
+        }
+        
         public IEnumerable<OctTreeNode<T>> GetLeaves(Predicate<OctTreeNode<T>> pred)
         {
             return GetLeaves(Root, pred);
         }
 
-        public IEnumerable<OctTreeNode<T>> GetLeaves(OctTreeNode<T> node, Predicate<OctTreeNode<T>> pred)
+        private IEnumerable<OctTreeNode<T>> GetLeaves(OctTreeNode<T> node, Predicate<OctTreeNode<T>> pred)
         {
             if (pred(node))
             {

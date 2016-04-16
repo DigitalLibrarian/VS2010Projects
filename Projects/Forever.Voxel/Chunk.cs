@@ -15,6 +15,7 @@ namespace Forever.Voxel
         Derez,
         Rez
     }
+
     public class Chunk : IDisposable
     {
         private readonly int NumberOfDimensions = 3;
@@ -41,7 +42,6 @@ namespace Forever.Voxel
             float hypotenuse = diff.LengthSquared();
 
             VoxelScale = diff / (float)chunksPerDimension;
-
         }
 
         public Chunk(int chunksPerDimension)
@@ -238,7 +238,8 @@ namespace Forever.Voxel
                 d = VoxelFaceNormals[i];
                 
                 // is normal facing camera
-                if (Vector3.Dot(d, camVector) < 0)
+                // TODO 
+                //if (Vector3.Dot(d, camVector) < 0)
                 {
                     int dx, dy, dz;
                     Indices(d, out dx, out dy, out dz);
@@ -491,7 +492,7 @@ namespace Forever.Voxel
             Instancing.Effect.Parameters["CameraPos"].SetValue(camPos);
             Instancing.Effect.Parameters["LightPosition"].SetValue(lightPos);
             Instancing.Effect.Parameters["LightDistanceSquared"].SetValue(distance);
-            float intensity = 0.5f;
+            float intensity = 0.1f;
             Instancing.Effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
             Instancing.Effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
 
