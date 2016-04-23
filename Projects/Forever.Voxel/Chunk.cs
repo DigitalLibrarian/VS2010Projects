@@ -116,31 +116,33 @@ namespace Forever.Voxel
         VertexBufferBinding InstanceBufferBinding { get; set; }
         private void SetupInstancing(GraphicsDevice device)
         {
-            SetupInstanceVertexDeclaration();
             var instanceCount = this.Capacity;
-            var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
+            var instanceBuffer = new VertexBuffer(device, VD.InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
             InstanceBufferBinding = new VertexBufferBinding(instanceBuffer, 0, 1);
         }
-        VertexDeclaration InstanceVertexDeclaration { get; set; }
-        private void SetupInstanceVertexDeclaration()
+
+        private static class VD
         {
-            VertexElement[] instanceStreamElements = new VertexElement[2];
-            int offset = 0;
-            instanceStreamElements[0] =
-                new VertexElement(offset, VertexElementFormat.Vector4,
-                    VertexElementUsage.Position, 1);
-            offset += sizeof(float) * 4;
+            static VD()
+            {
+                VertexElement[] instanceStreamElements = new VertexElement[2];
+                int offset = 0;
+                instanceStreamElements[0] =
+                    new VertexElement(offset, VertexElementFormat.Vector4,
+                        VertexElementUsage.Position, 1);
+                offset += sizeof(float) * 4;
 
-            instanceStreamElements[1] =
-                    new VertexElement(offset, VertexElementFormat.Color,
-                        VertexElementUsage.Color, 1);
-            offset += sizeof(byte) * 4;
+                instanceStreamElements[1] =
+                        new VertexElement(offset, VertexElementFormat.Color,
+                            VertexElementUsage.Color, 1);
+                offset += sizeof(byte) * 4;
 
-            InstanceVertexDeclaration = new VertexDeclaration(instanceStreamElements);
+                InstanceVertexDeclaration = new VertexDeclaration(instanceStreamElements);
+            }
+            public static VertexDeclaration InstanceVertexDeclaration { get; private set; }
         }
-      
         public int InstanceCount { get; private set; }
         Voxel.ViewState[] InstanceBuffer { get; set; }
         private void RebuildInstanceBuffer(Ray cameraRay)
@@ -162,14 +164,14 @@ namespace Forever.Voxel
             InstanceCount = next;
             if (InstanceCount > 0)
             {
-                InstanceBufferBinding.VertexBuffer.SetData(0, InstanceBuffer, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
+                InstanceBufferBinding.VertexBuffer.SetData(0, InstanceBuffer, 0, InstanceCount, VD.InstanceVertexDeclaration.VertexStride);
             }
             NeedRebuild = false;
         }
         Random Random = new Random();
         static Material DefaultMaterial = new Material(Color.AliceBlue);
 
-        Vector3[] VoxelFaceNormals = {  
+        static Vector3[] VoxelFaceNormals = {  
                 Vector3.UnitX,
                 Vector3.UnitY, 
                 Vector3.UnitZ,
