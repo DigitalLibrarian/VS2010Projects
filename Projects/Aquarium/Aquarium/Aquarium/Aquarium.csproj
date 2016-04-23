@@ -208,7 +208,7 @@
     <Compile Include="Sim\SimSpace.cs" />
     <Compile Include="Sim\SimSpacePartition.cs" />
     <Compile Include="Sim\Simulation.cs" />
-    <Compile Include="SparseVoxelOctTreeScreen.cs" />
+    <Compile Include="OctTreeRayMarchingScreen.cs" />
     <Compile Include="Targeting\TargetManager.cs" />
     <Compile Include="UiOverlayGameScreen.cs" />
     <Compile Include="UI\ActionBar\ActionBarAction.cs" />
@@ -240,6 +240,7 @@
     <Compile Include="UI\Targets\TargetWindow.cs" />
     <Compile Include="UI\UiElement.cs" />
     <Compile Include="UI\UiOverlay.cs" />
+    <Compile Include="VolumeScreen.cs" />
     <Compile Include="VoxelScreen.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,7 @@ using Aquarium.UI.Controls;
 
 namespace Aquarium
 {
-    class SparseVoxelOctTreeScreen : FlyAroundGameScreen
+    class OctTreeRayMarchingScreen : FlyAroundGameScreen
     {
         OctTree<int> Tree { get; set; }
         int MaxTreeDepth { get; set; }

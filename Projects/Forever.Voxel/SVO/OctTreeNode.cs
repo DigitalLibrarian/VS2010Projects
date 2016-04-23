@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Forever.Extensions;
 namespace Forever.Voxel.SVO
 {
+    // TODO - experiment with struct
     public class OctTreeNode<T>
     {
         public const int Subdivisions = 8;

@@ -43,9 +43,6 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibNoise">
-      <HintPath>..\..\randomDlls\LibNoise.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
       <Private>False</Private>
     </Reference>
@@ -96,14 +93,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Meshing\VoxelInstancing.cs" />
-    <Compile Include="SVO\ChunkTree.cs" />
     <Compile Include="SVO\NodePosition.cs" />
     <Compile Include="SVO\OctTreeNode.cs" />
     <Compile Include="SVO\RayCast.cs" />
     <Compile Include="SVO\OctTree.cs" />
     <Compile Include="ThrottledQueue.cs" />
-    <Compile Include="World\WorldCell.cs" />
-    <Compile Include="World\WorldCellState.cs" />
+    <Compile Include="World\Volume.cs" />
     <Compile Include="ChunkSpace.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Voxel.cs" />
@@ -125,7 +120,9 @@
       <Name>Forever.SpacePartitions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Sampling\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

@@ -10,7 +10,7 @@ namespace Forever.Voxel.SVO
 {
     public class OctTree<T>
     {
-        public OctTreeNode<T> Root { get; private set; }
+        public OctTreeNode<T> Root { get; protected set; }
 
         public OctTree(BoundingBox box)
         {
@@ -24,9 +24,8 @@ namespace Forever.Voxel.SVO
             return tree;
         }
 
-        public static void Subdivide(OctTreeNode<T> node, int depth)
+        static void Subdivide(OctTreeNode<T> node, int depth)
         {
-            if (node == null) return;
             if (depth == 0) return; // leaf
 
             if (node.IsLeaf)

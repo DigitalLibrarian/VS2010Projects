@@ -38,7 +38,6 @@ namespace Forever.SpacePartitions
             if (OnUnRegister != null) OnUnRegister.Invoke(obj);
         }
 
-
         public void Register(T obj, Vector3 position)
         {
             var coord = PositionToCoord(position);
@@ -60,13 +59,10 @@ namespace Forever.SpacePartitions
 
                 base.RemovePartition(partition);
             }
-
         }
 
         public void Update(T obj, Vector3 position)
         {
-            //TODO - this hasn't been tested
-
             var p = PartitionAssignment[obj];
             if (p.Box.Contains(position) == ContainmentType.Disjoint)
             {
@@ -74,7 +70,5 @@ namespace Forever.SpacePartitions
                 Register(obj, position);
             }
         }
-
-
     }
 }
