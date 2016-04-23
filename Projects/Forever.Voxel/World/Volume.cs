@@ -68,14 +68,13 @@ namespace Forever.Voxel.World
         {
             if (State == VolumeCellState.UnAllocated)
             {
-                Allocate(
-                    (x, y, z) => 
-                        Chunk.SetVoxel(x, y, z, sampler.GetSample(
-                            origin + new Vector3(
-                                x * volume.VoxelSize, 
-                                y * volume.VoxelSize, 
-                                z * volume.VoxelSize), 
-                            volume.VoxelSize
+                Allocate((x, y, z) => 
+                    Chunk.SetVoxel(x, y, z, sampler.GetSample(
+                        origin + new Vector3(
+                            x * volume.VoxelSize, 
+                            y * volume.VoxelSize, 
+                            z * volume.VoxelSize), 
+                        volume.VoxelSize
                     )));
             }
         }
@@ -117,9 +116,11 @@ namespace Forever.Voxel.World
         float VoxelSize { get; }
         float ChunkSize { get; }
         float Side { get; }
+
+        ReferencePoint Reference { get; }
     }
 
-    public struct ReferencePoint
+    public class ReferencePoint
     {
         public Vector3 Position;
         public Ray Ray;
@@ -128,7 +129,7 @@ namespace Forever.Voxel.World
 
     public class VolumeViewer : IVoxelVolume
     {
-        ReferencePoint Reference;
+        public ReferencePoint Reference { get; private set; }
 
         VertexBuffer GeometryBuffer { get; set; }
         IndexBuffer IndexBuffer { get; set; }
@@ -154,7 +155,7 @@ namespace Forever.Voxel.World
         IList<IVolumeChunk> RenderSet { get; set; }
         
         public VolumeViewer(IVoxelSampler sampler, IVoxelEffect effect,
-            int chunksPerSide = 16, int chunkResolution = 32, float voxelSize=1f)
+            int chunksPerSide = 16, int chunkResolution = 32, float voxelSize = 1f)
         {
             Sampler = sampler;
             Effect = effect;

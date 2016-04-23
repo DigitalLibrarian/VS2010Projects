@@ -14,14 +14,12 @@ namespace Forever.Render.Instancing
         public VertexBuffer GeometryBuffer { get; private set; }
         public VertexBuffer InstanceBuffer { get; set; }
         public IndexBuffer IndexBuffer { get; private set; }
-        public VertexDeclaration InstanceVertexDeclaration { get; private set; }
         public Effect Effect { get; private set; }
 
         public InstancingClass(
             VertexBuffer geometryBuffer, 
             VertexBuffer instanceBuffer, 
             IndexBuffer indexBuffer, 
-            VertexDeclaration vertexDeclaration,
             Effect effect
             )
         {
@@ -30,7 +28,6 @@ namespace Forever.Render.Instancing
             IndexBuffer = indexBuffer;
 
 
-            InstanceVertexDeclaration = vertexDeclaration;
             Effect = effect;
 
             var bindings = new VertexBufferBinding[2];

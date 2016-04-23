@@ -125,7 +125,7 @@ namespace Forever.Voxel
             var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
-            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, InstanceVertexDeclaration, Effect);
+            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, Effect);
         }
         VertexDeclaration InstanceVertexDeclaration { get; set; }
         private void SetupInstanceVertexDeclaration()

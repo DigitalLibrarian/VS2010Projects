@@ -43,7 +43,7 @@ namespace Forever.Voxel.Meshing
             var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
-            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, InstanceVertexDeclaration, Effect);
+            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, Effect);
         }
 
         private void SetupInstanceVertexDeclaration()

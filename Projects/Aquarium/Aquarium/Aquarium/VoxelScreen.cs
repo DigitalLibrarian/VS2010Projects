@@ -456,7 +456,7 @@ namespace Aquarium
                                 TestBox = node.Box;
                                 yield return node.Box.GetCenter();
                             }
-                            if (node.Box.Max.Y < GetHeight(node.Box.Max.X, node.Box.Max.Z)) break;
+                            if (node.Box.Max.Y + delta < GetHeight(node.Box.Max.X, node.Box.Max.Z)) break;
                         }
                     } 
                 }
@@ -506,6 +506,10 @@ namespace Aquarium
                     if (LoadSequence != null) LoadSequence.Dispose();
 
                     LoadSequence = SceneLoadSequence_PerlinIsoSurface_RayCast().GetEnumerator();
+                    if (!LoadSequence.MoveNext())
+                    {
+                        LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
+                    }
                 }
             }
         }
