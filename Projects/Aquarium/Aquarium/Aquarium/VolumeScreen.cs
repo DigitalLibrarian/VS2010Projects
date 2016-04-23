@@ -64,13 +64,13 @@ namespace Aquarium
 
         public Color LightDiffuseColorIntensity
         {
-            get { return new Color( _effect.Parameters["LightDiffuseColorIntensity"].GetValueVector4()); }
-            set { _effect.Parameters["LightDiffuseColorIntensity"].SetValue(value.ToVector4()); }
+            get { return new Color( _effect.Parameters["LightDiffuseColorIntensity"].GetValueVector3()); }
+            set { _effect.Parameters["LightDiffuseColorIntensity"].SetValue(value.ToVector3()); }
         }
         public Color DiffuseColor
         {
-            get { return new Color(_effect.Parameters["DiffuseColor"].GetValueVector4()); }
-            set { _effect.Parameters["DiffuseColor"].SetValue(value.ToVector4()); }
+            get { return new Color(_effect.Parameters["DiffuseColor"].GetValueVector3()); }
+            set { _effect.Parameters["DiffuseColor"].SetValue(value.ToVector3()); }
         }
 
 

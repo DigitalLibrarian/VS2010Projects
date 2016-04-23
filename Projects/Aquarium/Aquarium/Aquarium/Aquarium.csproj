@@ -191,6 +191,7 @@
     <Compile Include="AssetNames.cs" />
     <Compile Include="DevScreen.cs" />
     <Compile Include="FlyAroundGameScreen.cs" />
+    <Compile Include="InstancingScreen.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="NuclexFrameworkDemoScreen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

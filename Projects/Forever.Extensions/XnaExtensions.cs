@@ -64,6 +64,16 @@ namespace Forever.Extensions
             return new Vector3(me.Next(b.Min.X, b.Max.X), me.Next(b.Min.Y, b.Max.Y), me.Next(b.Min.Z, b.Max.Z));
         }
 
+        public static Color NextColor(this Random me)
+        {
+            return new Color(me.NextFloat(), me.NextFloat(), me.NextFloat(), me.NextFloat());
+        }
+
+        public static float NextFloat(this Random me)
+        {
+            return (float)me.NextDouble();
+        }
+
         public static float Next(this Random me, float min, float max)
         {
             var d = max - min;

@@ -15,6 +15,7 @@ namespace Aquarium
         {
             var index = new List<GameScreen>
             {
+                new InstancingScreen(),
                 new VolumeScreen(),
                 new NuclexFrameworkDemoScreen(),
                 new OctTreeRayMarchingScreen(),

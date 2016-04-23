@@ -92,7 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Meshing\VoxelInstancing.cs" />
+    <Compile Include="Meshing\CubeInstancing.cs" />
     <Compile Include="SVO\NodePosition.cs" />
     <Compile Include="SVO\OctTreeNode.cs" />
     <Compile Include="SVO\RayCast.cs" />

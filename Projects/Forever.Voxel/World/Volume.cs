@@ -17,12 +17,12 @@ namespace Forever.Voxel.World
         int Size { get; }
 
         int InstanceCount { get; }
-        VertexBufferBinding[] Bindings { get; }
+        Voxel.ViewState[] Instances { get; }
 
         void Allocate(Action<int, int, int> initialVisitor = null);
         void Deallocate();
 
-        int RebuildInstanceBuffer(ReferencePoint reference);
+        int RebuildInstances(ReferencePoint reference);
 
         void SetVoxel(int x, int y, int z, Voxel voxel);
     }
@@ -105,6 +105,13 @@ namespace Forever.Voxel.World
         Matrix WVP { get; set; }
         Vector3 CameraPosition { get; set; }
         float VoxelScale { get; set; }
+
+        Vector3 LightPos { get; set; }
+        float LightDistanceSquared { get; set; }
+
+
+        Color LightDiffuseColorIntensity { get; set; }
+        Color DiffuseColor { get; set; }
         
         EffectTechnique CurrentTechnique { get; }
     }
@@ -131,6 +138,7 @@ namespace Forever.Voxel.World
     {
         public ReferencePoint Reference { get; private set; }
 
+        VertexBuffer InstanceBuffer { get; set; }
         VertexBuffer GeometryBuffer { get; set; }
         IndexBuffer IndexBuffer { get; set; }
 
@@ -153,6 +161,8 @@ namespace Forever.Voxel.World
 
         IVoxelEffect Effect { get; set; }
         IList<IVolumeChunk> RenderSet { get; set; }
+
+        VertexBufferBinding[] Bindings { get; set; }
         
         public VolumeViewer(IVoxelSampler sampler, IVoxelEffect effect,
             int chunksPerSide = 16, int chunkResolution = 32, float voxelSize = 1f)
@@ -179,6 +189,8 @@ namespace Forever.Voxel.World
             RenderSet = new List<IVolumeChunk>();
 
             Effect.VoxelScale = VoxelSize;
+            Bindings = new VertexBufferBinding[2];
+            Bindings[0] = new VertexBufferBinding(GeometryBuffer);
         }
         public void UpdateReferencePoint(Vector3 p, Ray r, BoundingFrustum frustum)
         {
@@ -189,13 +201,15 @@ namespace Forever.Voxel.World
 
         public void Draw(RenderContext rc)
         {
+            rc.GraphicsDevice.SetVertexBuffers(Bindings);
+
             var viewProj = rc.Camera.View * rc.Camera.Projection;
             Effect.CameraPosition = rc.Camera.Position;
             foreach (var chunk in RenderSet)
             {
                 Effect.WVP = chunk.World * viewProj;
-                rc.GraphicsDevice.SetVertexBuffers(chunk.Bindings);
                 rc.GraphicsDevice.Indices = this.IndexBuffer;
+
 
                 foreach (var pass in Effect.CurrentTechnique.Passes)
                 {

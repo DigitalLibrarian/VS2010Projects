@@ -16,6 +16,8 @@ namespace Forever.Render.Instancing
         public IndexBuffer IndexBuffer { get; private set; }
         public Effect Effect { get; private set; }
 
+        VertexBufferBinding[] Bindings { get; set; }
+
         public InstancingClass(
             VertexBuffer geometryBuffer, 
             VertexBuffer instanceBuffer, 
@@ -35,7 +37,6 @@ namespace Forever.Render.Instancing
             bindings[1] = new VertexBufferBinding(InstanceBuffer, 0, 1);
             Bindings = bindings;
         }
-        VertexBufferBinding[] Bindings { get; set; }
         public void Draw(float duration, RenderContext renderContext, int instanceCount)
         {
             if (instanceCount <= 0) return;
