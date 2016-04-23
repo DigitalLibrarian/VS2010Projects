@@ -16,6 +16,7 @@ using LibNoise;
 using Forever.Voxel.SVO;
 using Forever.SpacePartitions;
 using Microsoft.Xna.Framework.Input;
+using Forever.Voxel.Meshing;
 
 namespace Aquarium
 {
@@ -37,7 +38,9 @@ namespace Aquarium
 
         Effect VoxelEffect { get; set; }
         private readonly string EffectName = "Effects\\VoxelEffect";
-        
+
+        IInstancer Instancer { get; set; }
+
         public override void LoadContent()
         {
             base.LoadContent();
@@ -85,11 +88,13 @@ namespace Aquarium
                     }
                 });
             }
+
+            Instancer = new CubeInstancing(ScreenManager.Game.GraphicsDevice, 2f);
         }
         
         Chunk ChunkFactory(BoundingBox bb)
         {
-            var chunk = new Chunk(bb, VoxelsPerDimension);
+            var chunk = new Chunk(bb, VoxelsPerDimension, Instancer);
             chunk.Initialize(RenderContext.GraphicsDevice, VoxelEffect);
             var pos = bb.Min;
             chunk.VisitCoords((x, y, z) => {
@@ -462,6 +467,8 @@ namespace Aquarium
                 }
             }
 
+            TestRay = null;
+            TestBox = null;
         }
 
         IEnumerable<Vector3> SceneLoadSequence_PerlinIsoSurface()
@@ -524,7 +531,7 @@ namespace Aquarium
             return new Vector3(p.X, h, p.Z);
         }
 
-        bool ConsumeLoadSequence(int max = 8)
+        bool ConsumeLoadSequence(int max = 16)
         {
             if (LoadSequence == null)
             {

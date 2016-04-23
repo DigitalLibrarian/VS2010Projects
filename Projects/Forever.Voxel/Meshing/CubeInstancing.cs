@@ -10,7 +10,12 @@ using Forever.Render;
 using Forever.Extensions; 
 namespace Forever.Voxel.Meshing
 {
-    public class CubeInstancing
+    public interface IInstancer
+    {
+        void Draw(RenderContext rc, VertexBufferBinding instanceBufferBinding, int instanceCount);
+    }
+
+    public class CubeInstancing : IInstancer
     {
         readonly int VertexCount = 8;
         readonly int IndexCount = 72;
@@ -18,18 +23,10 @@ namespace Forever.Voxel.Meshing
         VertexBuffer GeometryBuffer { get; set; }
         IndexBuffer IndexBuffer { get; set; }
         
-        public int VoxelCapacity { get; private set; }
-
         VertexBufferBinding[] Bindings { get; set; }
 
-        public CubeInstancing(int voxelCapacity)
+        public CubeInstancing(GraphicsDevice device, float scale=1f)
         {
-            VoxelCapacity = voxelCapacity;
-        }
-
-        public void LoadContent(Game game)
-        {
-            var device = game.GraphicsDevice;
             var vertexCount = VertexCount;
             GeometryBuffer = new VertexBuffer(device, VertexPositionColor.VertexDeclaration,
                                               vertexCount, BufferUsage.WriteOnly);
@@ -37,13 +34,13 @@ namespace Forever.Voxel.Meshing
             var indexCount = IndexCount;
             IndexBuffer = new IndexBuffer(device, typeof(int), indexCount, BufferUsage.WriteOnly);
 
-            SetUpGeometry();
+            SetUpGeometry(scale);
 
             Bindings = new VertexBufferBinding[2];
             Bindings[0] = new VertexBufferBinding(GeometryBuffer);
         }
 
-        private void SetUpGeometry()
+        private void SetUpGeometry(float scale)
         {
             int[] solidIndices = new int[]  
             {  
@@ -82,7 +79,7 @@ namespace Forever.Voxel.Meshing
             // TODO - make a custom vertex class that is only a position
             var verts = box.GetCorners().Select(x => new VertexPositionColor
             {
-                Position = x,
+                Position = x * scale,
                 // this color should never appear
                 Color = Color.Purple
             }).ToArray();
@@ -91,8 +88,7 @@ namespace Forever.Voxel.Meshing
             IndexBuffer.SetData(solidIndices);
         }
 
-
-        public void Draw(RenderContext rc, GameTime gameTime, VertexBufferBinding instanceBufferBinding, int instanceCount)
+        public void Draw(RenderContext rc, VertexBufferBinding instanceBufferBinding, int instanceCount)
         {
             if (instanceCount == 0) return;
             Bindings[1] = instanceBufferBinding;

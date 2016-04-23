@@ -7,6 +7,7 @@ using Forever.Render.Instancing;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
+using Forever.Voxel.Meshing;
 
 namespace Forever.Voxel
 {
@@ -24,27 +25,28 @@ namespace Forever.Voxel
         public Voxel[][][] Voxels { get; set; }
         int VoxelsPerDimension { get; set; }
 
-        InstancingClass Instancing { get; set; }
+        IInstancer Instancer { get; set; }
+
         public Vector3 Position { get; set; }
         public Vector3 VoxelScale { get; set; }
 
         public int Capacity { get { return (int)Math.Pow(VoxelsPerDimension, NumberOfDimensions); } }
 
-        public Chunk(BoundingBox bb, int chunksPerDimension)
+        public Chunk(BoundingBox bb, int voxelsPerDimension, IInstancer instancer)
         {
-            VoxelsPerDimension = chunksPerDimension;
+            VoxelsPerDimension = voxelsPerDimension;
             Allocate();
 
             Box = bb;
             var diff = (bb.Max - bb.Min);
             Position = bb.Min + ( diff * 0.5f);
-            World = Matrix.Identity;
             float hypotenuse = diff.LengthSquared();
-
-            VoxelScale = diff / (float)chunksPerDimension;
+            VoxelScale = diff / (float)voxelsPerDimension;
+             World = Matrix.Identity;
+            Instancer = instancer;
         }
 
-        public Chunk(int chunksPerDimension)
+        public Chunk(int chunksPerDimension, IInstancer instancer)
         {
             VoxelScale = new Vector3(1f, 1f, 1f);
             VoxelsPerDimension = chunksPerDimension;
@@ -58,6 +60,7 @@ namespace Forever.Voxel
             var min = Position + new Vector3(-halfSide, -halfSide, -halfSide);
             var max = Position + new Vector3(halfSide, halfSide, halfSide);
             Box = new BoundingBox(min, max);
+            Instancer = instancer;
         }
 
         bool InBound(int x, int y, int z)
@@ -107,25 +110,18 @@ namespace Forever.Voxel
         {
             Effect = effect;
             SetupInstancing(device);
-            SetUpGeometry();
             NeedRebuild = true;
         }
 
+        VertexBufferBinding InstanceBufferBinding { get; set; }
         private void SetupInstancing(GraphicsDevice device)
         {
-            var vertexCount = 8;
-            var geometryBuffer = new VertexBuffer(device, VertexPositionColor.VertexDeclaration,
-                                              vertexCount, BufferUsage.WriteOnly);
-
-            var indexCount = 72;
-            var indexBuffer = new IndexBuffer(device, typeof(int), indexCount, BufferUsage.WriteOnly);
-
             SetupInstanceVertexDeclaration();
             var instanceCount = this.Capacity;
             var instanceBuffer = new VertexBuffer(device, InstanceVertexDeclaration,
                                               instanceCount, BufferUsage.WriteOnly);
 
-            Instancing = new InstancingClass(geometryBuffer, instanceBuffer, indexBuffer, Effect);
+            InstanceBufferBinding = new VertexBufferBinding(instanceBuffer, 0, 1);
         }
         VertexDeclaration InstanceVertexDeclaration { get; set; }
         private void SetupInstanceVertexDeclaration()
@@ -144,53 +140,7 @@ namespace Forever.Voxel
 
             InstanceVertexDeclaration = new VertexDeclaration(instanceStreamElements);
         }
-
-        private void SetUpGeometry()
-        {
-            int[] solidIndices = new int[]  
-            {  
-                0, 1, 3,
-                1, 2, 3,
-                1, 5, 2, 
-                5, 2, 6,
-                4, 1, 0, 
-                4, 5, 1, 
-                4, 7, 6,
-                4, 6, 5,
-                0, 4, 3,
-                4, 3, 7,
-                7, 3, 2,
-                6, 7, 2,
-
-          
-                3, 1, 0,
-                3, 2, 1,
-                2, 5, 1,
-                6, 2, 5,
-                0, 1, 4,
-                1, 5, 4,
-                6, 7, 4,
-                5, 6, 4,
-                3, 4, 0,
-                7, 3, 4,
-                2, 3, 7,
-                2, 7, 6
-
-            };
-            float unit =  (Unit / 2f);
-            var box = new BoundingBox(new Vector3(-unit, -unit, -unit) * VoxelScale, new Vector3(unit, unit, unit) * VoxelScale);
-            // TODO - make a custom vertex class that is only a position
-            var verts = box.GetCorners().Select(x => new VertexPositionColor
-            {
-                Position = x,
-                // this color should never appear
-                Color = Color.Purple
-            }).ToArray();
-
-            Instancing.GeometryBuffer.SetData(verts);
-            Instancing.IndexBuffer.SetData(solidIndices);
-        }
-
+      
         public int InstanceCount { get; private set; }
         Voxel.ViewState[] InstanceBuffer { get; set; }
         private void RebuildInstanceBuffer(Ray cameraRay)
@@ -212,7 +162,7 @@ namespace Forever.Voxel
             InstanceCount = next;
             if (InstanceCount > 0)
             {
-                Instancing.InstanceBuffer.SetData(0, InstanceBuffer, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
+                InstanceBufferBinding.VertexBuffer.SetData(0, InstanceBuffer, 0, InstanceCount, InstanceVertexDeclaration.VertexStride);
             }
             NeedRebuild = false;
         }
@@ -487,16 +437,17 @@ namespace Forever.Voxel
             var lightPos = new Vector3(-200, 200, -200);
             float distance = (Position - lightPos).LengthSquared();
 
-            Instancing.Effect.CurrentTechnique = Instancing.Effect.Techniques["Instancing"];
-            Instancing.Effect.Parameters["WVP"].SetValue(wvp);
-            Instancing.Effect.Parameters["CameraPos"].SetValue(camPos);
-            Instancing.Effect.Parameters["LightPosition"].SetValue(lightPos);
-            Instancing.Effect.Parameters["LightDistanceSquared"].SetValue(distance);
+            Effect.CurrentTechnique = Effect.Techniques["Instancing"];
+            Effect.Parameters["WVP"].SetValue(wvp);
+            Effect.Parameters["CameraPos"].SetValue(camPos);
+            Effect.Parameters["LightPosition"].SetValue(lightPos);
+            Effect.Parameters["LightDistanceSquared"].SetValue(distance);
             float intensity = 0.1f;
-            Instancing.Effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
-            Instancing.Effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
+            Effect.Parameters["LightDiffuseColorIntensity"].SetValue(new Color(intensity, intensity, intensity).ToVector3());
+            Effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector3());
 
-            Instancing.Draw(duration, rc, InstanceCount);
+            Effect.CurrentTechnique.Passes[0].Apply();
+            Instancer.Draw(rc, InstanceBufferBinding, InstanceCount);
         }
 
         public Matrix World;

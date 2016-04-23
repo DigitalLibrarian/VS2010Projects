@@ -26,8 +26,7 @@ namespace Aquarium
         {
             base.LoadContent();
 
-            Instancing = new CubeInstancing(Capacity);
-            Instancing.LoadContent(ScreenManager.Game);
+            Instancing = new CubeInstancing(ScreenManager.Game.GraphicsDevice);
 
             SetupInstanceVertexDeclaration();
             var instanceCount = this.Capacity;
@@ -79,12 +78,10 @@ namespace Aquarium
             VoxelEffect.DiffuseColor = Color.White;
 
             VoxelEffect.CurrentTechnique.Passes[0].Apply();
-            Instancing.Draw(RenderContext, gameTime, InstanceBufferBinding, this.Capacity);
+            Instancing.Draw(RenderContext, InstanceBufferBinding, this.Capacity);
 
             base.Draw(gameTime);
         }
-
-
 
         private void SetupInstanceVertexDeclaration()
         {
