@@ -18,25 +18,25 @@ namespace Aquarium
             base.LoadContent();
 
             Sampler = new NullVoxelSampler();
-            Volume = new VolumeViewer(Sampler, null);
+            //Volume = new VolumeViewer(Sampler, null);
         }
 
         public override void Draw(GameTime gameTime)
         {
-            Volume.Draw(RenderContext);
+            //Volume.Draw(RenderContext);
 
             base.Draw(gameTime);
         }
 
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            Volume.UpdateReferencePoint(RenderContext.Camera.Position, RenderContext.GetCameraRay(), RenderContext.GetViewFrustum());
+            //Volume.UpdateReferencePoint(RenderContext.Camera.Position, RenderContext.GetCameraRay(), RenderContext.GetViewFrustum());
 
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
         }
     }
 
-    class VoxelEffectAdapter : IVoxelEffect
+    class VoxelEffect : IVoxelEffect
     {
         public Matrix WVP
         {
@@ -85,7 +85,7 @@ namespace Aquarium
         public Microsoft.Xna.Framework.Graphics.EffectTechnique CurrentTechnique { get { return _effect.CurrentTechnique; } }
 
         private Effect _effect;
-        public VoxelEffectAdapter(Effect effect)
+        public VoxelEffect(Effect effect)
         {
             _effect = effect;
         }

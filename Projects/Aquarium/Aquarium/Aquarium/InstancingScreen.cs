@@ -54,7 +54,7 @@ namespace Aquarium
 
             var effect = ScreenManager.Game.Content.Load<Effect>("Effects\\VoxelEffect");
             effect.CurrentTechnique = effect.Techniques["Instancing"];
-            VoxelEffect = new VoxelEffectAdapter(effect);
+            VoxelEffect = new VoxelEffect(effect);
         }
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
