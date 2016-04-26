@@ -99,7 +99,6 @@
     <Compile Include="SVO\OctTree.cs" />
     <Compile Include="ThrottledQueue.cs" />
     <Compile Include="World\Volume.cs" />
-    <Compile Include="ChunkSpace.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Voxel.cs" />
     <Compile Include="VoxelState.cs" />

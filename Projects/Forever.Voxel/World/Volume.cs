@@ -109,7 +109,6 @@ namespace Forever.Voxel.World
         Vector3 LightPos { get; set; }
         float LightDistanceSquared { get; set; }
 
-
         Color LightDiffuseColorIntensity { get; set; }
         Color DiffuseColor { get; set; }
         
@@ -192,6 +191,7 @@ namespace Forever.Voxel.World
             Bindings = new VertexBufferBinding[2];
             Bindings[0] = new VertexBufferBinding(GeometryBuffer);
         }
+
         public void UpdateReferencePoint(Vector3 p, Ray r, BoundingFrustum frustum)
         {
             this.Reference.Position = p;

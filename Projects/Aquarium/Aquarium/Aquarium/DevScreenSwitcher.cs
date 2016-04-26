@@ -15,11 +15,10 @@ namespace Aquarium
         {
             var index = new List<GameScreen>
             {
+                new VoxelScreen(),
                 new InstancingScreen(),
-                new VolumeScreen(),
                 new NuclexFrameworkDemoScreen(),
                 new OctTreeRayMarchingScreen(),
-                new VoxelScreen(),
                 new SimulationScreen(),
                 new FlyAroundGameScreen()
             }.ToDictionary(x => x.GetType().ToString());;

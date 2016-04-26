@@ -24,8 +24,6 @@ namespace Aquarium
     {
         const int VoxelsPerDimension = 8;
 
-        ChunkSpace ChunkSpace { get; set; }
-
         LabelUiElement DebugLabel { get; set; }
 
         Perlin Perlin = null;
@@ -47,8 +45,6 @@ namespace Aquarium
             SetupPerlin();
 
             VoxelEffect = ScreenManager.Game.Content.Load<Effect>(EffectName);
-
-            ChunkSpace = new ChunkSpace(VoxelsPerDimension, ChunkFactory);
 
             var spawnHeightAboveGround = 30 * VoxelsPerDimension;
             var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
@@ -141,7 +137,7 @@ namespace Aquarium
         {
             int maxHeight = 1000 * VoxelsPerDimension;
             float half = maxHeight / 2f;
-            var bottomLeft = new Vector3(-half, -half, -half); ;
+            var bottomLeft = new Vector3(-half, -half, -half);
             var scale = 0.9f;
             float n = SmoothNoise(x * scale, z * scale);
             var threshold = bottomLeft.Y + half + (n * half);
@@ -202,31 +198,7 @@ namespace Aquarium
                 if (RenderDepth > -1) RenderDepth--;
             }
 
-            if (input.CurrentMouseState.MiddleButton == ButtonState.Pressed)
-            {
-                MarkInTreeBomb();
-            }
-
             base.HandleInput(input);
-        }
-
-        void MarkInTreeBomb()
-        {
-            CenteredCubeIterate(MarkInTree, RenderContext.Camera.Position, 4);
-        }
-
-        void CenteredCubeIterate(Action<Chunk> action, Vector3 pos, int halfSize)
-        {
-            for (int x = -halfSize; x < halfSize; x++)
-            {
-                for (int z = -halfSize; z < halfSize; z++)
-                {
-                    for (int y = -halfSize; y < halfSize; y++)
-                    {
-                        action(ChunkSpace.GetOrCreate(pos + (new Vector3(x, y, z) * VoxelsPerDimension)).Objects.First() as Chunk);
-                    }
-                }
-            }
         }
 
         public void ShootChunksOctTree(Ray ray, ChunkRayTool tool, bool closestFirst)
@@ -443,7 +415,7 @@ namespace Aquarium
 
             var tree = LoadingTree;
             var pos = tree.Root.Box.Min;
-            float delta = ChunkSpace.GridSize;
+            float delta = VoxelsPerDimension;
             for (float x = tree.Root.Box.Min.X; x < tree.Root.Box.Max.X; x += delta)
             {
                 for (float z = tree.Root.Box.Min.Z; z < tree.Root.Box.Max.Z; z += delta)
@@ -544,7 +516,10 @@ namespace Aquarium
                 var loadedNode = ChunkTree.GetLeafContaining(v);
                 if (loadedNode != null && loadedNode.Value == null)
                 {
-                    MarkInTree(ChunkSpace.GetOrCreate(v).Objects.First() as Chunk);
+                    var chunkLeaf = ChunkTree.GetLeafContaining(v);
+                    chunkLeaf.Value = ChunkFactory(chunkLeaf.Box);
+
+                    MarkInTree(v);
                 }
 
                 if (!LoadSequence.MoveNext()) return false;
@@ -552,27 +527,18 @@ namespace Aquarium
             return true;
         }
 
-        void MarkInTree(Chunk c)
+        void MarkInTree(Vector3 v)
         {
-            var v = c.Box.GetCenter();
             var loadingLeaf = LoadingTree.GetLeafContaining(v);
-            if (loadingLeaf != null)// && !loadingLeaf.Value)
+            loadingLeaf.Value = true;
+            while (loadingLeaf.IsLeaf 
+                && loadingLeaf.Parent != null 
+                && !loadingLeaf.Parent.Value 
+                && !loadingLeaf.Parent.Children.Any(x => !x.Value))
             {
+                loadingLeaf = loadingLeaf.Parent;
                 loadingLeaf.Value = true;
-
-                var chunkLeaf = ChunkTree.GetLeafContaining(v);
-                chunkLeaf.Value = c;
-
-                while (loadingLeaf.IsLeaf && loadingLeaf.Parent != null && !loadingLeaf.Parent.Value && !loadingLeaf.Parent.Children.Any(x => !x.Value))
-                {
-                    loadingLeaf = loadingLeaf.Parent;
-                    loadingLeaf.Value = true;
-                    loadingLeaf.Prune();
-                }
-            }
-            else
-            {
-                int brak = 0;
+                loadingLeaf.Prune();
             }
         }
 

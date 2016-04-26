@@ -2,40 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Forever.Voxel.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Forever.Voxel.World;
+using Forever.Voxel.SVO;
 
 namespace Aquarium
 {
-    class VolumeScreen : FlyAroundGameScreen
-    {
-        IVoxelSampler Sampler { get; set; }
-        VolumeViewer Volume { get; set; }
-
-        public override void LoadContent()
-        {
-            base.LoadContent();
-
-            Sampler = new NullVoxelSampler();
-            //Volume = new VolumeViewer(Sampler, null);
-        }
-
-        public override void Draw(GameTime gameTime)
-        {
-            //Volume.Draw(RenderContext);
-
-            base.Draw(gameTime);
-        }
-
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
-        {
-            //Volume.UpdateReferencePoint(RenderContext.Camera.Position, RenderContext.GetCameraRay(), RenderContext.GetViewFrustum());
-
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
-        }
-    }
-
     class VoxelEffect : IVoxelEffect
     {
         public Matrix WVP
