@@ -17,6 +17,8 @@ using Forever.Voxel.SVO;
 using Forever.SpacePartitions;
 using Microsoft.Xna.Framework.Input;
 using Forever.Voxel.Meshing;
+using Forever.Voxel.World;
+using Aquarium.Sampling;
 
 namespace Aquarium
 {
@@ -39,11 +41,21 @@ namespace Aquarium
 
         IInstancer Instancer { get; set; }
 
+        Ray? TestRay;
+        BoundingBox? TestBox;
+
+
+        NoiseHeightMapVoxelSampler VoxelSampler { get; set; }
+
         public override void LoadContent()
         {
             base.LoadContent();
-            SetupPerlin();
-
+            VoxelSampler = new NoiseHeightMapVoxelSampler()
+            {
+                MaxHeight = VoxelsPerDimension * 500,
+                StartColor = Color.DarkGray,
+                EndColor = Color.AntiqueWhite
+            };
             VoxelEffect = ScreenManager.Game.Content.Load<Effect>(EffectName);
 
             var spawnHeightAboveGround = 30 * VoxelsPerDimension;
@@ -51,7 +63,8 @@ namespace Aquarium
             Ui.Elements.AddRange(CreateUILayout());
 
             MaxTreeDepth = 5;
-            RenderDepth = -1;
+            RenderDepth = 0
+                ;
 
             var s = (float)VoxelsPerDimension;
             float worldSize = (s * (float) System.Math.Pow(2, MaxTreeDepth));
@@ -68,6 +81,8 @@ namespace Aquarium
             User.Body.Position = startPos;
             User.Body.Orientation = Quaternion.CreateFromYawPitchRoll(0f, (float)System.Math.PI/-2f, 0f);
 
+
+            
             for (int i = 0; i < MaxTreeDepth; i++)
             {
                 LoadingTree.VisitLeaves(node =>
@@ -84,7 +99,7 @@ namespace Aquarium
                     }
                 });
             }
-
+            
             Instancer = new CubeInstancing(ScreenManager.Game.GraphicsDevice, 2f);
         }
         
@@ -94,59 +109,15 @@ namespace Aquarium
             chunk.Initialize(RenderContext.GraphicsDevice, VoxelEffect);
             var pos = bb.Min;
             chunk.VisitCoords((x, y, z) => {
-                var world = chunk.ArrayToChunk(new Vector3(x, y, z));
-                float tX = (pos.X + (x * VoxelsPerDimension));
-                float tY = (pos.Y + (y * VoxelsPerDimension));
-                float tZ = (pos.Z + (z * VoxelsPerDimension));
-
-                chunk.Voxels[x][y][z].Material = new Material(
-                    new Color(
-                       (float) x / VoxelsPerDimension,
-                       (float) y / VoxelsPerDimension,
-                       (float) z / VoxelsPerDimension
-                        )
-                    );
-
-                float height = GetHeight(world.X, world.Z);
-                bool active = world.Y < height;
-                chunk.Voxels[x][y][z].State = active ? VoxelState.Active : VoxelState.Inactive;
+                chunk.Voxels[x][y][z] = VoxelSampler.GetSample(chunk.ArrayToChunk(new Vector3(x, y, z)), 1f);
             });
             
             return chunk;
         }
-        void SetupPerlin()
-        {
-            NoiseQuality quality = NoiseQuality.High;
-            int seed = 3;
-            int octaves = 8;
-            double frequency = 0.0001;
-            double lacunarity = 0.0;
-            double persistence = 1;
-
-            var module = new Perlin();
-            module.Frequency = frequency;
-            module.NoiseQuality = quality;
-            module.Seed = seed;
-            module.OctaveCount = octaves;
-            module.Lacunarity = lacunarity;
-            module.Persistence = persistence;
-            Perlin = module;
-        }
 
         float GetHeight(float x, float z)
         {
-            int maxHeight = 1000 * VoxelsPerDimension;
-            float half = maxHeight / 2f;
-            var bottomLeft = new Vector3(-half, -half, -half);
-            var scale = 0.9f;
-            float n = SmoothNoise(x * scale, z * scale);
-            var threshold = bottomLeft.Y + half + (n * half);
-            return threshold;
-        }
-
-        public float SmoothNoise(float x, float y)
-        {
-            return (float) (Perlin.GetValue((double)x, (double)y, 10));
+            return VoxelSampler.GetSurfaceHeight(x, z);
         }
 
         List<IUiElement> CreateUILayout()
@@ -313,90 +284,10 @@ namespace Aquarium
             SceneLoad();
         }
 
-
-
-
         #region Scene Loading
         IEnumerator<Vector3> LoadSequence { get; set; }
-        IEnumerable<Vector3> SceneLoadSequence_CameraBelowGround(Vector3 pos, int numChunks)
-        {
-            for (int x = -numChunks; x < numChunks; x++)
-            {
-                for (int z = -numChunks; z < numChunks; z++)
-                {
-                    for (int y = -numChunks; y < numChunks; y++)
-                    {
-                        yield return pos + new Vector3(x, y, z) * VoxelsPerDimension;
-                    }
-                }
-            }
-        }
-        IEnumerable<Vector3> SceneLoadSequence_CameraAboveGround_SurfaceProjection(Vector3 pos, int numChunks)
-        {
-            int snakeLength = numChunks*numChunks;
-            
-            int state = 0;            
-            float dx, dz;
-            int stride = 0;
-            int leapSize = 0;
-            bool repeat = false;
-            for (int i = 0; i < snakeLength; i++)
-            {
-                pos = ProjectToSurface(pos);
-                yield return (pos);
-                yield return (pos + new Vector3(0, VoxelsPerDimension, 0));
-                yield return (pos + new Vector3(0, -VoxelsPerDimension, 0));
-                
-                yield return (pos + new Vector3(VoxelsPerDimension, 0, 0));
-                yield return (pos + new Vector3(-VoxelsPerDimension, 0, 0));
-
-                yield return (pos + new Vector3(0, 0, VoxelsPerDimension));
-                yield return (pos + new Vector3(0, 0,-VoxelsPerDimension));
-                
-                switch (state)
-                {
-                    case 0:
-                        dx = -1;
-                        dz = 0;
-                        break;
-                    case 1:
-                        dx = 0;
-                        dz = 1;
-                        break;
-                    case 2:
-                        dx = 1;
-                        dz = 0;
-                        break;
-                    case 3:
-                        dx = 0;
-                        dz = -1;
-                        break;
-                    default: throw new NotImplementedException();
-                }
-
-                pos.X += dx * (VoxelsPerDimension);
-                pos.Z += dz * (VoxelsPerDimension);
-
-                if (++stride > leapSize)
-                {
-                    stride = 0;
-
-                    if (repeat)
-                    {
-                        leapSize++;
-                    }
-                    repeat = !repeat;
-
-                    state++;
-                    state %= 4;
-                }
-            }
-        }
-
-
         IEnumerable<Vector3> SceneLoadSequence_OctTree()
         {
-
             while (!LoadingTree.Root.IsLeaf)
             {
                 var leaf = LoadingTree.FindFirstLeaf(x => !x.Value);
@@ -406,25 +297,24 @@ namespace Aquarium
                 }
             }
         }
-
-        Ray? TestRay;
-        BoundingBox? TestBox;
-
+        
         IEnumerable<Vector3> SceneLoadSequence_PerlinIsoSurface_RayCast()
         {
-
             var tree = LoadingTree;
             var pos = tree.Root.Box.Min;
             float delta = VoxelsPerDimension;
-            for (float x = tree.Root.Box.Min.X; x < tree.Root.Box.Max.X; x += delta)
+            float half = delta / 2f;
+            Vector3[] nodeCorners = new Vector3[8];
+            for (float x = tree.Root.Box.Min.X+half; x < tree.Root.Box.Max.X+half; x += half)
             {
-                for (float z = tree.Root.Box.Min.Z; z < tree.Root.Box.Max.Z; z += delta)
+                for (float z = tree.Root.Box.Min.Z+half; z < tree.Root.Box.Max.Z+half; z += half)
                 {
-                    var v = new Vector3(x, tree.Root.Box.Max.Y + (delta / 2), z);
-                    var dir = new Vector3(x + 0.00001f, tree.Root.Box.Min.Y - (delta / 2), z + 0.00001f) - v;
+                    var v = new Vector3(x, tree.Root.Box.Max.Y, z);
+                    // ray temporary fix for issue #57
+                    var dir = new Vector3(x, tree.Root.Box.Min.Y, z) - v;
                     dir.Normalize();
                     TestRay = new Ray(v, dir);
-                    foreach(var node in tree.RayCast(TestRay.Value))
+                    foreach (var node in tree.RayCast(TestRay.Value))
                     {
                         if (node != null)
                         {
@@ -433,44 +323,36 @@ namespace Aquarium
                                 TestBox = node.Box;
                                 yield return node.Box.GetCenter();
                             }
-                            if (node.Box.Max.Y + delta < GetHeight(node.Box.Max.X, node.Box.Max.Z)) break;
+
+                            bool allUnder = true;
+                            node.Box.GetCorners(nodeCorners);
+                            foreach (var corner in nodeCorners)
+                            {
+                                // if the corner is above the surface, it is not submerged
+                                if (GetHeight(corner.X, corner.Z) < corner.Y)
+                                {
+                                    allUnder = false;
+                                    break;
+                                }
+                            }
+
+                            if (allUnder)
+                            {
+                                // if node is completely submerged then stop loading this ray
+                                break;
+                            }
                         }
-                    } 
+                    }
                 }
             }
 
             TestRay = null;
             TestBox = null;
-        }
 
-        IEnumerable<Vector3> SceneLoadSequence_PerlinIsoSurface()
-        {   
-            var boxSize = ChunkTree.Root.Box.GetHalfSize()*2;
-            var offset = new Vector3(0.5f, 0.5f, 0.5f) * VoxelsPerDimension;
-            int numChunks = (int)boxSize.X / VoxelsPerDimension;
-            var chunkSize = new Vector3(VoxelsPerDimension, VoxelsPerDimension, VoxelsPerDimension);
-
-            var pos = ChunkTree.Root.Box.Min;
-            for (int x = 0; x < numChunks; x++)
+            foreach(var v in SceneLoadSequence_OctTree())
             {
-                for (int z = 0; z < numChunks; z++)
-                {
-                    var chunkPos = pos + (new Vector3(x, 0, z) * VoxelsPerDimension);
-                    float yWorld = GetHeight(chunkPos.X, chunkPos.Z);
-                    var v = new Vector3(chunkPos.X, yWorld, chunkPos.Z);
-
-                    OctTreeNode<Chunk> node  = ChunkTree.GetLeafContaining(v);
-
-                    if (node != null)
-                    {
-                        foreach (var corner in node.Box.GetCorners())
-                        {
-                            yield return corner+offset;
-                        }
-                    }
-                }
+                yield return v;
             }
-            
         }
 
 
@@ -478,17 +360,13 @@ namespace Aquarium
         void SceneLoad()
         {
             if (LoadingTree.Root.IsLeaf) return;
-            if (frameCount++ % 20 == 0)
+            if (frameCount++ % 10 == 0)
             {
                 if (!ConsumeLoadSequence())
                 {
                     if (LoadSequence != null) LoadSequence.Dispose();
 
                     LoadSequence = SceneLoadSequence_PerlinIsoSurface_RayCast().GetEnumerator();
-                    if (!LoadSequence.MoveNext())
-                    {
-                        LoadSequence = SceneLoadSequence_OctTree().GetEnumerator();
-                    }
                 }
             }
         }
@@ -503,7 +381,7 @@ namespace Aquarium
             return new Vector3(p.X, h, p.Z);
         }
 
-        bool ConsumeLoadSequence(int max = 16)
+        bool ConsumeLoadSequence(int max = 8)
         {
             if (LoadSequence == null)
             {
@@ -512,6 +390,7 @@ namespace Aquarium
             Vector3 v;
             for (int i = 0; i < max; i++)
             {
+                if (!LoadSequence.MoveNext()) return false;
                 v = LoadSequence.Current;
                 var loadedNode = ChunkTree.GetLeafContaining(v);
                 if (loadedNode != null && loadedNode.Value == null)
@@ -522,7 +401,6 @@ namespace Aquarium
                     MarkInTree(v);
                 }
 
-                if (!LoadSequence.MoveNext()) return false;
             }
             return true;
         }
@@ -541,8 +419,6 @@ namespace Aquarium
                 loadingLeaf.Prune();
             }
         }
-
-
         #endregion
     }
 }

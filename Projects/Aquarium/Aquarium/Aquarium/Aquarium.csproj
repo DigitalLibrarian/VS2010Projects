@@ -203,6 +203,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Sampling\NoiseHeightMapVoxelSampler.cs" />
     <Compile Include="SimulationScreen.cs" />
     <Compile Include="Sim\IRayPickable.cs" />
     <Compile Include="Sim\ISimObject.cs" />

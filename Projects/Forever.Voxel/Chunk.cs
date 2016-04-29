@@ -238,10 +238,7 @@ namespace Forever.Voxel
         {
             return new Vector3((int)v.X, (int)v.Y, (int)v.Z);
         }
-        public Vector3 ChunkToWorld(Vector3 chunkCoord)
-        {
-            return Vector3.Transform(chunkCoord, World);
-        }
+       
         public Vector3 WorldToChunk(Vector3 worldCoord)
         {
             return Vector3.Transform(worldCoord, Matrix.Invert(World));
