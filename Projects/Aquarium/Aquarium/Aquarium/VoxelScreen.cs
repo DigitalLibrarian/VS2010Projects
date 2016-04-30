@@ -25,11 +25,11 @@ namespace Aquarium
     class VoxelScreen : FlyAroundGameScreen
     {
         const int VoxelsPerDimension = 8;
+        int LoadingFrameFrequency = 20;
+        int LoadSequencePumpSize = 8;
 
         LabelUiElement DebugLabel { get; set; }
-
-        Perlin Perlin = null;
-
+        
         OctTree<bool> LoadingTree { get; set; }
         OctTree<Chunk> ChunkTree { get; set; }
 
@@ -43,31 +43,30 @@ namespace Aquarium
 
         Ray? TestRay;
         BoundingBox? TestBox;
-
-
         NoiseHeightMapVoxelSampler VoxelSampler { get; set; }
+
+        float VoxelSize = 1f;
 
         public override void LoadContent()
         {
             base.LoadContent();
             VoxelSampler = new NoiseHeightMapVoxelSampler()
             {
-                MaxHeight = VoxelsPerDimension * 500,
-                StartColor = Color.DarkGray,
-                EndColor = Color.AntiqueWhite
+                MaxHeight = VoxelsPerDimension * VoxelSize * 500,
+                StartColor = Color.LightPink,
+                EndColor = Color.DarkOrchid
             };
             VoxelEffect = ScreenManager.Game.Content.Load<Effect>(EffectName);
 
-            var spawnHeightAboveGround = 30 * VoxelsPerDimension;
+            var spawnHeightAboveGround = 5 * VoxelsPerDimension * VoxelSize;
             var spawnPoint = new Vector3(0, GetHeight(0, 0) + spawnHeightAboveGround, 0);
             Ui.Elements.AddRange(CreateUILayout());
 
             MaxTreeDepth = 5;
-            RenderDepth = 0
-                ;
+            RenderDepth = 0;
 
-            var s = (float)VoxelsPerDimension;
-            float worldSize = (s * (float) System.Math.Pow(2, MaxTreeDepth));
+            var chunkSize = (float)VoxelsPerDimension * VoxelSize;
+            float worldSize = (chunkSize * (float) System.Math.Pow(2, MaxTreeDepth)) * 0.5f;
 
             var treeBox = new BoundingBox(
                 spawnPoint + new Vector3(-worldSize, -worldSize, -worldSize),
@@ -76,13 +75,11 @@ namespace Aquarium
             ChunkTree = OctTree<Chunk>.CreatePreSubdivided(MaxTreeDepth, treeBox);
 
             var diff = treeBox.Max - treeBox.Min;
-            var startPos = Vector3.Zero;
-            startPos = ProjectToHeight(startPos, ChunkTree.Root.Box.Max.Y);
-            User.Body.Position = startPos;
+            //var startPos = Vector3.Zero;
+            //startPos = ProjectToHeight(startPos, ChunkTree.Root.Box.Max.Y);
+            User.Body.Position = spawnPoint;
             User.Body.Orientation = Quaternion.CreateFromYawPitchRoll(0f, (float)System.Math.PI/-2f, 0f);
 
-
-            
             for (int i = 0; i < MaxTreeDepth; i++)
             {
                 LoadingTree.VisitLeaves(node =>
@@ -100,16 +97,18 @@ namespace Aquarium
                 });
             }
             
-            Instancer = new CubeInstancing(ScreenManager.Game.GraphicsDevice, 2f);
+            Instancer = new CubeInstancing(ScreenManager.Game.GraphicsDevice, VoxelSize);
         }
         
         Chunk ChunkFactory(BoundingBox bb)
         {
-            var chunk = new Chunk(bb, VoxelsPerDimension, Instancer);
+            //var chunk = new Chunk(bb, VoxelsPerDimension, Instancer);
+            var chunk = new Chunk(bb.GetCenter(), VoxelsPerDimension, VoxelSize, Instancer);
+
             chunk.Initialize(RenderContext.GraphicsDevice, VoxelEffect);
             var pos = bb.Min;
             chunk.VisitCoords((x, y, z) => {
-                chunk.Voxels[x][y][z] = VoxelSampler.GetSample(chunk.ArrayToChunk(new Vector3(x, y, z)), 1f);
+                chunk.Voxels[x][y][z] = VoxelSampler.GetSample(chunk.ArrayToWorld(new Vector3(x, y, z)), VoxelSize);
             });
             
             return chunk;
@@ -117,7 +116,7 @@ namespace Aquarium
 
         float GetHeight(float x, float z)
         {
-            return VoxelSampler.GetSurfaceHeight(x, z);
+            return VoxelSampler.GetSurfaceHeight(x, z, VoxelSize);
         }
 
         List<IUiElement> CreateUILayout()
@@ -204,7 +203,7 @@ namespace Aquarium
                 {
                     for(int z = -halfSize; z < halfSize; z++)
                     {
-                        var offset = new Vector3(x, y, z);
+                        var offset = new Vector3(x, y, z) * VoxelSize;
                         var p = ray.Position + offset;
                         var r = new Ray(p, ray.Direction);
                         ShootChunksOctTree(r, tool, true);
@@ -222,7 +221,7 @@ namespace Aquarium
 
             var numChunksXZ = 4000;
             var numChunksY = 1000;
-            var halfSize = new Vector3(numChunksXZ/2f, numChunksY/2f, numChunksXZ/2f) * VoxelsPerDimension;
+            var halfSize = new Vector3(numChunksXZ/2f, numChunksY/2f, numChunksXZ/2f) * VoxelsPerDimension * VoxelSize;
             var pos = RenderContext.Camera.Position;
             var sphere = new BoundingBox(pos - halfSize, pos + halfSize);
 
@@ -302,7 +301,7 @@ namespace Aquarium
         {
             var tree = LoadingTree;
             var pos = tree.Root.Box.Min;
-            float delta = VoxelsPerDimension;
+            float delta = VoxelsPerDimension * VoxelSize;
             float half = delta / 2f;
             Vector3[] nodeCorners = new Vector3[8];
             for (float x = tree.Root.Box.Min.X+half; x < tree.Root.Box.Max.X+half; x += half)
@@ -360,7 +359,7 @@ namespace Aquarium
         void SceneLoad()
         {
             if (LoadingTree.Root.IsLeaf) return;
-            if (frameCount++ % 10 == 0)
+            if (frameCount++ % LoadingFrameFrequency == 0)
             {
                 if (!ConsumeLoadSequence())
                 {
@@ -381,14 +380,14 @@ namespace Aquarium
             return new Vector3(p.X, h, p.Z);
         }
 
-        bool ConsumeLoadSequence(int max = 8)
+        bool ConsumeLoadSequence()
         {
             if (LoadSequence == null)
             {
                 return false;
             }
             Vector3 v;
-            for (int i = 0; i < max; i++)
+            for (int i = 0; i < LoadSequencePumpSize; i++)
             {
                 if (!LoadSequence.MoveNext()) return false;
                 v = LoadSequence.Current;

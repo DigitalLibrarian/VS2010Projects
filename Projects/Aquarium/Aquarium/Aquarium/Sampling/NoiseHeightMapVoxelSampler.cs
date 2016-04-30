@@ -17,7 +17,7 @@ namespace Aquarium.Sampling
         public Color StartColor { get; set; }
         public Color EndColor { get; set; }
 
-        IModule Noise { get; set; }
+        IModule Noise_Surface { get; set; }
 
         IModule Noise_ColorR { get; set; }
         IModule Noise_ColorG { get; set; }
@@ -29,9 +29,9 @@ namespace Aquarium.Sampling
             NoiseQuality quality = NoiseQuality.High;
             int seed = 1;
             int octaves = 3;
-            double frequency = 0.001;
+            double frequency = 0.0001;
             double lacunarity = 1.5;
-            double persistence = 0.6;
+            double persistence = 0.1;
 
             var module = new Perlin();
             module.Frequency = frequency;
@@ -41,7 +41,7 @@ namespace Aquarium.Sampling
             module.Lacunarity = lacunarity;
             module.Persistence = persistence;
 
-            Noise = module;
+            Noise_Surface = module;
             MinHeight = 0;
             MaxHeight = 1;
             StartColor = Color.Black;
@@ -96,11 +96,10 @@ namespace Aquarium.Sampling
 
         public Voxel GetSample(float x, float y, float z, float scale)
         {
-            float height = GetSurfaceHeight(x, z);
-            bool active = y < height;
+            float height = GetSurfaceHeight(x, z, scale);
+            bool active = y*scale < height;
 
             x *= scale;
-            y *= scale;
             z *= scale;
 
             return new Voxel
@@ -130,7 +129,7 @@ namespace Aquarium.Sampling
 
         float SmoothNoise(float x, float y)
         {
-            return (float)(Noise.GetValue((double)x, (double)y, 0));
+            return (float)(Noise_Surface.GetValue((double)x, (double)y, 0));
         }
 
         float SmoothNoise(IModule noise, float x, float y, float z)
@@ -138,10 +137,9 @@ namespace Aquarium.Sampling
             return (float)(noise.GetValue((double)x, (double)y, (double)z));
         }
 
-        public float GetSurfaceHeight(float x, float z)
+        public float GetSurfaceHeight(float x, float z, float scale)
         {
-
-            float n = SmoothNoise(x, z);
+            float n = SmoothNoise(x*scale, z*scale);
             return MinHeight + (n * (MaxHeight - MinHeight));
         }
     }

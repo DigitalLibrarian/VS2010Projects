@@ -1,9 +1,14 @@
 float4x4 WVP;
+float4x4 World;
+float4x4 View;
+float4x4 Proj;
 float3 CameraPos;
 float3 LightPosition;
 float3 LightDiffuseColorIntensity;
 float LightDistanceSquared;
 float3 DiffuseColor;
+float VoxelScale;
+
 
 struct VertexShaderInput
 {
@@ -22,9 +27,13 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float4 chunkSpa
                                 float4 instanceColor : COLOR1)
 {
     VertexShaderOutput output;
+	
+	float4 modelPos = input.Position;
+	float4 pos = chunkSpacePos + (modelPos * (1));
+	pos.w = 1;
+	pos = mul(pos, WVP);
 
-	float4 pos = chunkSpacePos + input.Position;
-	output.Position = mul(pos, WVP);
+	output.Position = pos;
 	output.RealPosition = output.Position;
 	output.Color = instanceColor;
 	

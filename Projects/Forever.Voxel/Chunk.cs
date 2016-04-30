@@ -28,9 +28,23 @@ namespace Forever.Voxel
         IInstancer Instancer { get; set; }
 
         public Vector3 Position { get; set; }
-        public Vector3 VoxelScale { get; set; }
+        public float VoxelSize { get; set; }
 
         public int Capacity { get { return (int)Math.Pow(VoxelsPerDimension, NumberOfDimensions); } }
+
+        public Chunk(Vector3 position, int voxelsPerDimension, float voxelSize, IInstancer instancer)
+        {
+            World = Matrix.Identity;
+            VoxelsPerDimension = voxelsPerDimension;
+            Position = position;
+            VoxelSize = voxelSize;
+            Instancer = instancer;
+
+            Allocate();
+            
+            var halfSize = new Vector3(1f, 1f, 1f) * (VoxelsPerDimension * VoxelSize) * 0.5f;
+            Box = new BoundingBox(Position - halfSize, Position + halfSize);
+        }
 
         public Chunk(BoundingBox bb, int voxelsPerDimension, IInstancer instancer)
         {
@@ -40,27 +54,9 @@ namespace Forever.Voxel
             Box = bb;
             var diff = (bb.Max - bb.Min);
             Position = bb.Min + ( diff * 0.5f);
-            float hypotenuse = diff.LengthSquared();
-            VoxelScale = diff / (float)voxelsPerDimension;
+            VoxelSize = diff.X / (float)voxelsPerDimension;
              World = Matrix.Identity;
-            Instancer = instancer;
-        }
-
-        public Chunk(int chunksPerDimension, IInstancer instancer)
-        {
-            VoxelScale = new Vector3(1f, 1f, 1f);
-            VoxelsPerDimension = chunksPerDimension;
-            Allocate();
-
-            World = Matrix.Identity;
-            Position = Vector3.Zero;
-
-            var totalSideLength = VoxelsPerDimension;
-            var halfSide = totalSideLength / 2f;
-            var min = Position + new Vector3(-halfSide, -halfSide, -halfSide);
-            var max = Position + new Vector3(halfSide, halfSide, halfSide);
-            Box = new BoundingBox(min, max);
-            Instancer = instancer;
+            Instancer = instancer;  
         }
 
         bool InBound(int x, int y, int z)
@@ -182,7 +178,7 @@ namespace Forever.Voxel
                                   
         bool IsOccluded(int x, int y, int z, Ray cameraRay)
         {
-            var camVector = this.ArrayToChunk(this.ArrayVector(x, y, z)) - this.WorldToChunk(cameraRay.Position);
+            var camVector = this.ArrayToWorld(this.ArrayVector(x, y, z)) - cameraRay.Position;
             camVector.Normalize();
             Vector3 d;
             for(int i = 0; i < VoxelFaceNormals.Length;i++)
@@ -216,11 +212,11 @@ namespace Forever.Voxel
                 Voxels[x][y][z].Material = DefaultMaterial;
             }
 
-            var pos = ArrayToChunk(ArrayVector(x, y, z)) + BlockOffset();
+            var pos = ArrayToWorld(ArrayVector(x, y, z));
             return new Voxel.ViewState
             {
                 Color = Voxels[x][y][z].Material.Color,
-                Position = new Vector4(pos.X, pos.Y, pos.Z, 0)
+                Position = new Vector4(pos.X, pos.Y, pos.Z, 0f)
             };
         }
 
@@ -239,30 +235,18 @@ namespace Forever.Voxel
             return new Vector3((int)v.X, (int)v.Y, (int)v.Z);
         }
        
-        public Vector3 WorldToChunk(Vector3 worldCoord)
+        private Vector3 BlockOffset()
         {
-            return Vector3.Transform(worldCoord, Matrix.Invert(World));
-        }
-        public Vector3 BlockOffset()
-        {
-            float d = Unit / 2f;
-            return new Vector3(d, d, d) * VoxelScale;
+            float d = Unit * 0.5f;
+            return new Vector3(d, d, d) * VoxelSize;
         }
         public Vector3 ChunkToArray(Vector3 chunkCoord)
         {
-            return (chunkCoord / VoxelScale) - Box.Min;
+            return (chunkCoord - Box.Min) / VoxelSize;
         }
-        public Vector3 ArrayToChunk(Vector3 arrayCoord)
+        public Vector3 ArrayToWorld(Vector3 arrayCoord)
         {
-            return Box.Min + (new Vector3(arrayCoord.X, arrayCoord.Y, arrayCoord.Z) * VoxelScale);
-        }
-
-        BoundingBox VoxelBoundingBoxChunkSpace(int x, int y, int z)
-        {
-            var chunkMin = Box.Min;
-            var voxelMin = chunkMin + new Vector3(x, y, z);
-            var voxelMax = voxelMin + new Vector3(1, 1, 1);
-            return new BoundingBox(voxelMin, voxelMax);
+            return Box.Min + ((arrayCoord * VoxelSize) + BlockOffset());
         }
         #endregion
 
@@ -279,12 +263,12 @@ namespace Forever.Voxel
             var pointOfIntersection = ray.Position + (penetration * ray.Direction); // where did it touch you?
 
             // rayPos is the camera position in array coordinates as vector3
-            var rayPos = WorldToChunk(pointOfIntersection + (Box.Min));
+            var rayPos = pointOfIntersection;
 
             rayPos = ChunkToArray(rayPos);
             // rayDirect is a normalized vector indicating the direction the mouse "click" was from the 
             // user's POV
-            var rayDirect = WorldToChunk(ray.Direction);
+            var rayDirect = ray.Direction;
 
             // testPos will be a vector "index" into the Voxels array
             Vector3 testPos = rayPos;
@@ -316,7 +300,7 @@ namespace Forever.Voxel
                             {
                                 // can only place by butting up against another block
                                 // (or the edge of a chunk);
-                                var nextPos = testPos + rayDirect;
+                                var nextPos = testPos + rayDirect * VoxelSize;
                                 var nextVoxel = Get(nextPos);
                                 if (nextVoxel.HasValue)
                                 {
@@ -343,67 +327,11 @@ namespace Forever.Voxel
 
                 }
 
-                testPos += rayDirect;
+                testPos += rayDirect*VoxelSize;
                 numTests++;
             } while (numTests < maxTests);
 
             return false;
-        }
-
-        public Vector3? ProjectToArray(Ray ray)
-        {
-            var chunkBox = Box;
-            float? test = ray.Intersects(chunkBox);
-            if (!test.HasValue) return null;
-
-            float penetration = test.Value;
-            var pointOfIntersection = ray.Position + (penetration * ray.Direction); // where did it touch you?
-            var rayPos = WorldToChunk(pointOfIntersection + (Box.Min));
-            rayPos = ChunkToArray(rayPos);
-            var rayDirect = WorldToChunk(ray.Direction);
-
-            return rayPos;
-        }
-
-        public void ArrayVisit(Vector3 start, Vector3 increment, Func<Vector3, bool> callback)
-        {
-            // testPos will be a vector "index" into the Voxels array
-            Vector3 testPos = start;
-
-            int maxTests = VoxelsPerDimension + 1;
-            int numTests = 0;
-            int x, y, z;
-            do
-            {
-                Indices(testPos, out x, out y, out z);
-                if (InBound(x, y, z) && !callback(testPos))
-                {
-                    break;
-                }
-                
-                testPos += increment;
-                numTests++;
-            } while (numTests < maxTests);
-        }
-
-
-        Vector3 ComputeClosestFaceNormal(Vector3 v, Vector3 delta, int x, int y, int z)
-        {
-            Vector3 winner = Vector3.UnitX;
-            var center = ArrayVector(x, y, z);
-            float closest = float.MaxValue;
-            foreach (var normal in VoxelFaceNormals)
-            {
-                var dist = ((center + normal) - v).LengthSquared();
-
-                if (dist < closest)
-                {
-                    closest = dist;
-                    winner = normal;
-                }
-            }
-
-            return winner;
         }
 
        
@@ -415,10 +343,6 @@ namespace Forever.Voxel
             z = (int)arrayVector.Z;
         }
 
-        public IEnumerable<Voxel> GetVoxels()
-        {
-            return Voxels.SelectMany<Voxel[][], Voxel[]>(x => x).SelectMany(x => x);
-        }
         #endregion
         
         public void Draw(float duration, RenderContext rc)
@@ -427,17 +351,24 @@ namespace Forever.Voxel
             {
                 RebuildInstanceBuffer(rc.GetCameraRay());
             }
-
+            
             var wvp = World
                 * rc.Camera.View
                 * rc.Camera.Projection;
-
+            
             var camPos = rc.Camera.Position;
             var lightPos = new Vector3(-200, 200, -200);
             float distance = (Position - lightPos).LengthSquared();
 
             Effect.CurrentTechnique = Effect.Techniques["Instancing"];
             Effect.Parameters["WVP"].SetValue(wvp);
+
+            Effect.Parameters["World"].SetValue(World);
+            Effect.Parameters["View"].SetValue(rc.Camera.View);
+            Effect.Parameters["Proj"].SetValue(rc.Camera.Projection);
+
+            Effect.Parameters["VoxelScale"].SetValue(VoxelSize);
+
             Effect.Parameters["CameraPos"].SetValue(camPos);
             Effect.Parameters["LightPosition"].SetValue(lightPos);
             Effect.Parameters["LightDistanceSquared"].SetValue(distance);
